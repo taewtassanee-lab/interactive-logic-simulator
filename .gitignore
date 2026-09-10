@@ -8,3 +8,7 @@ dist-ssr
 .vscode/*
 !.vscode/extensions.json
 npm-debug.log*
+
+# ไฟล์รหัสของครู ห้ามอัปโหลดขึ้น GitHub
+SECRETS-*.txt
+*.local.gs

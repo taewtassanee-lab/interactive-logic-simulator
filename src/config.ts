@@ -41,7 +41,7 @@ export const SYNC_CONFIG = {
   /** URL ของ Apps Script Web App เช่น https://script.google.com/macros/s/AKfycb.../exec */
   endpoint: '',
   /** ต้องตรงกับค่า CLASS_SECRET ในไฟล์ Code.gs */
-  classSecret: '',
+  classSecret: 'nhpk-w32281-z0fyrkal5z',
   /** ระยะเวลาหน่วงก่อนส่งข้อมูล (มิลลิวินาที) กันการยิงถี่ขณะนักเรียนพิมพ์ */
   debounceMs: 4000,
 } as const;
