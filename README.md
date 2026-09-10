@@ -9,6 +9,17 @@
 เห็นการเปลี่ยนแปลงของ Array ตัวแปร คะแนน และเงื่อนไขจบเกมแบบ Real-time แก้ Bug 2 ภารกิจ
 ทำใบงานดิจิทัลบนหน้าเว็บ ดาวน์โหลดเป็น PDF แล้วนำไปแนบส่งใน Google Classroom ด้วยตนเอง
 
+## เปิดใช้งานเว็บ
+
+**ลิงก์เว็บออนไลน์ (ใช้ได้ทุกที่ ทุกอุปกรณ์)**
+
+https://taewtassanee-lab.github.io/interactive-logic-simulator/
+
+โค้ดต้นฉบับ: https://github.com/taewtassanee-lab/interactive-logic-simulator
+
+เว็บนี้อัปเดตอัตโนมัติทุกครั้งที่ push โค้ดขึ้น branch `main` โดยใช้ GitHub Actions
+ดูสถานะการ deploy ได้ที่แท็บ Actions ของ repository
+
 ---
 
 ## สารบัญ
@@ -228,6 +239,27 @@ export const DEFAULT_CLASSROOM_URL = 'https://classroom.google.com/';
 ## วิธีเผยแพร่ระบบ
 
 โปรเจกต์ตั้งค่า `base: './'` ไว้แล้ว จึงวางที่ path ใดก็ทำงานได้
+
+### ตัวเลือกที่ใช้อยู่ตอนนี้ — GitHub Pages (ตั้งค่าเสร็จแล้ว)
+
+ระบบเผยแพร่อยู่ที่ https://taewtassanee-lab.github.io/interactive-logic-simulator/ แล้ว
+ไฟล์ตั้งค่าอยู่ที่ `.github/workflows/deploy.yml`
+
+**วิธีอัปเดตเว็บหลังแก้ไขโค้ด**
+
+```bash
+git add -A
+git commit -m "อธิบายสิ่งที่แก้"
+git push
+```
+
+GitHub จะ build และอัปเดตเว็บให้เองภายใน 1-2 นาที ไม่ต้องรัน `npm run build` เอง
+
+**วิธีตั้งลิงก์ Google Classroom บนเว็บออนไลน์**
+
+ไปที่ repository > Settings > Secrets and variables > Actions > แท็บ Variables > New repository variable
+ตั้งชื่อว่า `VITE_CLASSROOM_URL` แล้วใส่ลิงก์งาน จากนั้นสั่ง deploy ใหม่ที่แท็บ Actions
+(หรือให้นักเรียนกรอกลิงก์เองในหน้าเริ่มต้นใช้งานก็ได้ ไม่ต้องตั้งค่านี้)
 
 ### ตัวเลือก A — Netlify (ง่ายที่สุด ไม่ต้องใช้ Git)
 
