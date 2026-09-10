@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { Compass, FlaskConical, Mouse, Rocket, Send, UserCheck, Users } from 'lucide-react';
+import { Compass, Mouse, Rocket, Send, UserCheck, Users } from 'lucide-react';
 import { APP_CONFIG } from '../config';
 import { useApp } from '../context/AppContext';
 import { useToast } from '../components/Toast';
 import { RoleTimer } from '../components/RoleTimer';
 import { Button, Card, TextField, Tooltip } from '../components/Ui';
-import { createSampleState } from '../data/sampleData';
 import { Mascot } from '../components/Illustrations';
 import { TeacherCard } from '../components/TeacherCard';
 
@@ -44,14 +43,6 @@ export const StartPage = ({ onStarted }: { onStarted: () => void }) => {
     update((prev) => ({ session: { ...prev.session, activityStarted: true } }));
     notify('เริ่มกิจกรรมแล้ว เข้าสู่หน้าจำลองตรรกะได้เลย', 'success');
     onStarted();
-  };
-
-  /** โหลดข้อมูลตัวอย่างเพื่อให้ครูดูหน้าตาใบงานและ PDF ได้ทันที */
-  const handleLoadSample = () => {
-    const sample = createSampleState();
-    update({ pair: sample.pair, session: sample.session, worksheet: sample.worksheet });
-    setErrors({});
-    notify('โหลดข้อมูลตัวอย่างแล้ว ใช้สำหรับทดสอบระบบเท่านั้น อย่าลืมแก้เป็นข้อมูลจริงก่อนส่งงาน', 'info');
   };
 
   return (
@@ -200,10 +191,6 @@ export const StartPage = ({ onStarted }: { onStarted: () => void }) => {
           <Button onClick={handleStart} className="px-5 py-2.5">
             <Rocket className="h-4 w-4" aria-hidden="true" />
             เริ่มกิจกรรม
-          </Button>
-          <Button variant="secondary" onClick={handleLoadSample}>
-            <FlaskConical className="h-4 w-4 text-think-500" aria-hidden="true" />
-            โหลดข้อมูลตัวอย่าง (สำหรับทดสอบระบบ)
           </Button>
           {state.session.activityStarted && (
             <span className="inline-flex items-center gap-1.5 text-sm font-medium text-mint-700">
