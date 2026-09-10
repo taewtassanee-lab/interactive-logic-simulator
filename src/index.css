@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply font-thai text-slate-700 antialiased;
+    margin: 0;
+    /* พื้นหลังโทนอ่อนแบบไล่สี อ่านง่ายแต่ไม่จืด */
+    background-color: #f6f4ff;
+    background-image:
+      radial-gradient(60rem 40rem at 8% -8%, rgba(168, 85, 247, 0.16), transparent 60%),
+      radial-gradient(50rem 34rem at 100% 0%, rgba(91, 115, 248, 0.18), transparent 62%),
+      radial-gradient(46rem 32rem at 50% 110%, rgba(255, 110, 165, 0.14), transparent 60%);
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+  }
+
+  /* ภาษาไทยมีสระบน-ล่าง ต้องเพิ่มระยะบรรทัดให้อ่านง่าย */
+  p,
+  li,
+  label,
+  td,
+  th {
+    line-height: 1.8;
+  }
+
+  :focus-visible {
+    outline: 3px solid theme('colors.think.400');
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .code-chip {
+    @apply rounded-lg bg-slate-100 px-1.5 py-0.5 font-mono text-[0.8em] text-slate-700;
+  }
+
+  /* การ์ดแบบ 3 มิติ: ขอบล่างหนาเหมือนแผ่นวัตถุลอยอยู่ */
+  .clay-card {
+    @apply rounded-[1.75rem] border-2 border-white bg-white;
+    box-shadow:
+      0 10px 0 -2px rgba(203, 213, 225, 0.45),
+      0 24px 40px -24px rgba(51, 65, 85, 0.5);
+  }
+
+  /* ปุ่มกดแบบ 3 มิติ กดแล้วยุบลงจริง */
+  .btn-3d {
+    @apply relative translate-y-0 transition-all duration-100;
+  }
+
+  .btn-3d:active:not(:disabled) {
+    @apply translate-y-[3px];
+    box-shadow: 0 1px 0 0 var(--btn-edge, rgba(15, 23, 42, 0.25)) !important;
+  }
+
+  /* ก้อนบล็อกคำสั่งแบบยกตัวขึ้นเมื่อชี้ */
+  .block-3d {
+    @apply transition-transform duration-150 will-change-transform;
+  }
+
+  .block-3d:hover {
+    transform: translateY(-3px) scale(1.01);
+  }
+
+  .scroll-thin {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.think.200') transparent;
+  }
+
+  .scroll-thin::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  .scroll-thin::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-think-200;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+
+  /* แถบแสงวิ่งบนเหรียญตราที่ได้รับแล้ว */
+  .shine-wrap {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shine-wrap::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      100deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.55) 50%,
+      transparent 70%
+    );
+    animation: shine 2.6s ease-in-out infinite;
+  }
+}
+
+/* เคารพการตั้งค่าลดการเคลื่อนไหวของผู้ใช้ (นักเรียนบางคนไวต่อภาพเคลื่อนไหว) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

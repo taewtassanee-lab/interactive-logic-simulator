@@ -1,0 +1,255 @@
+import {
+  ArrowDown,
+  ArrowUp,
+  Blocks,
+  CircleCheck,
+  Eraser,
+  FlaskConical,
+  Lightbulb,
+  Play,
+  RotateCcw,
+  StepForward,
+  Trash2,
+  TriangleAlert,
+} from 'lucide-react';
+import { BLOCK_MAP } from '../data/blocks';
+import type { BlockId, LogicReport, WorkspaceBlock } from '../types';
+import { Button, Card, EmptyState } from './Ui';
+
+interface Props {
+  blocks: WorkspaceBlock[];
+  report: LogicReport;
+  activeBlockId: BlockId | null;
+  hints: string[];
+  hintsOpen: boolean;
+  isRunning: boolean;
+  onMove: (index: number, direction: -1 | 1) => void;
+  onRemove: (uid: string) => void;
+  onLoadBuggy: () => void;
+  onClear: () => void;
+  onRun: () => void;
+  onStep: () => void;
+  onResetSim: () => void;
+  onToggleHints: () => void;
+}
+
+export const LogicWorkspace = ({
+  blocks,
+  report,
+  activeBlockId,
+  hints,
+  hintsOpen,
+  isRunning,
+  onMove,
+  onRemove,
+  onLoadBuggy,
+  onClear,
+  onRun,
+  onStep,
+  onResetSim,
+  onToggleHints,
+}: Props) => (
+  <Card
+    title="พื้นที่เรียงลำดับตรรกะ"
+    subtitle="เรียงบล็อกจากบนลงล่างตามลำดับการทำงานของระบบ"
+    icon={<Blocks className="h-5 w-5 text-think-600" aria-hidden="true" />}
+  >
+    {/* ---------- แถบปุ่มควบคุม ---------- */}
+    <div className="mb-4 flex flex-wrap gap-2">
+      <Button variant="primary" onClick={onRun} disabled={blocks.length === 0}>
+        <Play className="h-4 w-4" aria-hidden="true" />
+        Run Simulation
+      </Button>
+      <Button variant="purple" onClick={onStep} disabled={blocks.length === 0}>
+        <StepForward className="h-4 w-4" aria-hidden="true" />
+        Run ทีละขั้น
+      </Button>
+      <Button variant="secondary" onClick={onResetSim} disabled={!isRunning}>
+        <RotateCcw className="h-4 w-4" aria-hidden="true" />
+        Reset Simulation
+      </Button>
+      <Button variant="secondary" onClick={onToggleHints}>
+        <Lightbulb className="h-4 w-4 text-lemon-500" aria-hidden="true" />
+        {hintsOpen ? 'ซ่อนคำใบ้' : 'แสดงคำใบ้'}
+      </Button>
+      <Button variant="secondary" onClick={onLoadBuggy}>
+        <FlaskConical className="h-4 w-4 text-bubble-500" aria-hidden="true" />
+        โหลดตัวอย่างตรรกะที่มี Bug
+      </Button>
+      <Button variant="ghost" onClick={onClear} disabled={blocks.length === 0}>
+        <Eraser className="h-4 w-4" aria-hidden="true" />
+        ล้าง Workspace
+      </Button>
+    </div>
+
+    {/* ---------- คำใบ้ ---------- */}
+    {hintsOpen && (
+      <div className="mb-4 animate-pop rounded-2xl border-2 border-lemon-200 bg-gradient-to-b from-lemon-50 to-white p-3.5">
+        <p className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-peach-900">
+          <Lightbulb className="h-4 w-4" aria-hidden="true" />
+          คำใบ้สำหรับขั้นตอนถัดไป
+        </p>
+        <ul className="space-y-1.5">
+          {hints.map((hint) => (
+            <li key={hint} className="flex gap-2 text-sm leading-relaxed text-peach-900">
+              <span aria-hidden="true">→</span>
+              <span>{hint}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    {/* ---------- รายการบล็อก ---------- */}
+    {blocks.length === 0 ? (
+      <EmptyState
+        icon={<Blocks className="h-10 w-10" aria-hidden="true" />}
+        title="ยังไม่มีบล็อกคำสั่งในพื้นที่นี้"
+        description="เลือกบล็อกจากคลังคำสั่งแล้วกดปุ่ม + เพื่อเริ่มเรียงตรรกะ หรือกดปุ่ม โหลดตัวอย่างตรรกะที่มี Bug เพื่อเริ่มจากโจทย์ที่ครูเตรียมไว้"
+      />
+    ) : (
+      <ol className="space-y-2">
+        {blocks.map((block, index) => {
+          const def = BLOCK_MAP[block.blockId];
+          const active = activeBlockId === block.blockId;
+          return (
+            <li key={block.uid}>
+              <div
+                className={`block-3d flex items-start gap-2.5 rounded-2xl border-2 px-3 py-2.5 ${
+                  active
+                    ? 'scale-[1.02] border-brand-400 bg-gradient-to-b from-brand-50 to-brand-100 ring-4 ring-brand-200'
+                    : def.isBug
+                      ? 'border-bubble-200 bg-gradient-to-b from-bubble-50 to-white'
+                      : 'border-slate-100 bg-white'
+                }`}
+                style={{
+                  boxShadow: active
+                    ? '0 5px 0 0 #9db4ff'
+                    : def.isBug
+                      ? '0 4px 0 0 rgba(255,200,222,0.9)'
+                      : '0 4px 0 0 rgba(203,213,225,0.55)',
+                }}
+              >
+                <span
+                  className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl font-mono text-xs font-bold shadow-clay-sm ${
+                    def.isBug
+                      ? 'bg-gradient-to-b from-bubble-200 to-bubble-300 text-bubble-900'
+                      : 'bg-gradient-to-b from-slate-100 to-slate-200 text-slate-700'
+                  }`}
+                  aria-hidden="true"
+                >
+                  {index + 1}
+                </span>
+
+                <div className="min-w-0 flex-1">
+                  <p className="break-words font-mono text-[12.5px] font-semibold leading-snug text-slate-800">
+                    {def.isBug && (
+                      <TriangleAlert
+                        className="mr-1 inline h-3.5 w-3.5 text-bubble-600"
+                        aria-hidden="true"
+                      />
+                    )}
+                    {def.isBug && <span className="sr-only">บล็อก Bug: </span>}
+                    {def.label}
+                  </p>
+                  <p className="mt-0.5 text-[11.5px] leading-relaxed text-slate-500">{def.hint}</p>
+                </div>
+
+                <div className="flex shrink-0 items-center gap-0.5">
+                  <button
+                    type="button"
+                    onClick={() => onMove(index, -1)}
+                    disabled={index === 0}
+                    className="rounded-xl p-1.5 text-slate-400 transition hover:-translate-y-0.5 hover:bg-slate-100 hover:text-brand-600 disabled:opacity-25"
+                    aria-label={`เลื่อนบล็อก ${def.label} ขึ้น`}
+                  >
+                    <ArrowUp className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onMove(index, 1)}
+                    disabled={index === blocks.length - 1}
+                    className="rounded-xl p-1.5 text-slate-400 transition hover:-translate-y-0.5 hover:bg-slate-100 hover:text-brand-600 disabled:opacity-25"
+                    aria-label={`เลื่อนบล็อก ${def.label} ลง`}
+                  >
+                    <ArrowDown className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onRemove(block.uid)}
+                    className="rounded-xl p-1.5 text-bubble-400 transition hover:-translate-y-0.5 hover:bg-bubble-100 hover:text-bubble-700"
+                    aria-label={`ลบบล็อก ${def.label}`}
+                  >
+                    <Trash2 className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    )}
+
+    {/* ---------- ผลตรวจตรรกะ ---------- */}
+    <div className="mt-4 space-y-2" aria-live="polite">
+      <h3 className="text-sm font-semibold text-slate-700">ผลตรวจตรรกะเบื้องต้น</h3>
+      {report.issues.map((issue) => {
+        const isOk = issue.severity === 'ok';
+        return (
+          <div
+            key={issue.id}
+            className={`rounded-2xl border-2 px-3.5 py-2.5 ${
+              isOk
+                ? 'border-mint-200 bg-gradient-to-b from-mint-50 to-white'
+                : issue.severity === 'bug'
+                  ? 'border-bubble-200 bg-gradient-to-b from-bubble-50 to-white'
+                  : 'border-lemon-200 bg-gradient-to-b from-lemon-50 to-white'
+            }`}
+          >
+            <p
+              className={`flex gap-2 text-sm font-medium leading-relaxed ${
+                isOk ? 'text-mint-900' : issue.severity === 'bug' ? 'text-bubble-900' : 'text-peach-900'
+              }`}
+            >
+              {isOk ? (
+                <CircleCheck className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              ) : (
+                <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              )}
+              <span>{issue.message}</span>
+            </p>
+            <p className="mt-1 pl-6 text-xs leading-relaxed text-slate-600">
+              แนวทาง: {issue.advice}
+            </p>
+          </div>
+        );
+      })}
+
+      <div className="grid gap-2 pt-1 sm:grid-cols-3">
+        {[
+          { label: 'ตรรกะสุ่มข้อสอบ', ok: report.randomLogicOk },
+          { label: 'ตรรกะตรวจคำตอบ', ok: report.answerLogicOk },
+          { label: 'ตรรกะจบเกม', ok: report.endLogicOk },
+        ].map((item) => (
+          <div
+            key={item.label}
+            className={`flex items-center gap-2 rounded-2xl border-2 px-3 py-2 text-xs font-semibold ${
+              item.ok
+                ? 'border-mint-200 bg-gradient-to-b from-mint-50 to-white text-mint-800'
+                : 'border-dashed border-slate-200 bg-white text-slate-400'
+            }`}
+          >
+            {item.ok ? (
+              <CircleCheck className="h-4 w-4 shrink-0" aria-hidden="true" />
+            ) : (
+              <span className="h-4 w-4 shrink-0 rounded-full border-2 border-slate-300" aria-hidden="true" />
+            )}
+            <span>
+              {item.label}: {item.ok ? 'ถูกต้อง' : 'ยังไม่ครบ'}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </Card>
+);
