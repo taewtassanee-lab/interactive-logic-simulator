@@ -3,7 +3,7 @@ import { BUGGY_EXAMPLE } from '../data/blocks';
 import { BlockLibrary } from '../components/BlockLibrary';
 import { LogicWorkspace } from '../components/LogicWorkspace';
 import { StateMonitor } from '../components/StateMonitor';
-import { MissionPanel } from '../components/MissionPanel';
+import { MissionBar } from '../components/MissionBar';
 import { ComparePanel } from '../components/ComparePanel';
 import { useApp } from '../context/AppContext';
 import { useToast } from '../components/Toast';
@@ -158,6 +158,8 @@ export const SimulatorPage = () => {
         </p>
       </div>
 
+      <MissionBar missions={state.missions} />
+
       {/* 3 คอลัมน์บนจอใหญ่ เรียงลงมาบนมือถือ */}
       <div className="grid gap-4 xl:grid-cols-[minmax(0,300px)_minmax(0,1fr)_minmax(0,340px)]">
         <BlockLibrary onAdd={handleAdd} />
@@ -187,8 +189,6 @@ export const SimulatorPage = () => {
       </div>
 
       <ComparePanel flags={flags} state={displayState} />
-
-      <MissionPanel missions={state.missions} liveState={displayState} />
     </div>
   );
 };
