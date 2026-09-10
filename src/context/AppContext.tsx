@@ -10,6 +10,8 @@ import {
 } from 'react';
 import type { AppState } from '../types';
 import { clearState, createInitialState, loadState, saveState } from '../utils/storage';
+import { isSyncEnabled, syncProgress, type SyncStatus } from '../utils/sync';
+import { SYNC_CONFIG } from '../config';
 
 interface AppContextValue {
   state: AppState;
@@ -18,6 +20,8 @@ interface AppContextValue {
   resetAll: () => void;
   /** เวลาที่บันทึกล่าสุด ใช้แสดงข้อความ "บันทึกอัตโนมัติแล้ว" */
   lastSavedAt: Date | null;
+  /** สถานะการส่งข้อมูลขึ้นแดชบอร์ดของครู */
+  syncStatus: SyncStatus;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -25,6 +29,7 @@ const AppContext = createContext<AppContextValue | null>(null);
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState<AppState>(() => loadState());
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>(isSyncEnabled() ? 'idle' : 'off');
   const firstRender = useRef(true);
 
   // บันทึกอัตโนมัติแบบหน่วงเวลา ลดการเขียน localStorage ขณะพิมพ์ใบงาน
@@ -39,6 +44,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     return () => window.clearTimeout(timer);
   }, [state]);
 
+  // ส่งความก้าวหน้าขึ้น Google Sheets แบบหน่วงเวลา ไม่รบกวนการทำงานของนักเรียน
+  useEffect(() => {
+    if (!isSyncEnabled() || !state.session.activityStarted) return;
+    const timer = window.setTimeout(async () => {
+      setSyncStatus('sending');
+      setSyncStatus(await syncProgress(state));
+    }, SYNC_CONFIG.debounceMs);
+    return () => window.clearTimeout(timer);
+  }, [state]);
+
   const update = useCallback<AppContextValue['update']>((patch) => {
     setState((prev) => ({ ...prev, ...(typeof patch === 'function' ? patch(prev) : patch) }));
   }, []);
@@ -47,11 +62,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     clearState();
     setState(createInitialState());
     setLastSavedAt(null);
+    setSyncStatus(isSyncEnabled() ? 'idle' : 'off');
   }, []);
 
   const value = useMemo(
-    () => ({ state, update, resetAll, lastSavedAt }),
-    [state, update, resetAll, lastSavedAt],
+    () => ({ state, update, resetAll, lastSavedAt, syncStatus }),
+    [state, update, resetAll, lastSavedAt, syncStatus],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

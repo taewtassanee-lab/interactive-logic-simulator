@@ -3,6 +3,7 @@ import {
   ClipboardList,
   FileText,
   GraduationCap,
+  LayoutDashboard,
   Lock,
   PlayCircle,
   Rocket,
@@ -16,6 +17,7 @@ import { SimulatorPage } from './pages/SimulatorPage';
 import { WorksheetPage } from './pages/WorksheetPage';
 import { SummaryPage } from './pages/SummaryPage';
 import { TeacherGuidePage } from './pages/TeacherGuidePage';
+import { DashboardPage } from './pages/DashboardPage';
 import { TEACHER_INFO } from './config';
 import type { TabId } from './types';
 
@@ -33,6 +35,7 @@ const TABS: TabDef[] = [
   { id: 'worksheet', label: 'ใบงานดิจิทัล', icon: FileText, requiresStart: true },
   { id: 'summary', label: 'สรุปและส่งงาน', icon: ClipboardList, requiresStart: true },
   { id: 'teacher', label: 'คู่มือครู', icon: GraduationCap, requiresStart: false },
+  { id: 'dashboard', label: 'แดชบอร์ดครู', icon: LayoutDashboard, requiresStart: false },
 ];
 
 const App = () => {
@@ -112,6 +115,7 @@ const App = () => {
         {tab === 'worksheet' && <WorksheetPage />}
         {tab === 'summary' && <SummaryPage onNavigate={goTo} />}
         {tab === 'teacher' && <TeacherGuidePage />}
+        {tab === 'dashboard' && <DashboardPage />}
       </main>
 
       <footer className="mt-4 border-t-2 border-white bg-white/80 py-5">

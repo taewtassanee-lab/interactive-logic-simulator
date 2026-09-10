@@ -29,6 +29,23 @@ export const TEACHER_INFO = {
   banner: './teacher-banner.jpg',
 } as const;
 
+/**
+ * การเชื่อมต่อกับ Google Sheets เพื่อทำแดชบอร์ดสรุปผลของครู
+ *
+ * ถ้า endpoint เว้นว่างไว้ ระบบจะทำงานแบบเดิมทุกประการ คือเก็บข้อมูลในเบราว์เซอร์อย่างเดียว
+ * ไม่ส่งข้อมูลออกไปไหน และแท็บแดชบอร์ดจะแสดงวิธีติดตั้งแทน
+ *
+ * วิธีตั้งค่าอ่านที่ docs/คู่มือติดตั้งแดชบอร์ด.md
+ */
+export const SYNC_CONFIG = {
+  /** URL ของ Apps Script Web App เช่น https://script.google.com/macros/s/AKfycb.../exec */
+  endpoint: '',
+  /** ต้องตรงกับค่า CLASS_SECRET ในไฟล์ Code.gs */
+  classSecret: '',
+  /** ระยะเวลาหน่วงก่อนส่งข้อมูล (มิลลิวินาที) กันการยิงถี่ขณะนักเรียนพิมพ์ */
+  debounceMs: 4000,
+} as const;
+
 export const APP_CONFIG = {
   appName: 'Interactive Logic Simulator',
   appTagline:

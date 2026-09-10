@@ -1,6 +1,6 @@
 /* ประเภทข้อมูลกลางของระบบทั้งหมด */
 
-export type TabId = 'start' | 'simulator' | 'worksheet' | 'summary' | 'teacher';
+export type TabId = 'start' | 'simulator' | 'worksheet' | 'summary' | 'teacher' | 'dashboard';
 
 /* ---------- ข้อมูลผู้เรียนและคู่ Pair Programming ---------- */
 
