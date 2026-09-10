@@ -9,7 +9,6 @@ export const createInitialState = (): AppState => ({
     driverNumber: '',
     navigatorName: '',
     navigatorNumber: '',
-    classroomUrl: APP_CONFIG.classroomUrl,
   },
   session: {
     activityStarted: false,

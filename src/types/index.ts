@@ -11,7 +11,6 @@ export interface PairInfo {
   driverNumber: string;
   navigatorName: string;
   navigatorNumber: string;
-  classroomUrl: string;
 }
 
 export interface SessionInfo {

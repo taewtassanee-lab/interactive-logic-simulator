@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Compass, FlaskConical, Link2, Mouse, Rocket, UserCheck, Users } from 'lucide-react';
+import { Compass, FlaskConical, Mouse, Rocket, Send, UserCheck, Users } from 'lucide-react';
 import { APP_CONFIG } from '../config';
 import { useApp } from '../context/AppContext';
 import { useToast } from '../components/Toast';
@@ -41,13 +41,7 @@ export const StartPage = ({ onStarted }: { onStarted: () => void }) => {
       return;
     }
 
-    update((prev) => ({
-      session: { ...prev.session, activityStarted: true },
-      pair: {
-        ...prev.pair,
-        classroomUrl: prev.pair.classroomUrl.trim() || APP_CONFIG.classroomUrl,
-      },
-    }));
+    update((prev) => ({ session: { ...prev.session, activityStarted: true } }));
     notify('เริ่มกิจกรรมแล้ว เข้าสู่หน้าจำลองตรรกะได้เลย', 'success');
     onStarted();
   };
@@ -55,7 +49,7 @@ export const StartPage = ({ onStarted }: { onStarted: () => void }) => {
   /** โหลดข้อมูลตัวอย่างเพื่อให้ครูดูหน้าตาใบงานและ PDF ได้ทันที */
   const handleLoadSample = () => {
     const sample = createSampleState();
-    update({ pair: { ...sample.pair, classroomUrl: pair.classroomUrl }, session: sample.session, worksheet: sample.worksheet });
+    update({ pair: sample.pair, session: sample.session, worksheet: sample.worksheet });
     setErrors({});
     notify('โหลดข้อมูลตัวอย่างแล้ว ใช้สำหรับทดสอบระบบเท่านั้น อย่าลืมแก้เป็นข้อมูลจริงก่อนส่งงาน', 'info');
   };
@@ -190,20 +184,16 @@ export const StartPage = ({ onStarted }: { onStarted: () => void }) => {
           <div className="hidden lg:block" aria-hidden="true" />
         </div>
 
-        <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
-          <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-700">
-            <Link2 className="h-4 w-4 text-brand-600" aria-hidden="true" />
-            ลิงก์งาน Google Classroom (ครูผู้สอนเป็นผู้กำหนด)
-          </div>
-          <TextField
-            label="URL งานใน Google Classroom"
-            value={pair.classroomUrl}
-            onChange={(v) => setField('classroomUrl', v)}
-            placeholder={APP_CONFIG.classroomUrl}
-            type="url"
-            inputMode="url"
-            hint={`หากเว้นว่างไว้ ระบบจะใช้ค่าเริ่มต้นจากไฟล์ config: ${APP_CONFIG.classroomUrl}`}
-          />
+        <div className="mt-4 rounded-2xl border-2 border-lemon-200 bg-gradient-to-b from-lemon-50 to-white p-4">
+          <p className="mb-1.5 flex items-center gap-2 font-display text-sm font-bold text-peach-900">
+            <Send className="h-4 w-4" aria-hidden="true" />
+            การส่งงานเมื่อทำกิจกรรมเสร็จ
+          </p>
+          <p className="text-sm leading-relaxed text-slate-600">
+            เมื่อทำกิจกรรมครบแล้ว ให้ดาวน์โหลดใบงาน PDF จากหน้า &quot;สรุปและส่งงาน&quot;
+            แล้ว<strong className="text-slate-800">เปิด Google Classroom ของชั้นเรียนด้วยตนเอง</strong>{' '}
+            เพื่อแนบไฟล์ PDF พร้อมไฟล์ผลงาน .capx ในงานที่ครูมอบหมาย
+          </p>
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-3">

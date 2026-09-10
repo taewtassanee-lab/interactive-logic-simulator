@@ -4,7 +4,6 @@ import {
   Circle,
   ClipboardCopy,
   Download,
-  ExternalLink,
   FileArchive,
   Loader2,
   Send,
@@ -159,19 +158,6 @@ export const SummaryPage = ({ onNavigate }: { onNavigate: (tab: TabId) => void }
     }
   };
 
-  const handleOpenClassroom = () => {
-    const url = pair.classroomUrl.trim();
-    if (!url) {
-      notify('กรุณาสอบถามลิงก์งาน Google Classroom จากครูผู้สอน', 'warn');
-      return;
-    }
-    if (!/^https?:\/\//i.test(url)) {
-      notify('ลิงก์ Google Classroom ไม่ถูกต้อง ต้องขึ้นต้นด้วย https:// กรุณาตรวจสอบกับครูผู้สอน', 'error');
-      return;
-    }
-    window.open(url, '_blank', 'noopener,noreferrer');
-  };
-
   const handleCopyText = async () => {
     try {
       await navigator.clipboard.writeText(buildSubmissionText(state));
@@ -305,7 +291,7 @@ export const SummaryPage = ({ onNavigate }: { onNavigate: (tab: TabId) => void }
       {/* ---------- ปุ่มส่งงาน ---------- */}
       <Card
         title="ส่งงานใน Google Classroom"
-        subtitle="ดาวน์โหลดใบงาน คัดลอกข้อความ แล้วเปิด Classroom เพื่อแนบไฟล์"
+        subtitle="ดาวน์โหลดใบงานและคัดลอกข้อความ แล้วนำไปส่งใน Classroom ด้วยตนเอง"
         icon={<Send className="h-5 w-5 text-brand-600" aria-hidden="true" />}
       >
         <div className="flex flex-wrap gap-2.5">
@@ -316,10 +302,6 @@ export const SummaryPage = ({ onNavigate }: { onNavigate: (tab: TabId) => void }
               <Download className="h-4 w-4" aria-hidden="true" />
             )}
             {busy ? 'กำลังสร้าง PDF...' : 'สร้างและดาวน์โหลดใบงาน PDF'}
-          </Button>
-          <Button variant="primary" onClick={handleOpenClassroom}>
-            <ExternalLink className="h-4 w-4" aria-hidden="true" />
-            เปิด Google Classroom เพื่อส่งงาน
           </Button>
           <Button variant="purple" onClick={handleCopyText}>
             <ClipboardCopy className="h-4 w-4" aria-hidden="true" />
@@ -342,13 +324,27 @@ export const SummaryPage = ({ onNavigate }: { onNavigate: (tab: TabId) => void }
           </pre>
         </div>
 
-        <ol className="mt-4 space-y-1.5 rounded-xl bg-brand-50 p-3.5 text-sm leading-relaxed text-brand-900">
-          <li>1. กดปุ่มดาวน์โหลด PDF แล้วเก็บไฟล์ไว้ในเครื่อง</li>
-          <li>2. เตรียมไฟล์ .capx จาก Construct 2 ไว้ในโฟลเดอร์เดียวกัน</li>
-          <li>3. กดปุ่มเปิด Google Classroom แล้วเลือกงานที่ครูมอบหมาย</li>
-          <li>4. กด &quot;เพิ่มหรือสร้าง&quot; แล้วแนบทั้งไฟล์ PDF และไฟล์ .capx</li>
-          <li>5. วางข้อความสำหรับส่งงานในช่องความคิดเห็นส่วนตัว แล้วกด &quot;ส่ง&quot;</li>
-        </ol>
+        <div className="mt-4 rounded-2xl border-2 border-brand-200 bg-gradient-to-b from-brand-50 to-white p-4">
+          <p className="mb-2 font-display text-sm font-bold text-brand-900">
+            ขั้นตอนการส่งงานใน Google Classroom
+          </p>
+          <ol className="space-y-2">
+            {[
+              'กดปุ่มดาวน์โหลด PDF ด้านบน แล้วเก็บไฟล์ไว้ในเครื่อง',
+              'เตรียมไฟล์ผลงาน .capx จาก Construct 2 ไว้ในโฟลเดอร์เดียวกัน',
+              'เปิดแอปหรือเว็บ Google Classroom ของชั้นเรียนด้วยตนเอง แล้วเลือกงานที่ครูมอบหมาย',
+              'กด "เพิ่มหรือสร้าง" แล้วแนบทั้งไฟล์ PDF และไฟล์ .capx',
+              'วางข้อความสำหรับส่งงานในช่องความคิดเห็นส่วนตัว แล้วกด "ส่ง"',
+            ].map((step, i) => (
+              <li key={step} className="flex items-start gap-2.5 text-sm leading-relaxed text-slate-700">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-brand-400 to-brand-600 font-display text-xs font-bold text-white shadow-clay-sm">
+                  {i + 1}
+                </span>
+                <span>{step}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
       </Card>
     </div>
   );

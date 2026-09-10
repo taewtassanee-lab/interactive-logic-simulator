@@ -1,11 +1,4 @@
-/**
- * ค่าตั้งต้นของระบบ
- * ครูผู้สอนสามารถแก้ไขได้ 2 วิธี
- * 1) สร้างไฟล์ .env แล้วกำหนด VITE_CLASSROOM_URL (แนะนำ)
- * 2) แก้ค่า DEFAULT_CLASSROOM_URL ในไฟล์นี้โดยตรง แล้ว build ใหม่
- */
-
-export const DEFAULT_CLASSROOM_URL = 'https://classroom.google.com/';
+/** ค่าตั้งต้นของระบบ */
 
 /**
  * ข้อมูลครูผู้สอน แสดงในหน้าเริ่มต้นใช้งาน คู่มือครู ท้ายเว็บ และในใบงาน PDF
@@ -47,7 +40,6 @@ export const APP_CONFIG = {
   semester: 'ภาคเรียนที่ 1 ปีการศึกษา 2569',
   unitName: 'หน่วยการเรียนรู้ที่ 2: การสร้างสื่อปฏิสัมพันธ์ด้วย Construct 2',
   worksheetTitle: 'ใบกิจกรรมถอดรหัสตรรกะและบันทึกการแก้ Bug',
-  classroomUrl: import.meta.env.VITE_CLASSROOM_URL || DEFAULT_CLASSROOM_URL,
   /** เวลาเริ่มต้นของ Role Switch Timer (วินาที) */
   roleSwitchSeconds: 10 * 60,
   /** จำนวนรอบสูงสุดที่ตัวจำลองจะทำงาน กันลูปไม่รู้จบเมื่อผู้เรียนวางตรรกะผิด */
