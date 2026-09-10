@@ -4,6 +4,7 @@ import {
   FileText,
   GraduationCap,
   LayoutDashboard,
+  Library,
   Lock,
   PlayCircle,
   Rocket,
@@ -18,6 +19,7 @@ import { WorksheetPage } from './pages/WorksheetPage';
 import { SummaryPage } from './pages/SummaryPage';
 import { TeacherGuidePage } from './pages/TeacherGuidePage';
 import { DashboardPage } from './pages/DashboardPage';
+import { KnowledgePage } from './pages/KnowledgePage';
 import { TEACHER_INFO } from './config';
 import type { TabId } from './types';
 
@@ -32,6 +34,7 @@ interface TabDef {
 const TABS: TabDef[] = [
   { id: 'start', label: 'เริ่มต้นใช้งาน', icon: Rocket, requiresStart: false },
   { id: 'simulator', label: 'จำลองตรรกะ', icon: PlayCircle, requiresStart: true },
+  { id: 'knowledge', label: 'คลังความรู้', icon: Library, requiresStart: false },
   { id: 'worksheet', label: 'ใบงานดิจิทัล', icon: FileText, requiresStart: true },
   { id: 'summary', label: 'สรุปและส่งงาน', icon: ClipboardList, requiresStart: true },
   { id: 'teacher', label: 'คู่มือครู', icon: GraduationCap, requiresStart: false },
@@ -112,6 +115,7 @@ const App = () => {
       <main className="mx-auto max-w-[1400px] px-3 py-5 sm:px-5 sm:py-6">
         {tab === 'start' && <StartPage onStarted={() => setTab('simulator')} />}
         {tab === 'simulator' && <SimulatorPage />}
+        {tab === 'knowledge' && <KnowledgePage />}
         {tab === 'worksheet' && <WorksheetPage />}
         {tab === 'summary' && <SummaryPage onNavigate={goTo} />}
         {tab === 'teacher' && <TeacherGuidePage />}
