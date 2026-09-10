@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   BookOpenCheck,
   Boxes,
+  ArrowLeftRight,
   CircleCheck,
   CircleHelp,
   FunctionSquare,
@@ -14,12 +15,14 @@ import { Button, Card, Pill } from '../components/Ui';
 import { ArrayPlayground } from '../components/ArrayPlayground';
 import { Mascot } from '../components/Illustrations';
 import {
+  ADVANCED_CONCEPTS,
   ARRAY_COMMANDS,
   ARRAY_CONCEPTS,
   COMMON_MISTAKES,
   FUNCTION_COMMANDS,
   FUNCTION_CONCEPTS,
   GLOSSARY,
+  REAL_EVENT_MAPPING,
   REVIEW_QUESTIONS,
   type CommandRow,
   type ConceptSection,
@@ -27,17 +30,21 @@ import {
 
 /* ---------- การ์ดแนวคิดแบบพับเก็บได้ ---------- */
 
+const TONES = {
+  brand: { ring: 'border-brand-200', head: 'bg-brand-50', num: 'from-brand-400 to-brand-600' },
+  think: { ring: 'border-think-200', head: 'bg-think-50', num: 'from-think-400 to-think-600' },
+  mint: { ring: 'border-mint-200', head: 'bg-mint-50', num: 'from-mint-400 to-mint-600' },
+} as const;
+
 const ConceptList = ({
   sections,
   tone,
 }: {
   sections: ConceptSection[];
-  tone: 'brand' | 'think';
+  tone: keyof typeof TONES;
 }) => {
   const [openId, setOpenId] = useState<string | null>(sections[0]?.id ?? null);
-  const ring = tone === 'brand' ? 'border-brand-200' : 'border-think-200';
-  const head = tone === 'brand' ? 'bg-brand-50' : 'bg-think-50';
-  const num = tone === 'brand' ? 'from-brand-400 to-brand-600' : 'from-think-400 to-think-600';
+  const { ring, head, num } = TONES[tone];
 
   return (
     <div className="space-y-2">
@@ -279,9 +286,58 @@ export const KnowledgePage = () => (
       <CommandTable rows={FUNCTION_COMMANDS} />
     </Card>
 
+    {/* ---------- เทคนิคที่ใช้ในไฟล์จริง ---------- */}
+    <Card
+      title="ส่วนที่ 3: เทคนิคเพิ่มเติมที่ใช้ในไฟล์จริง"
+      subtitle="3 เรื่องที่จะเจอใน Event Sheet ของโปรเจกต์ แต่ไม่มีในเว็บจำลอง"
+      icon={<Boxes className="h-5 w-5 text-mint-600" aria-hidden="true" />}
+    >
+      <ConceptList sections={ADVANCED_CONCEPTS} tone="mint" />
+    </Card>
+
+    {/* ---------- ตารางเทียบเว็บจำลองกับของจริง ---------- */}
+    <Card
+      title="ส่วนที่ 4: จากเว็บจำลอง สู่ Event Sheet จริง"
+      subtitle="บล็อกในเว็บนี้ตรงกับคำสั่งใดใน Construct 2 ใช้เป็นแผนที่ตอนลงมือทำจริง"
+      icon={<ArrowLeftRight className="h-5 w-5 text-think-600" aria-hidden="true" />}
+    >
+      <p className="mb-3 rounded-2xl border-2 border-dashed border-lemon-200 bg-lemon-50 px-3.5 py-2.5 text-xs leading-relaxed text-peach-900">
+        เว็บจำลองตั้งใจย่อคำสั่งให้สั้นเพื่อให้เข้าใจตรรกะก่อน เมื่อไปเขียนจริงใน Construct 2
+        ชื่อคำสั่งจะยาวกว่าและมีรายละเอียดเพิ่ม ตารางนี้จับคู่ให้ทีละบรรทัด
+      </p>
+      <div className="scroll-thin -mx-1 overflow-x-auto px-1">
+        <table className="w-full min-w-[760px] border-collapse text-sm">
+          <thead>
+            <tr className="border-b-2 border-slate-200 text-left">
+              <th className="px-2.5 py-2 text-xs font-bold text-slate-600">บล็อกในเว็บจำลอง</th>
+              <th className="px-2.5 py-2 text-xs font-bold text-slate-600">คำสั่งจริงใน Construct 2</th>
+              <th className="px-2.5 py-2 text-xs font-bold text-slate-600">สิ่งที่ต่างออกไป</th>
+            </tr>
+          </thead>
+          <tbody>
+            {REAL_EVENT_MAPPING.map((m) => (
+              <tr key={m.real} className="border-b border-slate-100 align-top hover:bg-think-50/40">
+                <td className="px-2.5 py-2">
+                  <code className="font-mono text-[11.5px] leading-snug text-slate-600">
+                    {m.block}
+                  </code>
+                </td>
+                <td className="px-2.5 py-2">
+                  <code className="font-mono text-[11.5px] font-semibold leading-snug text-brand-800">
+                    {m.real}
+                  </code>
+                </td>
+                <td className="px-2.5 py-2 text-xs leading-relaxed text-slate-600">{m.note}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </Card>
+
     {/* ---------- นำมาประกอบกัน ---------- */}
     <Card
-      title="ส่วนที่ 3: นำมาประกอบกันเป็นระบบแบบทดสอบสุ่ม"
+      title="ส่วนที่ 5: โครงตรรกะทั้งหมดของระบบ"
       subtitle="ตรรกะทั้งหมดที่ต้องเขียนใน Event Sheet"
       icon={<BookOpenCheck className="h-5 w-5 text-mint-600" aria-hidden="true" />}
     >
@@ -291,12 +347,12 @@ export const KnowledgePage = () => (
             title: 'Function "Random"',
             tone: 'border-brand-200 bg-gradient-to-b from-brand-50 to-white',
             steps: [
-              'Set Num to floor(random(Array.Width))',
-              'Set CurrentQuestion to Array.At(Num, 0, 0)',
-              'Array -> Delete index Num from X axis',
-              'Display CurrentQuestion',
+              'Set Num to int(random(Array.Width))',
+              'quiz: Set animation frame to int(trim(tokenat(Array.At(Num),0,",")))',
+              'Set Answer to trim(tokenat(Array.At(Num),1,","))',
+              'Array > Delete index Num from X axis',
             ],
-            note: 'อ่านค่าก่อน แล้วจึงลบ ลำดับนี้ห้ามสลับ',
+            note: 'อ่านค่าให้ครบทั้งหมายเลขข้อและเฉลยก่อน แล้วจึงลบ ลำดับนี้ห้ามสลับ',
           },
           {
             title: 'ตรวจคำตอบ',
@@ -312,8 +368,13 @@ export const KnowledgePage = () => (
           {
             title: 'เงื่อนไขจบเกม',
             tone: 'border-mint-200 bg-gradient-to-b from-mint-50 to-white',
-            steps: ['If Array is empty (Width = 0)', 'Go to Layout "Summary"', 'Display Score'],
-            note: 'ต้องตรวจว่าว่างก่อน จึงค่อยเปลี่ยนหน้า',
+            steps: [
+              'Array > Is empty (Invert = ยังไม่ว่าง) → สุ่มต่อ',
+              'Else → เข้าสู่ทางจบเกม',
+              'Score ≤ 5 → Go to เสียใจ',
+              'Score > 5 → Go to ดีใจ',
+            ],
+            note: 'ไฟล์จริงแยกหน้าจบเป็น 2 หน้าตามคะแนน ไม่ใช่หน้า Summary หน้าเดียว',
           },
         ].map((box) => (
           <div key={box.title} className={`rounded-[1.25rem] border-2 p-3.5 ${box.tone}`}>
@@ -338,7 +399,7 @@ export const KnowledgePage = () => (
 
     {/* ---------- ข้อผิดพลาดที่พบบ่อย ---------- */}
     <Card
-      title="ส่วนที่ 4: ข้อผิดพลาดที่พบบ่อย"
+      title="ส่วนที่ 6: ข้อผิดพลาดที่พบบ่อย"
       subtitle="อ่านไว้ก่อน จะได้ไม่เสียเวลาหาสาเหตุนาน"
       icon={<TriangleAlert className="h-5 w-5 text-bubble-600" aria-hidden="true" />}
     >

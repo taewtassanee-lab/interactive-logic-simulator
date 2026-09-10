@@ -46,7 +46,8 @@ export const ARRAY_CONCEPTS: ConceptSection[] = [
       'Array.Width คือจำนวนช่องบนแกน X ณ ขณะนั้น',
       'เมื่อใช้คำสั่ง Delete index ค่า Array.Width จะลดลง 1 และช่องที่อยู่ข้างหลังจะเลื่อนมาแทนที่',
       'เมื่อ Array.Width = 0 แปลว่าไม่มีข้อมูลเหลือแล้ว ใช้เป็นเงื่อนไขจบเกมได้',
-      'ในกิจกรรมนี้เรียกเงื่อนไขนั้นสั้น ๆ ว่า "Array is empty" แต่เวลาเขียนจริงใน Construct 2 ใช้เงื่อนไข Array > Compare size แล้วตรวจว่า Width = 0',
+      'Construct 2 มีเงื่อนไข Array > Is empty ให้ใช้ได้โดยตรง ไม่ต้องเขียนเทียบ Width = 0 เอง',
+      'เงื่อนไขนี้กลับด้าน (Invert) ได้ด้วยการคลิกขวาแล้วเลือก Invert จะกลายเป็น "ยังไม่ว่าง" ซึ่งใช้บ่อยกว่า',
     ],
   },
   {
@@ -60,6 +61,46 @@ export const ARRAY_CONCEPTS: ConceptSection[] = [
       'floor() ปัดเศษลงเป็นจำนวนเต็ม เช่น floor(2.7183) = 2',
       'floor(random(Array.Width)) จึงได้เลข 0 ถึง Width-1 ซึ่งเป็นช่วง Index ที่ถูกต้องพอดี',
       'ถ้าลืมใส่ floor() จะได้ทศนิยม ทำให้อ้างช่องผิดหรือได้ค่าว่าง',
+    ],
+  },
+];
+
+export const ADVANCED_CONCEPTS: ConceptSection[] = [
+  {
+    id: 'invert',
+    title: 'การกลับเงื่อนไข (Invert) ทำให้เขียนสั้นลง',
+    plain:
+      'บางครั้งเราอยากสั่งว่า "ถ้ายังไม่ว่าง ให้สุ่มต่อ" แทนที่จะเขียนเงื่อนไขใหม่ ใช้วิธีกลับเงื่อนไขเดิมได้เลย เงื่อนไขที่ถูกกลับด้านจะมีเครื่องหมายกากบาทสีแดงนำหน้า',
+    technical: [
+      'คลิกขวาที่เงื่อนไขแล้วเลือก Invert เพื่อกลับความหมายเป็นตรงกันข้าม',
+      'Array > Is empty เมื่อ Invert แล้วจะหมายถึง "Array ยังไม่ว่าง"',
+      'รูปแบบที่ใช้บ่อยคือ ถ้ายังไม่ว่าง ให้สุ่มข้อถัดไป ส่วน Else คือจบเกม',
+      'สังเกตในหน้า Event Sheet จะเห็นกากบาทสีแดงหน้าเงื่อนไขที่ถูก Invert',
+    ],
+  },
+  {
+    id: 'tokenat',
+    title: 'เก็บหลายค่าไว้ในช่องเดียวด้วย tokenat',
+    plain:
+      'ข้อสอบ 1 ข้อมีทั้งหมายเลขข้อและเฉลย ถ้าเก็บแยกกันต้องใช้ Array สองชุด วิธีที่ง่ายกว่าคือเก็บรวมไว้ช่องเดียวคั่นด้วยจุลภาค เช่น "0,ก" แล้วค่อยแยกออกมาตอนใช้งาน',
+    technical: [
+      'tokenat(ข้อความ, ลำดับ, ตัวคั่น) ใช้ดึงข้อความแต่ละส่วนออกมา ลำดับนับจาก 0 เหมือน Index',
+      'tokenat("0,ก", 0, ",") ได้ "0" ซึ่งคือหมายเลขข้อ',
+      'tokenat("0,ก", 1, ",") ได้ "ก" ซึ่งคือตัวเลือกที่เป็นคำตอบถูก',
+      'trim() ใช้ตัดช่องว่างหน้าหลังออก กันปัญหาเวลาพิมพ์ข้อมูลแล้วเผลอเคาะเว้นวรรค',
+      'int() แปลงข้อความให้เป็นตัวเลข เพื่อนำไปใช้กับ Set animation frame ได้',
+    ],
+  },
+  {
+    id: 'load-json',
+    title: 'ใส่ข้อสอบเข้า Array ทีเดียวด้วย Load from JSON',
+    plain:
+      'แทนที่จะสั่ง Set value ทีละช่อง 10 ครั้ง เราเขียนข้อมูลทั้งหมดเป็นข้อความ JSON แล้วโหลดเข้า Array ครั้งเดียวจบ',
+    technical: [
+      'ใช้แอ็กชัน Array > Load from JSON string ในเหตุการณ์ On start of layout',
+      'ค่า size ใน JSON เช่น [10,1,1] หมายถึง Width = 10, Height = 1, Depth = 1',
+      'เพิ่มหรือลดจำนวนข้อสอบทำได้โดยแก้ข้อความ JSON และตัวเลข size ให้ตรงกัน',
+      'ถ้าจำนวนข้อมูลกับ size ไม่ตรงกัน Array จะโหลดไม่ครบหรือมีช่องว่างปนมา',
     ],
   },
 ];
@@ -140,9 +181,14 @@ export const ARRAY_COMMANDS: CommandRow[] = [
     note: 'Array.Width กลายเป็น 0',
   },
   {
-    command: 'Array > Compare size (Width = 0)',
-    meaning: 'ตรวจว่าไม่มีข้อมูลเหลือแล้ว',
-    note: 'คือเงื่อนไขที่ใบงานเรียกว่า Array is empty',
+    command: 'Array > Is empty',
+    meaning: 'ตรวจว่าไม่มีข้อมูลเหลือใน Array แล้ว',
+    note: 'คลิกขวาแล้วเลือก Invert เพื่อกลับเป็น "ยังไม่ว่าง"',
+  },
+  {
+    command: 'Array > Compare size',
+    meaning: 'เทียบขนาดของ Array เช่น Width = 0',
+    note: 'ใช้แทน Is empty ได้ แต่ Is empty อ่านง่ายกว่า',
   },
 ];
 
@@ -161,6 +207,86 @@ export const FUNCTION_COMMANDS: CommandRow[] = [
     command: 'Function.Param(0)',
     meaning: 'อ่านค่าพารามิเตอร์ตัวแรกที่ส่งเข้ามา',
     note: 'นับจาก 0 เหมือน Index ของ Array',
+  },
+];
+
+export interface MappingRow {
+  /** ชื่อบล็อกในเว็บจำลอง */
+  block: string;
+  /** สิ่งที่ต้องเขียนจริงใน Construct 2 */
+  real: string;
+  note: string;
+}
+
+/**
+ * ตารางเทียบบล็อกในเว็บจำลอง กับคำสั่งจริงใน Event Sheet ของโปรเจกต์
+ * อ้างอิงจากไฟล์ Construct 2 ที่ใช้สอนจริง เพื่อให้ผู้เรียนต่อยอดได้ทันทีโดยไม่สับสน
+ */
+export const REAL_EVENT_MAPPING: MappingRow[] = [
+  {
+    block: 'On start of layout',
+    real: 'System > On start of layout',
+    note: 'ในไฟล์จริงมี Array > Load from JSON string เพื่อใส่ข้อสอบเข้า Array ก่อน แล้วจึง Call Function "Random"',
+  },
+  {
+    block: 'Function "Random"',
+    real: 'Function > On "Random"',
+    note: 'เป็นเงื่อนไข ไม่ใช่แอ็กชัน คำสั่งที่อยู่ใต้เหตุการณ์นี้คือเนื้อในของฟังก์ชัน',
+  },
+  {
+    block: 'Set Num to floor(random(Array.Width))',
+    real: 'System > Set Num to int(random(Array.Width))',
+    note: 'ไฟล์จริงใช้ int() ซึ่งให้ผลเหมือน floor() เมื่อค่าไม่ติดลบ ใช้ตัวไหนก็ได้',
+  },
+  {
+    block: 'Set CurrentQuestion to Array.At(Num, 0, 0)',
+    real: 'quiz > Set animation frame to int(trim(tokenat(Array.At(Num), 0, ",")))',
+    note: 'ไฟล์จริงเก็บข้อสอบเป็นภาพในเฟรมแอนิเมชัน จึงดึงหมายเลขข้อออกมาแล้วสั่งเปลี่ยนเฟรม',
+  },
+  {
+    block: '(ไม่มีในเว็บจำลอง)',
+    real: 'System > Set Answer to trim(tokenat(Array.At(Num), 1, ","))',
+    note: 'ดึงตัวอักษรเฉลยจากช่องเดียวกันเก็บไว้ในตัวแปร Answer เพื่อใช้ตรวจคำตอบทีหลัง',
+  },
+  {
+    block: 'Array -> Delete index Num from X axis',
+    real: 'Array > Delete index Num from X axis',
+    note: 'ตรงกันทุกตัวอักษร และต้องอยู่หลังการอ่านค่าเสมอ',
+  },
+  {
+    block: 'If Array is empty',
+    real: 'Array > Is empty (กลับด้านด้วย Invert)',
+    note: 'ไฟล์จริงเขียนเป็น "ถ้ายังไม่ว่าง ให้สุ่มต่อ" แล้วใช้ Else เป็นทางจบเกม',
+  },
+  {
+    block: 'On button answer clicked',
+    real: 'Mouse > On Left button Clicked on bt_Select',
+    note: 'ผูกกับปุ่มตัวเลือกโดยตรง',
+  },
+  {
+    block: 'If Answer = bt_Select.Choice',
+    real: 'System > Compare two values: Answer = bt_Select.Choice',
+    note: 'เทียบเฉลยที่เก็บไว้กับตัวเลือกที่ผู้เล่นกด',
+  },
+  {
+    block: 'Add 1 to Score',
+    real: 'System > Add 1 to Score',
+    note: 'ไฟล์จริงมี feedback แสดงผลถูกผิดและ Wait 0.4 seconds ก่อนไปข้อถัดไป',
+  },
+  {
+    block: 'Call Function "Random"',
+    real: 'Function > Call "Random" ()',
+    note: 'เรียกทั้งกรณีตอบถูกและตอบผิด เพื่อให้เกมเดินหน้าต่อเสมอ',
+  },
+  {
+    block: 'Go to Layout "Summary"',
+    real: 'System > Go to เสียใจ หรือ Go to ดีใจ',
+    note: 'ไฟล์จริงแยกหน้าจบเป็น 2 หน้า ตัดสินด้วยเงื่อนไข Score ≤ 5 และ Score > 5',
+  },
+  {
+    block: 'Display Score',
+    real: 'System > Every tick แล้ว txt_Score > Set text to Score',
+    note: 'อัปเดตข้อความคะแนนทุกเฟรม จึงเห็นคะแนนเปลี่ยนทันที',
   },
 ];
 
@@ -209,6 +335,27 @@ export const COMMON_MISTAKES: Mistake[] = [
     fix: 'ย้าย Add 1 to Score ให้อยู่ภายใต้เงื่อนไข If Answer = bt_Select.Choice เท่านั้น',
   },
   {
+    id: 'json-size',
+    title: 'เพิ่มข้อสอบแล้วข้อสุดท้ายไม่ออก หรือมีข้อว่างโผล่มา',
+    symptom: 'เพิ่มข้อสอบใน JSON แล้วบางข้อไม่ถูกสุ่ม หรือขึ้นหน้าจอว่าง',
+    cause: 'แก้ข้อมูลใน JSON แล้วแต่ลืมแก้ตัวเลข size ให้ตรงกับจำนวนข้อจริง',
+    fix: 'แก้ size ใน Load from JSON string ให้ตรงกับจำนวนข้อ เช่น มี 12 ข้อต้องเป็น [12,1,1]',
+  },
+  {
+    id: 'forget-invert',
+    title: 'เกมจบทันทีที่เริ่มเล่น หรือไม่จบเลย',
+    symptom: 'พอเริ่มเกมก็เด้งไปหน้าสรุปทันที หรือทำครบทุกข้อแล้วก็ยังไม่จบ',
+    cause: 'ลืมกลับเงื่อนไข Is empty ด้วย Invert ทำให้ความหมายกลับตรงข้ามกับที่ต้องการ',
+    fix: 'คลิกขวาที่เงื่อนไข Is empty เลือก Invert แล้วสังเกตว่ามีกากบาทสีแดงนำหน้า',
+  },
+  {
+    id: 'tokenat-index',
+    title: 'คำถามขึ้นถูกแต่ตรวจคำตอบผิดตลอด',
+    symptom: 'ภาพคำถามแสดงถูกข้อ แต่ตอบถูกก็ยังขึ้นว่าผิด',
+    cause: 'สลับลำดับใน tokenat เช่น ใช้ 0 ทั้งสองที่ ทำให้ตัวแปร Answer ได้หมายเลขข้อแทนตัวเฉลย',
+    fix: 'ตรวจว่าใช้ tokenat(..., 0, ",") สำหรับหมายเลขข้อ และ tokenat(..., 1, ",") สำหรับเฉลย',
+  },
+  {
     id: 'wrong-function-name',
     title: 'เรียกฟังก์ชันแล้วไม่มีอะไรเกิดขึ้น',
     symptom: 'ตอบคำถามเสร็จแล้วระบบค้าง ไม่ไปข้อถัดไป',
@@ -233,6 +380,11 @@ export const GLOSSARY: GlossaryItem[] = [
   { term: 'Parameter', meaning: 'ค่าที่ส่งเข้าไปให้ฟังก์ชันใช้ทำงาน อ่านด้วย Function.Param()' },
   { term: 'random()', meaning: 'นิพจน์สุ่มตัวเลขทศนิยมตั้งแต่ 0 ถึงค่าที่กำหนด (ไม่ถึงค่านั้น)' },
   { term: 'floor()', meaning: 'นิพจน์ปัดเศษลงให้เป็นจำนวนเต็ม' },
+  { term: 'tokenat()', meaning: 'นิพจน์แยกข้อความที่คั่นด้วยตัวคั่น ออกมาทีละส่วน นับจาก 0' },
+  { term: 'trim()', meaning: 'นิพจน์ตัดช่องว่างหน้าและหลังข้อความออก' },
+  { term: 'int()', meaning: 'นิพจน์แปลงค่าให้เป็นจำนวนเต็ม ให้ผลเหมือน floor() เมื่อค่าไม่ติดลบ' },
+  { term: 'Invert', meaning: 'การกลับความหมายของเงื่อนไขให้เป็นตรงกันข้าม แสดงด้วยกากบาทสีแดง' },
+  { term: 'Load from JSON', meaning: 'แอ็กชันใส่ข้อมูลทั้งชุดเข้า Array ในคำสั่งเดียว' },
   { term: 'Event Sheet', meaning: 'หน้าเขียนเงื่อนไขและคำสั่งของ Construct 2' },
   { term: 'Layout', meaning: 'ฉากหรือหน้าจอหนึ่งหน้าในเกม เช่น Quiz และ Summary' },
 ];
@@ -278,6 +430,27 @@ export const REVIEW_QUESTIONS: ReviewQuestion[] = [
     ],
     answerIndex: 1,
     explain: 'ต้องอ่านค่าด้วย Array.At ให้เสร็จก่อน ถ้าลบก่อนข้อมูลจะหายไปแล้วอ่านไม่ได้',
+  },
+  {
+    id: 'q6',
+    question: 'ในไฟล์จริง ข้อมูลช่องหนึ่งเก็บว่า "3,ก" คำสั่ง tokenat("3,ก", 1, ",") จะได้ค่าใด',
+    choices: ['3', 'ก', '3,ก', 'ค่าว่าง'],
+    answerIndex: 1,
+    explain:
+      'tokenat นับลำดับจาก 0 ดังนั้นลำดับ 0 คือ "3" ซึ่งเป็นหมายเลขข้อ ส่วนลำดับ 1 คือ "ก" ซึ่งเป็นตัวเฉลย',
+  },
+  {
+    id: 'q7',
+    question: 'เงื่อนไข Array > Is empty ที่มีกากบาทสีแดงนำหน้า มีความหมายว่าอย่างไร',
+    choices: [
+      'Array ว่างแล้ว',
+      'Array ยังไม่ว่าง',
+      'เงื่อนไขนี้ถูกปิดใช้งาน',
+      'Array มีข้อผิดพลาด',
+    ],
+    answerIndex: 1,
+    explain:
+      'กากบาทสีแดงคือการ Invert หรือกลับความหมายเป็นตรงกันข้าม เงื่อนไขจึงอ่านว่า Array ยังไม่ว่าง ใช้สำหรับสั่งให้สุ่มข้อถัดไปต่อ',
   },
   {
     id: 'q5',
