@@ -89,7 +89,25 @@ function buildRow(p) {
   ];
 }
 
-/** รับข้อมูลจากเว็บแอปของนักเรียน */
+/**
+ * ลบข้อมูลของคู่ใดคู่หนึ่งออกจากชีต
+ * คืนค่า true เมื่อพบและลบแล้ว, false เมื่อไม่พบแถวนั้น
+ */
+function deleteRowByPair(classroom, pairCode) {
+  const sheet = getSheet();
+  const key = rowKey(classroom, pairCode);
+  const values = sheet.getDataRange().getValues();
+
+  for (let i = 1; i < values.length; i += 1) {
+    if (rowKey(values[i][1], values[i][2]) === key) {
+      sheet.deleteRow(i + 1); // +1 เพราะแถวในชีตนับจาก 1 และแถวแรกเป็นหัวตาราง
+      return true;
+    }
+  }
+  return false;
+}
+
+/** รับข้อมูลจากเว็บแอปของนักเรียน และคำสั่งลบจากแดชบอร์ดของครู */
 function doPost(e) {
   const lock = LockService.getScriptLock();
   try {
@@ -97,6 +115,22 @@ function doPost(e) {
     lock.waitLock(20000);
 
     const body = JSON.parse(e.postData.contents);
+
+    // คำสั่งลบใช้รหัสครูเท่านั้น นักเรียนที่มีแต่รหัสห้องเรียนลบข้อมูลไม่ได้
+    if (body.action === 'delete') {
+      if (body.teacherKey !== TEACHER_KEY) {
+        return jsonOut({ ok: false, error: 'รหัสครูไม่ถูกต้อง ไม่มีสิทธิ์ลบข้อมูล' });
+      }
+      if (!body.classroom || !body.pairCode) {
+        return jsonOut({ ok: false, error: 'ไม่ได้ระบุห้องเรียนหรือรหัสคู่ที่ต้องการลบ' });
+      }
+      const removed = deleteRowByPair(body.classroom, body.pairCode);
+      return jsonOut({
+        ok: removed,
+        error: removed ? '' : 'ไม่พบข้อมูลของคู่นี้ในชีต อาจถูกลบไปแล้ว',
+      });
+    }
+
     if (body.secret !== CLASS_SECRET) {
       return jsonOut({ ok: false, error: 'รหัสห้องเรียนไม่ถูกต้อง' });
     }

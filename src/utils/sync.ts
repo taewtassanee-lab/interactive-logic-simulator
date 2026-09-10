@@ -125,6 +125,41 @@ export const fetchDashboard = async (teacherKey: string): Promise<DashboardResul
   }
 };
 
+/**
+ * ลบข้อมูลของคู่ใดคู่หนึ่งออกจาก Google Sheets
+ * ใช้รหัสครูเป็นตัวยืนยันสิทธิ์ นักเรียนที่มีแต่รหัสห้องเรียนสั่งลบไม่ได้
+ */
+export const deletePairRow = async (
+  teacherKey: string,
+  classroom: string,
+  pairCode: string,
+): Promise<{ ok: boolean; error?: string }> => {
+  if (!isSyncEnabled()) return { ok: false, error: 'ยังไม่ได้ตั้งค่าที่เก็บข้อมูล' };
+  try {
+    const res = await fetch(SYNC_CONFIG.endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'delete', teacherKey, classroom, pairCode }),
+    });
+    const data = (await res.json()) as { ok?: boolean; error?: string };
+    if (!data.ok) {
+      // สคริปต์รุ่นเก่ายังไม่รู้จักคำสั่ง delete จึงตีความเป็นการเขียนข้อมูลแล้วฟ้องเรื่องรหัสห้องเรียน
+      const outdated = (data.error ?? '').includes('รหัสห้องเรียน');
+      return {
+        ok: false,
+        error: outdated
+          ? 'สคริปต์ใน Google Sheets ยังเป็นรุ่นเก่าที่ยังลบข้อมูลไม่ได้ ให้อัปเดตโค้ด Apps Script แล้ว Deploy รุ่นใหม่ก่อน'
+          : (data.error ?? 'ลบข้อมูลไม่สำเร็จ'),
+      };
+    }
+    // ล้างแคชการส่งข้อมูล เพื่อให้รอบถัดไปส่งค่าใหม่ได้แม้ข้อมูลจะเหมือนเดิม
+    lastPayload = '';
+    return { ok: true };
+  } catch {
+    return { ok: false, error: 'เชื่อมต่อไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่' };
+  }
+};
+
 /** แปลงข้อมูลเป็นไฟล์ CSV ให้ครูดาวน์โหลดไปทำคะแนนต่อ */
 export const rowsToCsv = (rows: ProgressRow[]): string => {
   const headers = [

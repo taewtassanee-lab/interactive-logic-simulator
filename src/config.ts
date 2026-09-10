@@ -39,7 +39,7 @@ export const TEACHER_INFO = {
  */
 export const SYNC_CONFIG = {
   /** URL ของ Apps Script Web App เช่น https://script.google.com/macros/s/AKfycb.../exec */
-  endpoint: 'https://script.google.com/macros/s/AKfycbyb1-rBCf0QHdRxwGlj_athWeQHrEOYd0FTTkIad958nX_vpJ92glEhmKPj-WYP8Ap1eg/exec',
+endpoint: 'https://script.google.com/macros/s/AKfycbyb1-rBCf0QHdRxwGlj_athWeQHrEOYd0FTTkIad958nX_vpJ92glEhmKPj-WYP8Ap1eg/exec',
   /** ต้องตรงกับค่า CLASS_SECRET ในไฟล์ Code.gs */
   classSecret: 'nhpk-w32281-z0fyrkal5z',
   /** ระยะเวลาหน่วงก่อนส่งข้อมูล (มิลลิวินาที) กันการยิงถี่ขณะนักเรียนพิมพ์ */

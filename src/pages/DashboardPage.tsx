@@ -9,13 +9,21 @@ import {
   RefreshCw,
   Search,
   Settings,
+  Trash2,
   TriangleAlert,
   Users,
+  X,
 } from 'lucide-react';
 import { useToast } from '../components/Toast';
 import { Button, Card, EmptyState, Pill, ProgressBar } from '../components/Ui';
 import { formatThaiDateTime } from '../utils/format';
-import { fetchDashboard, isSyncEnabled, rowsToCsv, type ProgressRow } from '../utils/sync';
+import {
+  deletePairRow,
+  fetchDashboard,
+  isSyncEnabled,
+  rowsToCsv,
+  type ProgressRow,
+} from '../utils/sync';
 
 const TEACHER_KEY_STORAGE = 'ils_teacher_key';
 const AUTO_REFRESH_MS = 30000;
@@ -72,6 +80,9 @@ export const DashboardPage = () => {
   const [lastLoadedAt, setLastLoadedAt] = useState<Date | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [keyword, setKeyword] = useState('');
+  /** แถวที่กำลังรอการยืนยันลบ null = ไม่มีหน้าต่างยืนยันเปิดอยู่ */
+  const [pendingDelete, setPendingDelete] = useState<ProgressRow | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const timerRef = useRef<number | null>(null);
 
   const configured = isSyncEnabled();
@@ -132,6 +143,29 @@ export const DashboardPage = () => {
       }
       notify('เปิดแดชบอร์ดเรียบร้อย', 'success');
     }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!pendingDelete) return;
+    setDeleting(true);
+    const res = await deletePairRow(teacherKey, pendingDelete.classroom, pendingDelete.pairCode);
+    setDeleting(false);
+
+    if (!res.ok) {
+      notify(res.error ?? 'ลบข้อมูลไม่สำเร็จ', 'error');
+      return;
+    }
+
+    // ตัดแถวออกจากตารางทันที ไม่ต้องรอโหลดใหม่ แล้วค่อยดึงข้อมูลจริงมายืนยัน
+    setRows((prev) =>
+      prev.filter(
+        (r) =>
+          !(r.classroom === pendingDelete.classroom && r.pairCode === pendingDelete.pairCode),
+      ),
+    );
+    notify(`ลบข้อมูลของคู่ ${pendingDelete.pairCode} เรียบร้อยแล้ว`, 'success');
+    setPendingDelete(null);
+    void load(teacherKey, true);
   };
 
   const handleExport = () => {
@@ -384,7 +418,7 @@ export const DashboardPage = () => {
             <table className="w-full min-w-[900px] border-collapse text-sm">
               <thead>
                 <tr className="border-b-2 border-slate-200 text-left">
-                  {['ห้อง', 'รหัสคู่', 'Driver', 'Navigator', 'ภารกิจ 1', 'ภารกิจ 2', 'คะแนน', 'ใบงาน', 'PDF', '.capx', 'สลับบทบาท', 'อัปเดต'].map(
+                  {['ห้อง', 'รหัสคู่', 'Driver', 'Navigator', 'ภารกิจ 1', 'ภารกิจ 2', 'คะแนน', 'ใบงาน', 'PDF', '.capx', 'สลับบทบาท', 'อัปเดต', 'ลบ'].map(
                     (h) => (
                       <th key={h} className="whitespace-nowrap px-2.5 py-2 text-xs font-bold text-slate-600">
                         {h}
@@ -452,6 +486,17 @@ export const DashboardPage = () => {
                             })
                           : '-'}
                       </td>
+                      <td className="px-2.5 py-2">
+                        <button
+                          type="button"
+                          onClick={() => setPendingDelete(r)}
+                          className="rounded-xl border-2 border-bubble-200 bg-white p-1.5 text-bubble-500 transition hover:-translate-y-0.5 hover:bg-bubble-50 hover:text-bubble-700"
+                          aria-label={`ลบข้อมูลของคู่ ${r.pairCode} ห้อง ${r.classroom}`}
+                          title="ลบข้อมูลของคู่นี้"
+                        >
+                          <Trash2 className="h-4 w-4" aria-hidden="true" />
+                        </button>
+                      </td>
                     </tr>
                   );
                 })}
@@ -460,6 +505,79 @@ export const DashboardPage = () => {
           </div>
         )}
       </Card>
+
+      {/* ---------- หน้าต่างยืนยันก่อนลบ ---------- */}
+      {pendingDelete && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-title"
+        >
+          <div className="clay-card w-full max-w-md animate-pop p-5">
+            <div className="mb-3 flex items-start justify-between gap-3">
+              <h2 id="delete-title" className="font-display text-lg font-bold text-slate-800">
+                ยืนยันการลบข้อมูล
+              </h2>
+              <button
+                type="button"
+                onClick={() => setPendingDelete(null)}
+                disabled={deleting}
+                className="rounded-xl p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                aria-label="ปิดหน้าต่างยืนยัน"
+              >
+                <X className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </div>
+
+            <p className="text-sm leading-relaxed text-slate-600">
+              จะลบข้อมูลของคู่นี้ออกจาก Google Sheets อย่างถาวร
+            </p>
+
+            <dl className="mt-3 space-y-1 rounded-2xl border-2 border-slate-100 bg-slate-50 px-3.5 py-3 text-sm">
+              <div className="flex gap-2">
+                <dt className="w-20 shrink-0 text-slate-500">ห้องเรียน</dt>
+                <dd className="font-semibold text-slate-800">{pendingDelete.classroom}</dd>
+              </div>
+              <div className="flex gap-2">
+                <dt className="w-20 shrink-0 text-slate-500">รหัสคู่</dt>
+                <dd className="font-semibold text-slate-800">{pendingDelete.pairCode}</dd>
+              </div>
+              <div className="flex gap-2">
+                <dt className="w-20 shrink-0 text-slate-500">Driver</dt>
+                <dd className="text-slate-700">{pendingDelete.driverName || '-'}</dd>
+              </div>
+              <div className="flex gap-2">
+                <dt className="w-20 shrink-0 text-slate-500">Navigator</dt>
+                <dd className="text-slate-700">{pendingDelete.navigatorName || '-'}</dd>
+              </div>
+            </dl>
+
+            <p className="mt-3 rounded-2xl border-2 border-lemon-200 bg-lemon-50 px-3.5 py-2.5 text-xs leading-relaxed text-peach-900">
+              การลบนี้ย้อนกลับไม่ได้ และหากคู่นี้ยังเปิดเว็บทำกิจกรรมอยู่ ข้อมูลจะถูกส่งกลับเข้ามาใหม่
+              เมื่อเขาทำอะไรต่อ
+            </p>
+
+            <div className="mt-4 flex justify-end gap-2">
+              <Button
+                variant="secondary"
+                onClick={() => setPendingDelete(null)}
+                disabled={deleting}
+              >
+                ยกเลิก
+              </Button>
+              <Button variant="danger" onClick={() => void handleConfirmDelete()} disabled={deleting}>
+                {deleting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                ) : (
+                  <Trash2 className="h-4 w-4" aria-hidden="true" />
+                )}
+                {deleting ? 'กำลังลบ...' : 'ยืนยันลบ'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
