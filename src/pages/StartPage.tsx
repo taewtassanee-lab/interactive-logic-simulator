@@ -7,6 +7,7 @@ import { RoleTimer } from '../components/RoleTimer';
 import { Button, Card, TextField, Tooltip } from '../components/Ui';
 import { Mascot } from '../components/Illustrations';
 import { TeacherCard } from '../components/TeacherCard';
+import { DeviceModePicker } from '../components/DeviceModePicker';
 
 interface FieldErrors {
   classroom?: string;
@@ -21,6 +22,7 @@ export const StartPage = ({ onStarted }: { onStarted: () => void }) => {
   const [errors, setErrors] = useState<FieldErrors>({});
 
   const pair = state.pair;
+  const isAssistant = state.session.deviceMode === 'assistant';
 
   const setField = (key: keyof typeof pair, value: string) => {
     update((prev) => ({ pair: { ...prev.pair, [key]: value } }));
@@ -108,6 +110,26 @@ export const StartPage = ({ onStarted }: { onStarted: () => void }) => {
         </ol>
       </Card>
 
+      <DeviceModePicker />
+
+      {isAssistant ? (
+        <Card
+          title="เครื่องผู้ช่วยพร้อมใช้งานแล้ว"
+          subtitle="ไม่ต้องกรอกข้อมูลผู้เรียนที่เครื่องนี้"
+          icon={<UserCheck className="h-5 w-5 text-think-600" aria-hidden="true" />}
+        >
+          <p className="text-sm leading-relaxed text-slate-600">
+            เปิดแท็บ <strong>คลังความรู้</strong> เพื่ออ่านเรื่อง Array และ Function
+            ระหว่างที่เพื่อนลงมือทำที่เครื่องหลัก และเปิดแท็บ <strong>จำลองตรรกะ</strong>
+            ทดลองเรียงบล็อกเพื่อทำความเข้าใจได้ โดยผลจะไม่ถูกบันทึกเข้าระบบ
+          </p>
+          <p className="mt-3 rounded-2xl border-2 border-dashed border-think-200 bg-think-50/70 px-3.5 py-2.5 text-xs leading-relaxed text-think-900">
+            บทบาท Navigator คือผู้อ่านเงื่อนไข ตรวจตรรกะ และให้คำแนะนำ
+            การเปิดคลังความรู้ไว้บนเครื่องนี้จะช่วยให้ตรวจสอบคำสั่งได้ทันทีโดยไม่ต้องแย่งจอกับ Driver
+          </p>
+        </Card>
+      ) : (
+      <>
       {/* ---------- แบบฟอร์มระบุตัวตน ---------- */}
       <Card
         title="ข้อมูลผู้เรียนและคู่ Pair Programming"
@@ -286,6 +308,8 @@ export const StartPage = ({ onStarted }: { onStarted: () => void }) => {
       </div>
 
       <RoleTimer />
+      </>
+      )}
     </div>
   );
 };

@@ -15,6 +15,7 @@ import { useApp } from '../context/AppContext';
 import { useToast } from '../components/Toast';
 import { useWorksheetPdf } from '../hooks/useWorksheetPdf';
 import { Button, Card } from '../components/Ui';
+import { AssistantNotice } from '../components/DeviceModePicker';
 import {
   buildPdfFileName,
   buildSubmissionText,
@@ -168,6 +169,10 @@ export const SummaryPage = ({ onNavigate }: { onNavigate: (tab: TabId) => void }
   };
 
   const submissionText = buildSubmissionText(state);
+
+  if (state.session.deviceMode === 'assistant') {
+    return <AssistantNotice page="หน้าสรุปและส่งงาน" />;
+  }
 
   return (
     <div className="space-y-4">

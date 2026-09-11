@@ -73,7 +73,7 @@ const App = () => {
   return (
     <div className="min-h-screen">
       <FloatingShapes />
-      <Header onReset={handleReset} />
+      <Header onReset={handleReset} isAssistant={state.session.deviceMode === 'assistant'} />
 
       <nav
         className="sticky top-[64px] z-20 border-b-2 border-white bg-white/95 sm:top-[72px]"
@@ -125,11 +125,14 @@ const App = () => {
         {tab === 'dashboard' && <DashboardPage />}
       </main>
 
-      {/* อยู่นอกการสลับแท็บ เวลาจึงเดินต่อเนื่องและเห็นได้ทุกหน้า */}
-      <FloatingRoleTimer />
-
-      {/* คำสั่งบังคับสลับบทบาท ขึ้นทับทุกหน้าเมื่อหมดเวลา */}
-      <RoleSwapOverlay />
+      {/* ตัวจับเวลาและคำสั่งสลับบทบาทแสดงเฉพาะเครื่องหลัก
+          เพื่อให้ทั้งคู่ดูเวลาจากจอเดียวกัน ไม่เดินคนละนาฬิกา */}
+      {state.session.deviceMode === 'primary' && (
+        <>
+          <FloatingRoleTimer />
+          <RoleSwapOverlay />
+        </>
+      )}
 
       <footer className="mt-4 border-t-2 border-white bg-white/80 py-5">
         <div className="mx-auto max-w-[1400px] px-4 text-center text-xs leading-relaxed text-slate-500">

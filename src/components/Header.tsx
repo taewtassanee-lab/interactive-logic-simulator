@@ -1,11 +1,17 @@
 import { useState } from 'react';
-import { RotateCcw, Sparkles, X } from 'lucide-react';
+import { RotateCcw, Sparkles, Tablet, X } from 'lucide-react';
 import { APP_CONFIG, TEACHER_INFO } from '../config';
 import { Button } from './Ui';
 import { Mascot } from './Illustrations';
 import { TeacherAvatar } from './TeacherCard';
 
-export const Header = ({ onReset }: { onReset: () => void }) => {
+export const Header = ({
+  onReset,
+  isAssistant,
+}: {
+  onReset: () => void;
+  isAssistant: boolean;
+}) => {
   const [confirming, setConfirming] = useState(false);
 
   return (
@@ -26,6 +32,12 @@ export const Header = ({ onReset }: { onReset: () => void }) => {
         </div>
 
         <div className="flex items-center gap-2">
+          {isAssistant && (
+            <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-white/50 bg-white/25 px-3 py-1.5 font-display text-xs font-bold text-white">
+              <Tablet className="h-3.5 w-3.5" aria-hidden="true" />
+              โหมดผู้ช่วย
+            </span>
+          )}
           {/* ครูผู้สอนและโรงเรียน แสดงบนจอกว้างเท่านั้น กันหัวเว็บแน่นบนมือถือ */}
           <span className="hidden items-center gap-2 rounded-full border-2 border-white/40 bg-white/20 py-1 pl-1 pr-3.5 text-white xl:inline-flex">
             <TeacherAvatar size={30} />

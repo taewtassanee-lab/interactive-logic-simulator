@@ -14,6 +14,7 @@ import { useApp } from '../context/AppContext';
 import { useToast } from '../components/Toast';
 import { useWorksheetPdf } from '../hooks/useWorksheetPdf';
 import { Button, Card, ProgressBar, TextArea, Tooltip } from '../components/Ui';
+import { AssistantNotice } from '../components/DeviceModePicker';
 import {
   getMissingWorksheetFields,
   getWorksheetFields,
@@ -79,6 +80,10 @@ export const WorksheetPage = () => {
     }
     await exportPdf();
   };
+
+  if (state.session.deviceMode === 'assistant') {
+    return <AssistantNotice page="ใบงานดิจิทัล" />;
+  }
 
   const q2Correct = w.q2FillIn.trim().toLowerCase() === CORRECT_Q2.toLowerCase();
   const q3Correct = w.q3Choice === CORRECT_Q3;

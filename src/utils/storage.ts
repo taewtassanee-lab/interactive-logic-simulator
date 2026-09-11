@@ -11,6 +11,7 @@ export const createInitialState = (): AppState => ({
     navigatorNumber: '',
   },
   session: {
+    deviceMode: 'primary',
     activityStarted: false,
     roleSwitchCount: 0,
     lastRoleSwitchAt: null,

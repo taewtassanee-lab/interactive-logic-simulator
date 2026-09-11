@@ -20,7 +20,16 @@ export interface PairInfo {
   navigatorNumber: string;
 }
 
+/**
+ * บทบาทของเครื่องที่ใช้งาน
+ * primary   = เครื่องหลักของคู่ (พีซีที่ Driver ใช้) ทำกิจกรรมและบันทึกข้อมูลได้ทั้งหมด
+ * assistant = เครื่องผู้ช่วย (iPad) เปิดอ่านและติดตามได้ แต่ไม่กรอกใบงานและไม่ส่งข้อมูล
+ *             ป้องกันไม่ให้สองเครื่องของคู่เดียวกันเขียนข้อมูลทับกัน
+ */
+export type DeviceMode = 'primary' | 'assistant';
+
 export interface SessionInfo {
+  deviceMode: DeviceMode;
   /** กด "เริ่มกิจกรรม" แล้วหรือยัง ใช้ล็อกไม่ให้ข้ามไปหน้าจำลองตรรกะ */
   activityStarted: boolean;
   /** จำนวนครั้งที่ยืนยันการสลับบทบาท */
