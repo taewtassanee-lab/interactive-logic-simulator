@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import { AppProvider } from './context/AppContext';
+import { RoleTimerProvider } from './context/RoleTimerContext';
 import { ToastProvider } from './components/Toast';
 import './index.css';
 
@@ -12,7 +13,9 @@ createRoot(rootElement).render(
   <StrictMode>
     <ToastProvider>
       <AppProvider>
-        <App />
+        <RoleTimerProvider>
+          <App />
+        </RoleTimerProvider>
       </AppProvider>
     </ToastProvider>
   </StrictMode>,

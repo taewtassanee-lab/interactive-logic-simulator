@@ -13,6 +13,7 @@ import { Header } from './components/Header';
 import { useApp } from './context/AppContext';
 import { useToast } from './components/Toast';
 import { FloatingShapes } from './components/Illustrations';
+import { FloatingRoleTimer } from './components/FloatingRoleTimer';
 import { StartPage } from './pages/StartPage';
 import { SimulatorPage } from './pages/SimulatorPage';
 import { WorksheetPage } from './pages/WorksheetPage';
@@ -113,7 +114,7 @@ const App = () => {
         </div>
       </nav>
 
-      <main className="mx-auto max-w-[1400px] px-3 py-5 sm:px-5 sm:py-6">
+      <main className="mx-auto max-w-[1400px] px-3 pb-24 pt-5 sm:px-5 sm:pb-28 sm:pt-6">
         {tab === 'start' && <StartPage onStarted={() => setTab('simulator')} />}
         {tab === 'simulator' && <SimulatorPage />}
         {tab === 'knowledge' && <KnowledgePage />}
@@ -122,6 +123,9 @@ const App = () => {
         {tab === 'teacher' && <TeacherGuidePage />}
         {tab === 'dashboard' && <DashboardPage />}
       </main>
+
+      {/* อยู่นอกการสลับแท็บ เวลาจึงเดินต่อเนื่องและเห็นได้ทุกหน้า */}
+      <FloatingRoleTimer />
 
       <footer className="mt-4 border-t-2 border-white bg-white/80 py-5">
         <div className="mx-auto max-w-[1400px] px-4 text-center text-xs leading-relaxed text-slate-500">
