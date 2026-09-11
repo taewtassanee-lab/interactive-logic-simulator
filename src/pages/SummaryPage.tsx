@@ -69,14 +69,14 @@ export const SummaryPage = ({ onNavigate }: { onNavigate: (tab: TabId) => void }
           id: 'm1',
           label: 'ผ่านภารกิจแก้ Bug ระบบสุ่มข้อสอบ',
           done: missions.mission1Passed,
-          fixHint: 'เพิ่มบล็อก Array -> Delete index Num from X axis แล้ว Run Simulation ใหม่',
+          fixHint: 'กลับไปหน้า "จำลองตรรกะ" เลือกภารกิจที่ 1 อ่านอาการและกดขอคำใบ้ทีละขั้น',
           goTo: 'simulator',
         },
         {
           id: 'm2',
           label: 'ผ่านภารกิจแก้ Bug เงื่อนไขจบเกม',
           done: missions.mission2Passed,
-          fixHint: 'จัด If Array is empty ให้อยู่ก่อน Go to Layout "Summary" แล้ว Run Simulation ใหม่',
+          fixHint: 'กลับไปหน้า "จำลองตรรกะ" เลือกภารกิจที่ 2 อ่านอาการและกดขอคำใบ้ทีละขั้น',
           goTo: 'simulator',
         },
         {

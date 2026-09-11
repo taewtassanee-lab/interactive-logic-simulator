@@ -163,10 +163,10 @@ export const WorksheetPage = () => {
             label="1. เมื่อทดลอง Run Simulation นักเรียนสังเกตเห็นการเปลี่ยนแปลงของค่าใน State Monitor อย่างไร"
             value={w.q1Observation}
             onChange={(v) => setW({ q1Observation: v })}
-            placeholder="เช่น เมื่อกด Run ค่า Num เปลี่ยนไปทุกครั้ง ข้อสอบใน Array ลดลงจาก 4 เหลือ 3 และ Score เพิ่มขึ้นเมื่อตอบถูก"
+            placeholder="เขียนสิ่งที่สังเกตเห็นด้วยตนเอง ระบุชื่อค่าที่เปลี่ยน และบอกว่าเปลี่ยนตอนคำสั่งใดทำงาน"
             rows={4}
             required
-            hint="เขียนอย่างน้อย 10 ตัวอักษร ระบุชื่อค่าที่เปลี่ยน เช่น Array Size, Num, Score"
+            hint="เขียนอย่างน้อย 10 ตัวอักษร ควรอ้างอิงค่าที่เห็นจริงใน State Monitor ไม่ใช่การเดา"
           />
 
           <div>
@@ -286,11 +286,7 @@ export const WorksheetPage = () => {
                   label="สาเหตุที่พบจากการดู Web App / Event Sheet"
                   value={row.cause}
                   onChange={(v) => setRow(index, { cause: v })}
-                  placeholder={
-                    index === 0
-                      ? 'เช่น ใน Function Random ไม่มีคำสั่ง Array -> Delete index ทำให้ Array.Width ไม่ลดลง'
-                      : 'เช่น ไม่มีเงื่อนไข If Array is empty ระบบจึงไม่รู้ว่าข้อสอบหมดแล้ว'
-                  }
+                  placeholder="เขียนด้วยคำของตัวเอง ว่าพบความผิดปกติอะไร และคิดว่าคำสั่งใดขาดหายหรือวางผิดตำแหน่ง"
                   rows={3}
                   required
                 />
@@ -298,11 +294,7 @@ export const WorksheetPage = () => {
                   label="แนวทางการแก้ไขข้อผิดพลาด"
                   value={row.fix}
                   onChange={(v) => setRow(index, { fix: v })}
-                  placeholder={
-                    index === 0
-                      ? 'เช่น เพิ่มบล็อก Array -> Delete index Num from X axis ต่อจาก Set CurrentQuestion'
-                      : 'เช่น เพิ่ม If Array is empty แล้วตามด้วย Go to Layout "Summary" และ Display Score'
-                  }
+                  placeholder="ระบุชื่อบล็อกที่ต้องเพิ่มหรือย้าย และบอกให้ชัดว่าต้องวางไว้ก่อนหรือหลังคำสั่งใด"
                   rows={3}
                   required
                 />
@@ -384,7 +376,7 @@ export const WorksheetPage = () => {
             label="2. Web App ช่วยให้เข้าใจ Array และ Function อย่างไร"
             value={w.q3AppHelp}
             onChange={(v) => setW({ q3AppHelp: v })}
-            placeholder="เช่น เห็นภาพว่า Array คือกล่องเก็บข้อสอบที่ลดลงทีละช่อง และ Function คือชุดคำสั่งที่เรียกซ้ำได้"
+            placeholder="เขียนจากประสบการณ์ของตนเอง ว่าส่วนใดของเว็บช่วยให้เข้าใจ และเข้าใจเรื่องอะไรเพิ่มขึ้น"
             rows={3}
             required
           />
@@ -392,7 +384,7 @@ export const WorksheetPage = () => {
             label="3. สิ่งที่คู่ของฉันทำได้ดีในการทำงานร่วมกันคืออะไร"
             value={w.q3PartnerGood}
             onChange={(v) => setW({ q3PartnerGood: v })}
-            placeholder="เช่น อธิบายเงื่อนไขได้ชัดเจน คอยเตือนเมื่อวางบล็อกผิดลำดับ"
+            placeholder="ยกตัวอย่างสิ่งที่คู่ของตนทำระหว่างกิจกรรมนี้จริง ๆ"
             rows={3}
             required
           />
@@ -400,7 +392,7 @@ export const WorksheetPage = () => {
             label="4. สิ่งที่ต้องพัฒนาต่อไปในการแก้ปัญหา Bug คืออะไร"
             value={w.q3ToImprove}
             onChange={(v) => setW({ q3ToImprove: v })}
-            placeholder="เช่น ต้องอ่าน Debug Log ให้ละเอียดขึ้นก่อนเดาสาเหตุ"
+            placeholder="ระบุสิ่งที่ตนเองทำได้ยังไม่ดีในครั้งนี้ และจะปรับอย่างไรในครั้งหน้า"
             rows={3}
             required
           />
