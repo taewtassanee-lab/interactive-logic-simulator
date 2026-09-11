@@ -24,6 +24,12 @@ interface RoleTimerValue {
   running: boolean;
   timeUp: boolean;
   switchCount: number;
+  /** ชื่อผู้ที่ทำหน้าที่ Driver อยู่ตอนนี้ */
+  currentDriver: string;
+  /** ชื่อผู้ที่ทำหน้าที่ Navigator อยู่ตอนนี้ */
+  currentNavigator: string;
+  /** true เมื่อหมดเวลาและยังไม่ยืนยันการสลับ ใช้บังคับให้หยุดทำงานก่อน */
+  mustSwitch: boolean;
   start: () => void;
   pause: () => void;
   reset: () => void;
@@ -63,7 +69,7 @@ export const RoleTimerProvider = ({ children }: { children: ReactNode }) => {
     if (seconds === 0 && running && !alerted) {
       setRunning(false);
       setAlerted(true);
-      notify('ถึงเวลาสลับบทบาท Driver และ Navigator แล้ว', 'warn');
+      notify('หมดเวลารอบนี้ ต้องสลับบทบาทก่อนจึงจะทำงานต่อได้', 'warn');
     }
   }, [seconds, running, alerted, notify]);
 
@@ -82,16 +88,26 @@ export const RoleTimerProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const markSwitched = useCallback(() => {
+    const now = new Date().toISOString();
     update((prev) => ({
       session: {
         ...prev.session,
         roleSwitchCount: prev.session.roleSwitchCount + 1,
-        lastRoleSwitchAt: new Date().toISOString(),
+        lastRoleSwitchAt: now,
+        // สลับตัวผู้ทำหน้าที่จริง ไม่ใช่แค่นับจำนวนครั้ง
+        driverIsFirstPerson: !prev.session.driverIsFirstPerson,
+        roleSwitchLog: [...prev.session.roleSwitchLog, now],
       },
     }));
-    reset();
-    notify('บันทึกการสลับบทบาทเรียบร้อยแล้ว เริ่มจับเวลารอบใหม่ได้', 'success');
-  }, [notify, reset, update]);
+    setSeconds(APP_CONFIG.roleSwitchSeconds);
+    setAlerted(false);
+    // เริ่มจับเวลารอบใหม่ทันที ผู้เรียนจะได้ไม่ลืมกด Start
+    setRunning(true);
+    notify('สลับบทบาทเรียบร้อย เริ่มจับเวลารอบใหม่แล้ว', 'success');
+  }, [notify, update]);
+
+  const { driverName, navigatorName } = state.pair;
+  const first = state.session.driverIsFirstPerson;
 
   const value = useMemo(
     () => ({
@@ -99,12 +115,28 @@ export const RoleTimerProvider = ({ children }: { children: ReactNode }) => {
       running,
       timeUp: seconds === 0,
       switchCount: state.session.roleSwitchCount,
+      currentDriver: (first ? driverName : navigatorName) || 'ผู้เรียนคนที่ 1',
+      currentNavigator: (first ? navigatorName : driverName) || 'ผู้เรียนคนที่ 2',
+      // บังคับเฉพาะตอนกิจกรรมเริ่มแล้วเท่านั้น
+      mustSwitch: seconds === 0 && state.session.activityStarted,
       start,
       pause,
       reset,
       markSwitched,
     }),
-    [seconds, running, state.session.roleSwitchCount, start, pause, reset, markSwitched],
+    [
+      seconds,
+      running,
+      state.session.roleSwitchCount,
+      state.session.activityStarted,
+      first,
+      driverName,
+      navigatorName,
+      start,
+      pause,
+      reset,
+      markSwitched,
+    ],
   );
 
   return <RoleTimerContext.Provider value={value}>{children}</RoleTimerContext.Provider>;

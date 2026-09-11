@@ -14,6 +14,7 @@ import { useApp } from './context/AppContext';
 import { useToast } from './components/Toast';
 import { FloatingShapes } from './components/Illustrations';
 import { FloatingRoleTimer } from './components/FloatingRoleTimer';
+import { RoleSwapOverlay } from './components/RoleSwapOverlay';
 import { StartPage } from './pages/StartPage';
 import { SimulatorPage } from './pages/SimulatorPage';
 import { WorksheetPage } from './pages/WorksheetPage';
@@ -126,6 +127,9 @@ const App = () => {
 
       {/* อยู่นอกการสลับแท็บ เวลาจึงเดินต่อเนื่องและเห็นได้ทุกหน้า */}
       <FloatingRoleTimer />
+
+      {/* คำสั่งบังคับสลับบทบาท ขึ้นทับทุกหน้าเมื่อหมดเวลา */}
+      <RoleSwapOverlay />
 
       <footer className="mt-4 border-t-2 border-white bg-white/80 py-5">
         <div className="mx-auto max-w-[1400px] px-4 text-center text-xs leading-relaxed text-slate-500">

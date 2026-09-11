@@ -23,9 +23,16 @@ export interface PairInfo {
 export interface SessionInfo {
   /** กด "เริ่มกิจกรรม" แล้วหรือยัง ใช้ล็อกไม่ให้ข้ามไปหน้าจำลองตรรกะ */
   activityStarted: boolean;
-  /** จำนวนครั้งที่กดปุ่ม "สลับบทบาทแล้ว" */
+  /** จำนวนครั้งที่ยืนยันการสลับบทบาท */
   roleSwitchCount: number;
   lastRoleSwitchAt: string | null;
+  /**
+   * true = คนที่กรอกชื่อในช่อง Driver กำลังทำหน้าที่ Driver อยู่
+   * false = สลับแล้ว คนที่กรอกในช่อง Navigator มาเป็น Driver แทน
+   */
+  driverIsFirstPerson: boolean;
+  /** เวลาที่สลับบทบาทแต่ละครั้ง ใช้เป็นหลักฐานในใบงาน */
+  roleSwitchLog: string[];
 }
 
 /* ---------- บล็อกคำสั่ง ---------- */

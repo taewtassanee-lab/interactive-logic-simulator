@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { Compass, Mouse } from 'lucide-react';
 import { BUGGY_EXAMPLE } from '../data/blocks';
 import { BlockLibrary } from '../components/BlockLibrary';
 import { LogicWorkspace } from '../components/LogicWorkspace';
@@ -10,12 +11,14 @@ import { useToast } from '../components/Toast';
 import type { BlockId, SimResult, WorkspaceBlock } from '../types';
 import { emptyState, MISSION_SUCCESS_MESSAGES, runSimulation } from '../utils/simulator';
 import { analyzeFlags, buildHints, validateWorkspace } from '../utils/validator';
+import { useRoleTimer } from '../context/RoleTimerContext';
 
 const newUid = () => `b_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 
 export const SimulatorPage = () => {
   const { state, update } = useApp();
   const { notify } = useToast();
+  const { currentDriver, currentNavigator } = useRoleTimer();
 
   const [result, setResult] = useState<SimResult | null>(null);
   const [frameIndex, setFrameIndex] = useState(-1);
@@ -148,11 +151,18 @@ export const SimulatorPage = () => {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3">
-        <p className="text-sm text-slate-600">
-          คู่ <span className="font-semibold text-slate-800">{state.pair.pairCode || '-'}</span> | Driver:{' '}
-          <span className="font-semibold text-slate-800">{state.pair.driverName || '-'}</span> | Navigator:{' '}
-          <span className="font-semibold text-slate-800">{state.pair.navigatorName || '-'}</span>
-        </p>
+        {/* แสดงว่าตอนนี้ใครทำหน้าที่อะไร เปลี่ยนตามการสลับบทบาทจริง */}
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          <span className="font-semibold text-slate-700">คู่ {state.pair.pairCode || '-'}</span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-brand-200 bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-800">
+            <Mouse className="h-3.5 w-3.5" aria-hidden="true" />
+            Driver: {currentDriver}
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-think-200 bg-think-50 px-2.5 py-1 text-xs font-semibold text-think-800">
+            <Compass className="h-3.5 w-3.5" aria-hidden="true" />
+            Navigator: {currentNavigator}
+          </span>
+        </div>
         <p className="rounded-full bg-slate-100 px-3 py-1 font-mono text-xs font-semibold text-slate-700">
           {stepLabel}
         </p>

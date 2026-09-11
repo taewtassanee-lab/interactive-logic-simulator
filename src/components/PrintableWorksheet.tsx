@@ -168,6 +168,17 @@ export const PrintableWorksheet = forwardRef<HTMLDivElement, { state: AppState }
           {worksheet.rolesPlayed.driver ? '[✓]' : '[  ]'} Driver &nbsp;&nbsp;&nbsp;
           {worksheet.rolesPlayed.navigator ? '[✓]' : '[  ]'} Navigator &nbsp;&nbsp;&nbsp;
           (สลับบทบาทระหว่างกิจกรรม {session.roleSwitchCount} ครั้ง)
+          {session.roleSwitchLog.length > 0 && (
+            <span style={{ display: 'block', marginTop: '4px', fontSize: '11.5px', color: '#475569' }}>
+              เวลาที่สลับ:{' '}
+              {session.roleSwitchLog
+                .map((t) =>
+                  new Date(t).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+                )
+                .join(' น. / ')}{' '}
+              น.
+            </span>
+          )}
         </div>
 
         <p style={S.qLabel}>2. Web App ช่วยให้เข้าใจ Array และ Function อย่างไร</p>

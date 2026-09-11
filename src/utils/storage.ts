@@ -14,6 +14,8 @@ export const createInitialState = (): AppState => ({
     activityStarted: false,
     roleSwitchCount: 0,
     lastRoleSwitchAt: null,
+    driverIsFirstPerson: true,
+    roleSwitchLog: [],
   },
   workspace: [],
   missions: {
@@ -59,7 +61,11 @@ const mergeState = (saved: Partial<AppState>): AppState => {
     ...base,
     ...saved,
     pair: { ...base.pair, ...(saved.pair ?? {}) },
-    session: { ...base.session, ...(saved.session ?? {}) },
+    session: {
+      ...base.session,
+      ...(saved.session ?? {}),
+      roleSwitchLog: Array.isArray(saved.session?.roleSwitchLog) ? saved.session.roleSwitchLog : [],
+    },
     missions: { ...base.missions, ...(saved.missions ?? {}) },
     worksheet: {
       ...base.worksheet,
