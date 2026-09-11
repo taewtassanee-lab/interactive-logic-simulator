@@ -172,6 +172,10 @@ export interface WorksheetData {
   q1Observation: string;
   q2FillIn: string;
   q3Choice: string;
+  /** ข้อ 4: ตรรกะของ int(random(Array.Width)) และเหตุผลที่ต้องครอบด้วย int หรือ floor */
+  q4RandomLogic: string;
+  /** ข้อ 5: ผลกระทบเมื่อลืมสั่ง Delete index */
+  q5NoDeleteEffect: string;
   /* ส่วนที่ 2 */
   debugRows: DebugRow[];
   /* ส่วนที่ 3 */

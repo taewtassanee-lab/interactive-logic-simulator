@@ -78,6 +78,16 @@ export const getWorksheetFields = (w: WorksheetData): WorksheetField[] => [
     filled: w.q3Choice.trim().length > 0,
   },
   {
+    key: 'q4',
+    label: 'ส่วนที่ 1 ข้อ 4: ตรรกะการสุ่ม Index และเหตุผลที่ต้องครอบด้วย int หรือ floor',
+    filled: w.q4RandomLogic.trim().length >= 10,
+  },
+  {
+    key: 'q5',
+    label: 'ส่วนที่ 1 ข้อ 5: ผลกระทบเมื่อลืมสั่ง Delete index',
+    filled: w.q5NoDeleteEffect.trim().length >= 10,
+  },
+  {
     key: 'row1cause',
     label: 'ส่วนที่ 2 แถวที่ 1: สาเหตุที่พบ',
     filled: w.debugRows[0].cause.trim().length >= 5,

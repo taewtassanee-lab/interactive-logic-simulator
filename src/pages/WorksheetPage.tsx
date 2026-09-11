@@ -14,7 +14,11 @@ import { useApp } from '../context/AppContext';
 import { useToast } from '../components/Toast';
 import { useWorksheetPdf } from '../hooks/useWorksheetPdf';
 import { Button, Card, ProgressBar, TextArea, Tooltip } from '../components/Ui';
-import { getMissingWorksheetFields, getWorksheetProgress } from '../utils/format';
+import {
+  getMissingWorksheetFields,
+  getWorksheetFields,
+  getWorksheetProgress,
+} from '../utils/format';
 import type { DebugRow, WorksheetData } from '../types';
 
 const Q3_CHOICES = [
@@ -36,6 +40,7 @@ export const WorksheetPage = () => {
   const w = state.worksheet;
   const progress = getWorksheetProgress(w);
   const missing = getMissingWorksheetFields(w);
+  const totalFields = getWorksheetFields(w).length;
 
   const setW = (patch: Partial<WorksheetData>) => {
     update((prev) => ({ worksheet: { ...prev.worksheet, ...patch } }));
@@ -254,6 +259,26 @@ export const WorksheetPage = () => {
               </p>
             )}
           </fieldset>
+
+          <TextArea
+            label="4. การสุ่ม Index ด้วย int(random(Array.Width)) ทำงานอย่างไร และเหตุใดจึงต้องครอบด้วย int หรือ floor"
+            value={w.q4RandomLogic}
+            onChange={(v) => setW({ q4RandomLogic: v })}
+            placeholder="อธิบายเป็นขั้นตอนว่าได้ค่าอะไรออกมาก่อน แล้วถูกแปลงเป็นอะไร และถ้าไม่ครอบจะเกิดอะไรขึ้น"
+            rows={3}
+            required
+            hint="ลองทดลองในหน้าคลังความรู้ ส่วนลองเล่น Array แล้วสังเกตเลข Index ที่สุ่มได้"
+          />
+
+          <TextArea
+            label="5. หากลืมสั่ง Delete index บนแกน X หลังสุ่มคำถามแล้ว จะส่งผลต่อ State Monitor และโปรแกรมอย่างไร"
+            value={w.q5NoDeleteEffect}
+            onChange={(v) => setW({ q5NoDeleteEffect: v })}
+            placeholder="ระบุค่าใน State Monitor ที่เปลี่ยนหรือไม่เปลี่ยน และผลที่เกิดกับผู้เล่น"
+            rows={3}
+            required
+            hint="ทดลองลบบล็อก Delete index ออกแล้วกด Run Simulation เพื่อดูผลจริง"
+          />
         </div>
       </Card>
 
@@ -455,7 +480,7 @@ export const WorksheetPage = () => {
             {showMissing ? 'ซ่อนรายการที่ยังไม่ครบ' : 'ตรวจรายการที่ยังไม่ครบ'}
           </Button>
           <span className="text-xs text-slate-500">
-            กรอกครบแล้ว {progress}% ({14 - missing.length} จาก 14 รายการ)
+            กรอกครบแล้ว {progress}% ({totalFields - missing.length} จาก {totalFields} รายการ)
           </span>
         </div>
       </Card>

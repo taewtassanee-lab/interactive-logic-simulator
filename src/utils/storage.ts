@@ -27,6 +27,8 @@ export const createInitialState = (): AppState => ({
     q1Observation: '',
     q2FillIn: '',
     q3Choice: '',
+    q4RandomLogic: '',
+    q5NoDeleteEffect: '',
     debugRows: [
       {
         point: 'จุดที่ 1 ระบบสุ่ม',

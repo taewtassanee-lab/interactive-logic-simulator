@@ -133,6 +133,16 @@ export const PrintableWorksheet = forwardRef<HTMLDivElement, { state: AppState }
         <p style={S.qLabel}>3. เมื่อ Array เป็นค่าว่าง [ ] ระบบควรทำงานอย่างไร</p>
         <div style={S.answer}>{show(worksheet.q3Choice)}</div>
 
+        <p style={S.qLabel}>
+          4. การสุ่ม Index ด้วย int(random(Array.Width)) ทำงานอย่างไร และเหตุใดจึงต้องครอบด้วย int หรือ floor
+        </p>
+        <div style={S.answer}>{show(worksheet.q4RandomLogic)}</div>
+
+        <p style={S.qLabel}>
+          5. หากลืมสั่ง Delete index บนแกน X หลังสุ่มคำถามแล้ว จะส่งผลต่อ State Monitor และโปรแกรมอย่างไร
+        </p>
+        <div style={S.answer}>{show(worksheet.q5NoDeleteEffect)}</div>
+
         {/* ---------- ส่วนที่ 2 ---------- */}
         <p style={S.sectionTitle}>ส่วนที่ 2 บันทึกรายการซ่อมข้อผิดพลาดระบบแบบทดสอบ</p>
         <table style={S.table}>

@@ -34,6 +34,8 @@ interface RoleTimerValue {
   pause: () => void;
   reset: () => void;
   markSwitched: () => void;
+  /** เลื่อนคำสั่งบังคับออกไปชั่วคราว ใช้ตอนอยู่ระหว่างนำเสนอหรือสาธิตหน้าชั้น */
+  postpone: (minutes: number) => void;
 }
 
 const RoleTimerContext = createContext<RoleTimerValue | null>(null);
@@ -109,6 +111,12 @@ export const RoleTimerProvider = ({ children }: { children: ReactNode }) => {
   const { driverName, navigatorName } = state.pair;
   const first = state.session.driverIsFirstPerson;
 
+  const postpone = useCallback((minutes: number) => {
+    setSeconds(Math.max(1, Math.round(minutes * 60)));
+    setAlerted(false);
+    setRunning(true);
+  }, []);
+
   const value = useMemo(
     () => ({
       seconds,
@@ -123,6 +131,7 @@ export const RoleTimerProvider = ({ children }: { children: ReactNode }) => {
       pause,
       reset,
       markSwitched,
+      postpone,
     }),
     [
       seconds,
@@ -136,6 +145,7 @@ export const RoleTimerProvider = ({ children }: { children: ReactNode }) => {
       pause,
       reset,
       markSwitched,
+      postpone,
     ],
   );
 

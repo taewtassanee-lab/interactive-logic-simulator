@@ -11,7 +11,7 @@ import { Button } from './Ui';
  * ซึ่งขัดกับหลักการ Pair Programming ที่ต้องได้ลงมือทั้งคู่
  */
 export const RoleSwapOverlay = () => {
-  const { mustSwitch, currentDriver, currentNavigator, switchCount, markSwitched } =
+  const { mustSwitch, currentDriver, currentNavigator, switchCount, markSwitched, postpone } =
     useRoleTimer();
 
   if (!mustSwitch) return null;
@@ -92,7 +92,17 @@ export const RoleSwapOverlay = () => {
           สลับที่นั่งแล้ว เริ่มรอบใหม่
         </Button>
 
-        <p className="mt-2 text-center text-xs text-slate-500">
+        {/* ทางออกสำรอง ใช้เมื่อครูกำลังสาธิตหน้าชั้นหรืออยู่ระหว่างนำเสนอ
+            ตั้งใจทำให้ปุ่มเล็กและจางกว่า เพื่อให้การสลับบทบาทยังเป็นทางเลือกหลัก */}
+        <button
+          type="button"
+          onClick={() => postpone(5)}
+          className="mt-2 w-full rounded-xl py-1.5 text-xs font-medium text-slate-400 underline decoration-dotted underline-offset-4 transition hover:text-slate-600"
+        >
+          ยังสลับไม่ได้ตอนนี้ ขอเลื่อนออกไปอีก 5 นาที
+        </button>
+
+        <p className="mt-1 text-center text-xs text-slate-500">
           สลับบทบาทไปแล้ว {switchCount} ครั้ง | ระบบบันทึกเวลาที่สลับไว้เป็นหลักฐานในใบงาน
         </p>
       </div>
