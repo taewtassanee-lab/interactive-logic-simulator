@@ -245,7 +245,7 @@ export const KnowledgePage = () => (
           </h2>
           <p className="mt-1 text-sm leading-relaxed text-white/90">
             รวมความรู้ที่ต้องใช้ในการสร้างระบบแบบทดสอบสุ่มด้วย Construct 2
-            เปิดอ่านได้ตลอดเวลาระหว่างทำกิจกรรม
+            อ่านก่อนเริ่มทำกิจกรรม และเปิดกลับมาดูได้ตลอดเวลา
           </p>
         </div>
       </div>

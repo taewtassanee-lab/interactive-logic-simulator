@@ -33,8 +33,9 @@ interface TabDef {
 
 const TABS: TabDef[] = [
   { id: 'start', label: 'เริ่มต้นใช้งาน', icon: Rocket, requiresStart: false },
-  { id: 'simulator', label: 'จำลองตรรกะ', icon: PlayCircle, requiresStart: true },
+  // คลังความรู้มาก่อนจำลองตรรกะ ให้ผู้เรียนอ่านทำความเข้าใจก่อนลงมือทำ
   { id: 'knowledge', label: 'คลังความรู้', icon: Library, requiresStart: false },
+  { id: 'simulator', label: 'จำลองตรรกะ', icon: PlayCircle, requiresStart: true },
   { id: 'worksheet', label: 'ใบงานดิจิทัล', icon: FileText, requiresStart: true },
   { id: 'summary', label: 'สรุปและส่งงาน', icon: ClipboardList, requiresStart: true },
   { id: 'teacher', label: 'คู่มือครู', icon: GraduationCap, requiresStart: false },
