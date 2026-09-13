@@ -157,7 +157,7 @@ export const NamePicker = ({ rows }: { rows: ProgressRow[] }) => {
 
 /* ==================== นาฬิกาจับเวลาจอใหญ่ ==================== */
 
-const PRESETS = [1, 3, 5, 10, 15];
+const PRESETS = [1, 3, 5, 10, 15, 20];
 
 export const BigTimer = () => {
   const [total, setTotal] = useState(5 * 60);
