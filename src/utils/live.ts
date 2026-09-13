@@ -108,7 +108,7 @@ const fetchWithRetry = async (
 const describeNetworkError = (err: unknown): string => {
   const name = err instanceof Error ? err.name : '';
   if (name === 'AbortError') {
-    return 'เซิร์ฟเวอร์ตอบช้าเกินไป ลองกดส่งอีกครั้ง';
+    return 'เซิร์ฟเวอร์ตอบช้าเกินไป รอสักครู่แล้วลองอีกครั้ง';
   }
   return 'เชื่อมต่อไม่สำเร็จ ตรวจสอบสัญญาณอินเทอร์เน็ตแล้วลองอีกครั้ง';
 };

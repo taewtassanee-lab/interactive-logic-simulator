@@ -3,6 +3,7 @@ import {
   Download,
   Eye,
   Loader2,
+  Maximize2,
   Play,
   RefreshCw,
   Radio,
@@ -22,6 +23,7 @@ import {
   startLiveActivity,
 } from '../../utils/live';
 import { LiveResultView, ResponderCounter, liveResponsesToCsv } from './TeacherViews';
+import { PresentationMode } from './PresentationMode';
 import type { LiveActivityPreset, LiveResponse, LiveSession } from '../../types/live';
 import type { ProgressRow } from '../../utils/sync';
 
@@ -65,6 +67,8 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
   const [error, setError] = useState('');
   const [revealed, setRevealed] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
+  /** เปิดจอฉายผลลัพธ์เต็มจอสำหรับหน้าชั้นเรียน */
+  const [presenting, setPresenting] = useState(false);
 
   // เลือกห้องแรกให้อัตโนมัติเมื่อข้อมูลมาถึง ครูจะได้ไม่ต้องกดเอง
   useEffect(() => {
@@ -126,10 +130,15 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
 
   /** จอครูมีเครื่องเดียว จึงถามหาคำตอบใหม่ถี่ได้โดยไม่กระทบโควตา */
   useEffect(() => {
-    if (!session?.open || !classroom) return;
+    if (!classroom.trim() || !teacherKey) return;
+    /**
+     * ถามซ้ำตลอดแม้ยังไม่มีกิจกรรมเปิดอยู่
+     * เพราะครั้งแรกที่เรียกอาจไม่ทันเมื่อ Apps Script เพิ่งตื่นจากพัก (ใช้เวลาหลายสิบวินาที)
+     * การถามซ้ำทำให้จอกลับมาแสดงกิจกรรมที่ค้างอยู่เองโดยครูไม่ต้องกดโหลดใหม่
+     */
     const id = window.setInterval(() => void refreshRef.current(true), TEACHER_POLL_MS);
     return () => window.clearInterval(id);
-  }, [session?.open, session?.activityId, classroom]);
+  }, [classroom, teacherKey, session?.activityId]);
 
   const open = async (p: LiveActivityPreset) => {
     if (!classroom.trim()) {
@@ -269,6 +278,11 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
             <p className="mt-0.5 text-sm leading-relaxed text-slate-600">{session.prompt}</p>
 
             <div className="mt-3 flex flex-wrap gap-2">
+              {/* ปุ่มแรกสุด เพราะเป็นสิ่งที่ครูกดทุกครั้งที่เปิดกิจกรรมเพื่อฉายหน้าชั้น */}
+              <Button variant="purple" onClick={() => setPresenting(true)}>
+                <Maximize2 className="h-4 w-4" aria-hidden="true" />
+                ฉายผลขึ้นจอหน้าชั้น
+              </Button>
               {session.open ? (
                 <Button variant="danger" disabled={busy} onClick={() => void close()}>
                   <Square className="h-4 w-4" aria-hidden="true" />
@@ -335,6 +349,12 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
               : 'ปิดรับคำตอบแล้ว ผลด้านล่างคือผลสุดท้าย'
           }
           icon={<Radio className="h-5 w-5 text-mint-600" aria-hidden="true" />}
+          actions={
+            <Button variant="purple" onClick={() => setPresenting(true)}>
+              <Maximize2 className="h-4 w-4" aria-hidden="true" />
+              ฉายเต็มจอ
+            </Button>
+          }
         >
           <LiveResultView
             preset={preset}
@@ -343,6 +363,22 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
             revealed={revealed}
           />
         </Card>
+      )}
+
+      {/* ---------- จอฉายผลลัพธ์หน้าชั้นเรียน ---------- */}
+      {presenting && session && preset && (
+        <PresentationMode
+          session={session}
+          preset={preset}
+          responses={responses}
+          teacherKey={teacherKey}
+          classroom={classroom}
+          revealed={revealed}
+          busy={busy}
+          onToggleReveal={() => setRevealed((v) => !v)}
+          onClose={() => void close()}
+          onExit={() => setPresenting(false)}
+        />
       )}
 
       {/* ---------- คลังกิจกรรม ---------- */}
