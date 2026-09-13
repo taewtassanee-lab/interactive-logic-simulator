@@ -83,7 +83,9 @@ const App = () => {
         className="sticky top-[64px] z-20 border-b-2 border-white bg-white/95 sm:top-[72px]"
         aria-label="เมนูหลัก"
       >
-        <div className="scroll-thin mx-auto flex max-w-[1400px] gap-1.5 overflow-x-auto px-2 py-2 sm:px-5">
+        {/* ตัดขึ้นบรรทัดใหม่แทนการเลื่อนแนวนอน เพราะบนไอแพดแนวตั้งแถบเมนูยาวเกินจอ
+            แล้วไม่มีอะไรบอกว่าปัดต่อได้ ทำให้แท็บท้าย ๆ เหมือนหายไปทั้งที่มีอยู่ */}
+        <div className="mx-auto flex max-w-[1400px] flex-wrap gap-1.5 px-2 py-2 sm:px-5">
           {TABS.map((t) => {
             const Icon = t.icon;
             const locked = t.requiresStart && !started;
@@ -94,7 +96,7 @@ const App = () => {
                 type="button"
                 onClick={() => goTo(t.id)}
                 aria-current={active ? 'page' : undefined}
-                className={`relative flex shrink-0 items-center gap-2 rounded-2xl px-3.5 py-2 font-display text-sm font-semibold transition-all duration-150 active:translate-y-[2px] sm:px-4 ${
+                className={`relative flex shrink-0 items-center gap-1.5 rounded-2xl px-2.5 py-1.5 font-display text-xs font-semibold transition-all duration-150 active:translate-y-[2px] sm:gap-2 sm:px-4 sm:py-2 sm:text-sm ${
                   active
                     ? 'bg-gradient-to-b from-brand-400 to-brand-600 text-white'
                     : 'bg-white text-slate-500 hover:-translate-y-0.5 hover:text-brand-600'
@@ -105,7 +107,7 @@ const App = () => {
                     : '0 3px 0 0 #e2e8f0',
                 }}
               >
-                <Icon className="h-4 w-4" aria-hidden="true" />
+                <Icon className="hidden h-4 w-4 sm:block" aria-hidden="true" />
                 <span>{t.label}</span>
                 {locked && (
                   <>
@@ -151,6 +153,8 @@ const App = () => {
           <p className="mt-1">
             ข้อมูลทั้งหมดถูกบันทึกไว้ในเบราว์เซอร์ของเครื่องนี้เท่านั้น ไม่ได้ส่งขึ้นเซิร์ฟเวอร์
           </p>
+          {/* ป้ายรุ่น ใช้ตรวจว่าเครื่องนี้โหลดไฟล์ชุดใหม่แล้วหรือยัง เวลาแคชค้างบนไอแพด */}
+          <p className="mt-2 text-[11px] text-slate-400">รุ่น {__BUILD_ID__}</p>
         </div>
       </footer>
     </div>
