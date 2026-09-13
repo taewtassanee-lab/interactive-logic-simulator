@@ -152,7 +152,7 @@ export const NamePicker = ({ rows }: { rows: ProgressRow[] }) => {
         <EmptyState
           icon={null}
           title="ยังไม่มีรายชื่อในระบบ"
-          description="รายชื่อจะขึ้นเองเมื่อนักเรียนกรอกข้อมูลและกดเริ่มกิจกรรมที่เครื่องหลักของคู่"
+          description="รายชื่อจะขึ้นเองเมื่อนักเรียนกรอกข้อมูลและกดเริ่มกิจกรรมที่เครื่อง Driver"
         />
       ) : (
         <div className="space-y-3.5">

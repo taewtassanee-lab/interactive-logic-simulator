@@ -40,7 +40,7 @@ const TABS: TabDef[] = [
   // คลังความรู้มาก่อนจำลองตรรกะ ให้ผู้เรียนอ่านทำความเข้าใจก่อนลงมือทำ
   { id: 'knowledge', label: 'คลังความรู้', icon: Library, requiresStart: false },
   { id: 'simulator', label: 'จำลองตรรกะ', icon: PlayCircle, requiresStart: true },
-  // กิจกรรมสดเป็นการตอบรายบุคคล ไอแพดเครื่องผู้ช่วยจึงเข้าร่วมได้ด้วย ไม่ต้องกดเริ่มกิจกรรมก่อน
+  // กิจกรรมสดเป็นการตอบรายบุคคล ไอแพดเครื่อง Navigator จึงเข้าร่วมได้ด้วย ไม่ต้องกดเริ่มกิจกรรมก่อน
   { id: 'live', label: 'กิจกรรมสด', icon: Radio, requiresStart: false },
   { id: 'worksheet', label: 'ใบงานดิจิทัล', icon: FileText, requiresStart: true },
   { id: 'summary', label: 'สรุปและส่งงาน', icon: ClipboardList, requiresStart: true },
@@ -132,7 +132,7 @@ const App = () => {
         {tab === 'dashboard' && <DashboardPage />}
       </main>
 
-      {/* ตัวจับเวลาและคำสั่งสลับบทบาทแสดงเฉพาะเครื่องหลัก
+      {/* ตัวจับเวลาและคำสั่งสลับบทบาทแสดงเฉพาะเครื่อง Driver
           เพื่อให้ทั้งคู่ดูเวลาจากจอเดียวกัน ไม่เดินคนละนาฬิกา */}
       {state.session.deviceMode === 'primary' && (
         <>

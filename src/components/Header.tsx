@@ -35,7 +35,7 @@ export const Header = ({
           {isAssistant && (
             <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-white/50 bg-white/25 px-3 py-1.5 font-display text-xs font-bold text-white">
               <Tablet className="h-3.5 w-3.5" aria-hidden="true" />
-              โหมดผู้ช่วย
+              โหมด Navigator
             </span>
           )}
           {/* ครูผู้สอนและโรงเรียน แสดงบนจอกว้างเท่านั้น กันหัวเว็บแน่นบนมือถือ */}

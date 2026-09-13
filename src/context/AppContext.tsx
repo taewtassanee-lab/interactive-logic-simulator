@@ -46,7 +46,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   // ส่งความก้าวหน้าขึ้น Google Sheets แบบหน่วงเวลา ไม่รบกวนการทำงานของนักเรียน
   useEffect(() => {
-    // เครื่องผู้ช่วยไม่ส่งข้อมูล กันการเขียนทับข้อมูลของเครื่องหลักในคู่เดียวกัน
+    // เครื่อง Navigator ไม่ส่งข้อมูล กันการเขียนทับข้อมูลของเครื่อง Driver ในคู่เดียวกัน
     if (!isSyncEnabled() || !state.session.activityStarted) return;
     if (state.session.deviceMode !== 'primary') return;
     const timer = window.setTimeout(async () => {

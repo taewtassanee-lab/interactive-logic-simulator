@@ -114,13 +114,13 @@ export const StartPage = ({ onStarted }: { onStarted: () => void }) => {
 
       {isAssistant ? (
         <Card
-          title="เครื่องผู้ช่วยพร้อมใช้งานแล้ว"
+          title="เครื่อง Navigator พร้อมใช้งานแล้ว"
           subtitle="ไม่ต้องกรอกข้อมูลผู้เรียนที่เครื่องนี้"
           icon={<UserCheck className="h-5 w-5 text-think-600" aria-hidden="true" />}
         >
           <p className="text-sm leading-relaxed text-slate-600">
             เปิดแท็บ <strong>คลังความรู้</strong> เพื่ออ่านเรื่อง Array และ Function
-            ระหว่างที่เพื่อนลงมือทำที่เครื่องหลัก และเปิดแท็บ <strong>จำลองตรรกะ</strong>
+            ระหว่างที่เพื่อนลงมือทำที่เครื่อง Driver และเปิดแท็บ <strong>จำลองตรรกะ</strong>
             ทดลองเรียงบล็อกเพื่อทำความเข้าใจได้ โดยผลจะไม่ถูกบันทึกเข้าระบบ
           </p>
           <p className="mt-3 rounded-2xl border-2 border-dashed border-think-200 bg-think-50/70 px-3.5 py-2.5 text-xs leading-relaxed text-think-900">

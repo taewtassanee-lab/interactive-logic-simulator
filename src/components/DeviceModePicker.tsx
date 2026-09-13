@@ -5,11 +5,11 @@ import { Card } from './Ui';
 import type { DeviceMode } from '../types';
 
 /**
- * ให้ผู้เรียนระบุว่าเครื่องที่กำลังใช้เป็นเครื่องหลักหรือเครื่องผู้ช่วย
+ * ให้ผู้เรียนระบุว่าเครื่องที่กำลังใช้เป็นเครื่อง Driver หรือเครื่อง Navigator
  *
  * เหตุผล: หนึ่งคู่ใช้ 1 พีซี + 2 iPad ถ้าทุกเครื่องกรอกใบงานและส่งข้อมูลด้วยรหัสคู่เดียวกัน
  * ข้อมูลจะเขียนทับกันในชีตของครู และคำตอบในใบงานจะแยกกันคนละชุดจนสร้าง PDF ได้ไม่ครบ
- * จึงกำหนดให้มีเครื่องหลักเพียงเครื่องเดียวต่อคู่
+ * จึงกำหนดให้มีเครื่อง Driver เพียงเครื่องเดียวต่อคู่
  */
 const OPTIONS: {
   mode: DeviceMode;
@@ -22,8 +22,8 @@ const OPTIONS: {
 }[] = [
   {
     mode: 'primary',
-    title: 'เครื่องหลักของคู่',
-    device: 'เครื่องคอมพิวเตอร์ที่ Driver ใช้',
+    title: 'เครื่อง Driver',
+    device: 'คอมพิวเตอร์ที่ใช้ลงมือทำและเขียน Event Sheet',
     icon: Monitor,
     can: [
       'ทำภารกิจแก้ Bug และบันทึกผล',
@@ -35,8 +35,8 @@ const OPTIONS: {
   },
   {
     mode: 'assistant',
-    title: 'เครื่องผู้ช่วย',
-    device: 'iPad ของนักเรียนแต่ละคน',
+    title: 'เครื่อง Navigator',
+    device: 'iPad ที่ใช้เปิดคลังความรู้และตรวจตรรกะ',
     icon: Tablet,
     can: [
       'เปิดคลังความรู้อ่านระหว่างทำงาน',
@@ -57,14 +57,14 @@ export const DeviceModePicker = () => {
       session: {
         ...prev.session,
         deviceMode: mode,
-        // เครื่องผู้ช่วยเปิดใช้งานได้ทันที ไม่ต้องกรอกข้อมูลผู้เรียน
+        // เครื่อง Navigator เปิดใช้งานได้ทันที ไม่ต้องกรอกข้อมูลผู้เรียน
         activityStarted: mode === 'assistant' ? true : prev.session.activityStarted,
       },
     }));
     notify(
       mode === 'primary'
-        ? 'ตั้งเป็นเครื่องหลักของคู่แล้ว กรอกข้อมูลผู้เรียนด้านล่างเพื่อเริ่มกิจกรรม'
-        : 'ตั้งเป็นเครื่องผู้ช่วยแล้ว เปิดคลังความรู้อ่านได้ทันที',
+        ? 'ตั้งเป็นเครื่อง Driver แล้ว กรอกข้อมูลผู้เรียนด้านล่างเพื่อเริ่มกิจกรรม'
+        : 'ตั้งเป็นเครื่อง Navigator แล้ว เปิดคลังความรู้อ่านได้ทันที',
       'success',
     );
   };
@@ -72,7 +72,7 @@ export const DeviceModePicker = () => {
   return (
     <Card
       title="เครื่องนี้ใช้ทำอะไร"
-      subtitle="หนึ่งคู่มีเครื่องหลักได้เพียงเครื่องเดียว เพื่อไม่ให้ข้อมูลของคู่เขียนทับกัน"
+      subtitle="หนึ่งคู่มีเครื่อง Driver ได้เพียงเครื่องเดียว เพื่อไม่ให้ข้อมูลของคู่เขียนทับกัน"
       icon={<Monitor className="h-5 w-5 text-brand-600" aria-hidden="true" />}
     >
       <div className="grid gap-3 md:grid-cols-2">
@@ -133,19 +133,25 @@ export const DeviceModePicker = () => {
           );
         })}
       </div>
+
+      <p className="mt-3 rounded-2xl border-2 border-dashed border-lemon-200 bg-lemon-50/70 px-3.5 py-2.5 text-xs leading-relaxed text-peach-900">
+        เลือกครั้งเดียวตอนต้นคาบ <strong>เมื่อถึงเวลาสลับบทบาทให้สลับที่นั่งอย่างเดียว</strong>{' '}
+        ไม่ต้องกลับมาเปลี่ยนการตั้งค่านี้ เพราะตัวเครื่องไม่ได้ย้ายตามคน
+        คนที่มาเป็น Driver คนใหม่ก็มานั่งที่คอมพิวเตอร์เครื่องเดิม
+      </p>
     </Card>
   );
 };
 
-/** ข้อความแจ้งเมื่อเครื่องผู้ช่วยเปิดหน้าที่ใช้ได้เฉพาะเครื่องหลัก */
+/** ข้อความแจ้งเมื่อเครื่อง Navigator เปิดหน้าที่ใช้ได้เฉพาะเครื่อง Driver */
 export const AssistantNotice = ({ page }: { page: string }) => (
   <Card
-    title={`${page}ใช้ได้ที่เครื่องหลักเท่านั้น`}
-    subtitle="เครื่องนี้ตั้งเป็นเครื่องผู้ช่วยไว้"
+    title={`${page}ใช้ได้ที่เครื่อง Driver เท่านั้น`}
+    subtitle="เครื่องนี้ตั้งเป็นเครื่อง Navigator ไว้"
     icon={<Tablet className="h-5 w-5 text-think-600" aria-hidden="true" />}
   >
     <p className="rounded-2xl border-2 border-lemon-200 bg-gradient-to-b from-lemon-50 to-white px-4 py-3 text-sm leading-relaxed text-peach-900">
-      เพื่อไม่ให้คำตอบของคู่แยกกันคนละชุด ระบบให้กรอกใบงานและส่งงานที่<strong>เครื่องหลัก</strong>
+      เพื่อไม่ให้คำตอบของคู่แยกกันคนละชุด ระบบให้กรอกใบงานและส่งงานที่<strong>เครื่อง Driver</strong>
       ซึ่งเป็นคอมพิวเตอร์ที่ Driver ใช้เพียงเครื่องเดียว
     </p>
     <p className="mt-3 text-sm leading-relaxed text-slate-600">
@@ -154,7 +160,7 @@ export const AssistantNotice = ({ page }: { page: string }) => (
     </p>
     <p className="mt-3 text-xs text-slate-500">
       หากเครื่องนี้คือคอมพิวเตอร์หลักของคู่จริง ให้กลับไปหน้า &quot;เริ่มต้นใช้งาน&quot;
-      แล้วเลือกใหม่เป็น &quot;เครื่องหลักของคู่&quot;
+      แล้วเลือกใหม่เป็น &quot;เครื่อง Driver&quot;
     </p>
   </Card>
 );
