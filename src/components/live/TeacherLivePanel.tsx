@@ -90,11 +90,24 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
     [session?.presetId],
   );
 
+  /**
+   * ลำดับของคำขอ ใช้ทิ้งผลลัพธ์ที่มาถึงช้ากว่าคำขอที่ใหม่กว่า
+   *
+   * Apps Script ตอบช้าไม่เท่ากันทุกครั้ง (2 ถึง 25 วินาที) แต่จอครูถามทุก 5 วินาที
+   * จึงมีหลายคำขอค้างอยู่พร้อมกัน ถ้าคำขอเก่ากลับมาทีหลังจะเขียนทับผลลัพธ์ใหม่
+   * อาการที่เห็นคือเพิ่งสลับกลับมาที่กิจกรรมเดิมแล้วคำตอบขึ้น 0 ทั้งที่มีอยู่ในชีต
+   */
+  const reqSeq = useRef(0);
+
   const refresh = useCallback(
     async (silent = false) => {
       if (!classroom || !teacherKey) return;
       if (!silent) setPolling(true);
-      const res = await fetchLiveResponses(teacherKey, classroom, session?.activityId ?? '');
+      const mySeq = (reqSeq.current += 1);
+      const askedFor = session?.activityId ?? '';
+      const res = await fetchLiveResponses(teacherKey, classroom, askedFor);
+      // มีคำขอที่ใหม่กว่าออกไปแล้ว ผลลัพธ์ชุดนี้จึงล้าสมัย ทิ้งไปทั้งชุด
+      if (mySeq !== reqSeq.current) return;
       setPolling(false);
       if (!res.ok) {
         setError(res.error ?? 'ดึงข้อมูลไม่สำเร็จ');
@@ -109,7 +122,7 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
        * จึงต้องกรองเหลือเฉพาะกิจกรรมที่กำลังเปิดอยู่ ไม่งั้นคำตอบของกิจกรรมก่อนหน้าจะปนขึ้นจอ
        */
       const all = res.data?.responses ?? [];
-      const wanted = session?.activityId || live?.activityId || '';
+      const wanted = askedFor || live?.activityId || '';
       setResponses(wanted ? all.filter((r) => r.activityId === wanted) : all);
     },
     [classroom, teacherKey, session?.activityId],
@@ -147,7 +160,18 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
     }
     setBusy(true);
     setRevealed(false);
-    const activityId = `${p.id}-${Date.now().toString(36)}`;
+
+    /**
+     * รหัสกิจกรรมผูกกับห้องเรียนและกิจกรรม ไม่ผูกกับเวลาที่กดเปิด
+     *
+     * เดิมต่อท้ายด้วยเวลา ทำให้การกดเปิดกิจกรรมเดิมซ้ำกลายเป็นกิจกรรมคนละตัว
+     * คำตอบเดิมยังอยู่ในชีตครบ แต่จอครูกรองตามรหัสกิจกรรมจึงไม่แสดงให้เห็น
+     * ดูเหมือนคำตอบของนักเรียนหายไปทั้งที่ไม่ได้หาย
+     *
+     * เปลี่ยนเป็นรหัสคงที่ การกดเปิดซ้ำจึงเป็นการกลับเข้ากิจกรรมเดิมพร้อมคำตอบที่มีอยู่
+     * ถ้าต้องการเริ่มนับใหม่ให้กดปุ่มล้างคำตอบ
+     */
+    const activityId = `${normalizeRoom(classroom)}::${p.id}`;
     const res = await startLiveActivity(teacherKey, {
       classroom,
       activityId,
@@ -156,16 +180,30 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
       title: p.title,
       prompt: p.prompt,
     });
-    setBusy(false);
     if (!res.ok) {
+      setBusy(false);
       setError(res.error ?? 'เปิดกิจกรรมไม่สำเร็จ');
       notify(res.error ?? 'เปิดกิจกรรมไม่สำเร็จ', 'error');
       return;
     }
     setError('');
     setSession(res.data?.session ?? null);
-    setResponses([]);
-    notify(`เปิดกิจกรรม "${p.title}" แล้ว บอกนักเรียนให้เข้าแท็บกิจกรรมสด`, 'success');
+
+    // ดึงคำตอบเดิมของกิจกรรมนี้กลับมาแสดงทันที ไม่ต้องรอรอบรีเฟรชถัดไป
+    const mySeq = (reqSeq.current += 1);
+    const back = await fetchLiveResponses(teacherKey, classroom, activityId);
+    setBusy(false);
+    if (mySeq !== reqSeq.current) return;
+    const existing = back.ok
+      ? (back.data?.responses ?? []).filter((r) => r.activityId === activityId)
+      : [];
+    setResponses(existing);
+    notify(
+      existing.length
+        ? `เปิดกิจกรรม "${p.title}" ต่อจากรอบเดิม มีคำตอบเดิมอยู่แล้ว ${existing.length} คน`
+        : `เปิดกิจกรรม "${p.title}" แล้ว บอกนักเรียนให้เข้าแท็บกิจกรรมสด`,
+      'success',
+    );
   };
 
   const close = async () => {
@@ -183,10 +221,20 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
     notify('ปิดรับคำตอบแล้ว คำตอบที่ส่งมายังแสดงอยู่บนจอ', 'success');
   };
 
-  const clear = async () => {
+  /**
+   * ลบคำตอบ scope 'activity' ลบเฉพาะกิจกรรมที่เปิดอยู่ scope 'room' ลบทั้งห้อง
+   *
+   * ที่ต้องมีตัวเลือกลบทั้งห้อง เพราะรุ่นก่อนหน้าตั้งรหัสกิจกรรมใหม่ทุกครั้งที่กดเปิด
+   * คำตอบจากการทดลองใช้จึงกระจายอยู่ใต้รหัสเก่าหลายชุดที่เข้าไม่ถึงจากหน้าจอแล้ว
+   */
+  const clear = async (scope: 'activity' | 'room') => {
     if (!session) return;
     setBusy(true);
-    const res = await clearLiveResponses(teacherKey, classroom, session.activityId);
+    const res = await clearLiveResponses(
+      teacherKey,
+      classroom,
+      scope === 'activity' ? session.activityId : '',
+    );
     setBusy(false);
     setConfirmClear(false);
     if (!res.ok) {
@@ -194,7 +242,12 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
       return;
     }
     setResponses([]);
-    notify('ลบคำตอบของกิจกรรมนี้แล้ว', 'success');
+    notify(
+      scope === 'activity'
+        ? 'ลบคำตอบของกิจกรรมนี้แล้ว'
+        : `ลบคำตอบกิจกรรมสดทั้งหมดของห้อง ${normalizeRoom(classroom)} แล้ว`,
+      'success',
+    );
   };
 
   const grouped = useMemo(() => {
@@ -276,6 +329,12 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
             </div>
             <h3 className="mt-2 font-display text-lg font-bold text-slate-800">{session.title}</h3>
             <p className="mt-0.5 text-sm leading-relaxed text-slate-600">{session.prompt}</p>
+            {responses.length > 0 && (
+              <p className="mt-1.5 text-xs text-slate-500">
+                คำตอบสะสมของกิจกรรมนี้ในห้อง {normalizeRoom(classroom)} · กดเปิดกิจกรรมนี้ซ้ำเมื่อไร
+                คำตอบเดิมก็ยังอยู่ ถ้าต้องการเริ่มนับใหม่ให้กด &quot;ล้างคำตอบ&quot;
+              </p>
+            )}
 
             <div className="mt-3 flex flex-wrap gap-2">
               {/* ปุ่มแรกสุด เพราะเป็นสิ่งที่ครูกดทุกครั้งที่เปิดกิจกรรมเพื่อฉายหน้าชั้น */}
@@ -308,12 +367,15 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
                 ดาวน์โหลด CSV
               </Button>
               {confirmClear ? (
-                <span className="flex items-center gap-2 rounded-2xl border-2 border-bubble-200 bg-bubble-50 px-3 py-1.5">
+                <span className="flex flex-wrap items-center gap-2 rounded-2xl border-2 border-bubble-200 bg-bubble-50 px-3 py-1.5">
                   <span className="text-sm font-semibold text-bubble-900">
-                    ลบคำตอบทั้งหมดของกิจกรรมนี้?
+                    ต้องการลบแค่ไหน (ย้อนกลับไม่ได้)
                   </span>
-                  <Button variant="danger" disabled={busy} onClick={() => void clear()}>
-                    ลบเลย
+                  <Button variant="danger" disabled={busy} onClick={() => void clear('activity')}>
+                    เฉพาะกิจกรรมนี้
+                  </Button>
+                  <Button variant="danger" disabled={busy} onClick={() => void clear('room')}>
+                    ทุกกิจกรรมของห้องนี้
                   </Button>
                   <Button variant="ghost" onClick={() => setConfirmClear(false)}>
                     ยกเลิก
@@ -420,7 +482,7 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
                         onClick={() => void open(a)}
                       >
                         <Play className="h-4 w-4" aria-hidden="true" />
-                        {active ? 'เปิดใหม่อีกครั้ง' : 'เปิดกิจกรรม'}
+                        {active ? 'กลับเข้ากิจกรรมนี้' : 'เปิดกิจกรรม'}
                       </Button>
                     </div>
                   );

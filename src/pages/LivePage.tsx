@@ -61,6 +61,8 @@ export const LivePage = () => {
   const startedAt = useRef(Date.now());
   /** เวลาที่ตรวจหากิจกรรมล่าสุด แสดงบนหน้าจอให้นักเรียนเห็นว่าระบบยังทำงานอยู่ */
   const [checkedAt, setCheckedAt] = useState<Date | null>(null);
+  /** ลำดับคำขอ ใช้ทิ้งผลที่มาถึงช้ากว่าคำขอที่ใหม่กว่า กันกิจกรรมเก่าย้อนกลับมาทับ */
+  const reqSeq = useRef(0);
 
   const preset = session ? getPreset(session.presetId) : undefined;
   const answered = Boolean(session && answeredId === session.activityId);
@@ -71,7 +73,9 @@ export const LivePage = () => {
       if (!identity?.classroom) return;
       // แสดงวงหมุนเฉพาะตอนนักเรียนกดเอง รอบอัตโนมัติทำเงียบ ๆ ไม่ให้จอกระพริบ
       if (manual) setLoading(true);
+      const mySeq = (reqSeq.current += 1);
       const res = await pollLiveSession(identity.classroom);
+      if (mySeq !== reqSeq.current) return;
       setLoading(false);
       if (!res.ok) {
         /**
