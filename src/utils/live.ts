@@ -42,12 +42,23 @@ const IDENTITY_KEY = 'ils_live_identity_v1';
  *
  * ใช้เฉพาะเป็นกุญแจจับคู่เท่านั้น ชื่อที่ผู้ใช้พิมพ์ยังแสดงตามเดิมบนหน้าจอ
  */
-export const normalizeRoom = (value: string): string =>
-  String(value ?? '')
+export const normalizeRoom = (value: string): string => {
+  const core = String(value ?? '')
     .replace(/\s+/g, '')
     .replace(/^ม\.?/, '')
     .replace(/[-–—]/g, '/')
     .toLowerCase();
+
+  /**
+   * เติมคำนำหน้า ม. กลับเข้าไปเมื่อเหลือแต่ตัวเลขกับเครื่องหมายทับ
+   *
+   * Google Sheets แปลงข้อความอย่าง "5/1" เป็นวันที่ให้เองโดยอัตโนมัติ
+   * พอเขียนลงชีตแล้วอ่านกลับ ค่าจะกลายเป็นวันที่ ไม่ใช่ "5/1" อีกต่อไป
+   * การจับคู่ห้องจึงพัง คำตอบเขียนลงได้แต่หาไม่เจอ โดยไม่มีข้อความแจ้งเตือนใด ๆ
+   * การมีตัวอักษรไทยนำหน้าทำให้ Sheets เก็บเป็นข้อความเสมอ
+   */
+  return /^[\d/]+$/.test(core) ? `ม.${core}` : core;
+};
 
 export const isLiveEnabled = (): boolean => Boolean(SYNC_CONFIG.endpoint.trim());
 
@@ -64,15 +75,58 @@ interface ApiResult<T> {
   outdated?: boolean;
 }
 
+/**
+ * ยิงคำขอพร้อมกำหนดเวลาสูงสุดและลองซ้ำอัตโนมัติ
+ *
+ * เน็ตโรงเรียนและไอแพดหลุดเป็นช่วง ๆ ได้ตลอด และ Apps Script เองก็ตอบช้าราว 2-4 วินาที
+ * ถ้าพลาดครั้งเดียวแล้วขึ้นข้อความแดงทันที นักเรียนจะคิดว่าระบบเสียทั้งที่รอบถัดไปก็ผ่าน
+ * จึงลองซ้ำให้เองก่อน แล้วค่อยรายงานว่าไม่สำเร็จจริง ๆ
+ */
+const fetchWithRetry = async (
+  url: string,
+  init: RequestInit,
+  { attempts, timeoutMs }: { attempts: number; timeoutMs: number },
+): Promise<Response> => {
+  let lastError: unknown;
+  for (let i = 0; i < attempts; i += 1) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      return await fetch(url, { ...init, signal: controller.signal });
+    } catch (err) {
+      lastError = err;
+      // เว้นระยะก่อนลองใหม่ ให้เครือข่ายได้ตั้งหลัก
+      if (i < attempts - 1) await new Promise((r) => setTimeout(r, 900 * (i + 1)));
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error('network');
+};
+
+/** ข้อความบอกสาเหตุที่อ่านรู้เรื่อง ช่วยให้แยกออกว่าเน็ตหลุดหรือรอนานเกินไป */
+const describeNetworkError = (err: unknown): string => {
+  const name = err instanceof Error ? err.name : '';
+  if (name === 'AbortError') {
+    return 'เซิร์ฟเวอร์ตอบช้าเกินไป ลองกดส่งอีกครั้ง';
+  }
+  return 'เชื่อมต่อไม่สำเร็จ ตรวจสอบสัญญาณอินเทอร์เน็ตแล้วลองอีกครั้ง';
+};
+
 const post = async <T>(body: Record<string, unknown>): Promise<ApiResult<T>> => {
   if (!isLiveEnabled()) return { ok: false, error: 'ยังไม่ได้ตั้งค่าที่เก็บข้อมูล' };
   try {
-    const res = await fetch(SYNC_CONFIG.endpoint, {
-      method: 'POST',
-      // text/plain ทำให้เป็น simple request เบราว์เซอร์จึงไม่ยิง preflight ที่ Apps Script ไม่รองรับ
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(body),
-    });
+    const res = await fetchWithRetry(
+      SYNC_CONFIG.endpoint,
+      {
+        method: 'POST',
+        // text/plain ทำให้เป็น simple request เบราว์เซอร์จึงไม่ยิง preflight ที่ Apps Script ไม่รองรับ
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(body),
+      },
+      // การส่งคำตอบสำคัญกว่าความเร็ว จึงรอนานกว่าและลองซ้ำมากกว่าตอนอ่านข้อมูล
+      { attempts: 3, timeoutMs: 25000 },
+    );
     const data = (await res.json()) as { ok?: boolean; error?: string } & T;
     if (!data.ok) {
       const error = data.error ?? 'ทำรายการไม่สำเร็จ';
@@ -80,8 +134,8 @@ const post = async <T>(body: Record<string, unknown>): Promise<ApiResult<T>> => 
       return { ok: false, error: outdated ? OUTDATED_HINT : error, outdated };
     }
     return { ok: true, data };
-  } catch {
-    return { ok: false, error: 'เชื่อมต่อไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่' };
+  } catch (err) {
+    return { ok: false, error: describeNetworkError(err) };
   }
 };
 
@@ -89,7 +143,11 @@ const get = async <T>(params: Record<string, string>): Promise<ApiResult<T>> => 
   if (!isLiveEnabled()) return { ok: false, error: 'ยังไม่ได้ตั้งค่าที่เก็บข้อมูล' };
   try {
     const qs = new URLSearchParams({ ...params, t: String(Date.now()) }).toString();
-    const res = await fetch(`${SYNC_CONFIG.endpoint}?${qs}`);
+    const res = await fetchWithRetry(
+      `${SYNC_CONFIG.endpoint}?${qs}`,
+      {},
+      { attempts: 2, timeoutMs: 15000 },
+    );
     const data = (await res.json()) as { ok?: boolean; error?: string } & T;
     if (!data.ok) {
       const error = data.error ?? 'ดึงข้อมูลไม่สำเร็จ';
@@ -97,8 +155,8 @@ const get = async <T>(params: Record<string, string>): Promise<ApiResult<T>> => 
       return { ok: false, error: outdated ? OUTDATED_HINT : error, outdated };
     }
     return { ok: true, data };
-  } catch {
-    return { ok: false, error: 'เชื่อมต่อไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่' };
+  } catch (err) {
+    return { ok: false, error: describeNetworkError(err) };
   }
 };
 

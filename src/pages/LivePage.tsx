@@ -51,6 +51,8 @@ export const LivePage = () => {
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
+  /** จำนวนครั้งที่ตรวจไม่ผ่านติดกัน ใช้กันไม่ให้เน็ตสะดุดครั้งเดียวขึ้นข้อความแดงทันที */
+  const [misses, setMisses] = useState(0);
   /** รหัสกิจกรรมที่ตอบไปแล้วบนเครื่องนี้ ใช้ตัดสินว่าจะแสดงฟอร์มหรือหน้าขอบคุณ */
   const [answeredId, setAnsweredId] = useState('');
   const [editing, setEditing] = useState(false);
@@ -71,11 +73,21 @@ export const LivePage = () => {
       if (manual) setLoading(true);
       const res = await pollLiveSession(identity.classroom);
       setLoading(false);
-      setCheckedAt(new Date());
       if (!res.ok) {
-        setError(res.error ?? 'ตรวจสอบกิจกรรมไม่สำเร็จ');
+        /**
+         * รอบตรวจอัตโนมัติพลาดครั้งสองครั้งเป็นเรื่องปกติของเน็ตโรงเรียน
+         * จึงขึ้นข้อความแดงเมื่อพลาดติดกันตั้งแต่ 3 ครั้ง (ราวครึ่งนาที) หรือเมื่อนักเรียนกดเอง
+         * ไม่งั้นจะขึ้นเตือนทั้งที่รอบถัดไปก็ต่อติดแล้ว ทำให้เข้าใจผิดว่าระบบเสีย
+         */
+        setMisses((n) => {
+          const next = n + 1;
+          if (manual || next >= 3) setError(res.error ?? 'ตรวจสอบกิจกรรมไม่สำเร็จ');
+          return next;
+        });
         return;
       }
+      setCheckedAt(new Date());
+      setMisses(0);
       setError('');
       const next = res.data?.session ?? null;
       setSession((prev) => {
@@ -104,6 +116,8 @@ export const LivePage = () => {
    */
   useEffect(() => {
     if (!identity?.classroom) return;
+    // หยุดตรวจระหว่างกำลังส่งคำตอบ ไม่ให้สองคำขอแย่งช่องสัญญาณกันจนคำตอบส่งไม่ผ่าน
+    if (sending) return;
     const every = answered ? STUDENT_IDLE_POLL_MS : STUDENT_POLL_MS;
     const id = window.setInterval(() => {
       // แท็บถูกซ่อนอยู่ไม่ต้องถาม แล้วค่อยไล่ให้ทันตอนกลับมา
@@ -111,7 +125,7 @@ export const LivePage = () => {
       void checkRef.current();
     }, every);
     return () => window.clearInterval(id);
-  }, [identity?.classroom, answered]);
+  }, [identity?.classroom, answered, sending]);
 
   // กลับมาที่แท็บนี้เมื่อไร ตรวจให้ทันทีโดยไม่ต้องรอรอบถัดไป
   useEffect(() => {
@@ -126,6 +140,7 @@ export const LivePage = () => {
   const send = async (draft: AnswerDraft) => {
     if (!session || !identity) return;
     setSending(true);
+    setError('');
     const res = await submitLiveResponse(
       {
         activityId: session.activityId,
@@ -142,8 +157,9 @@ export const LivePage = () => {
     );
     setSending(false);
     if (!res.ok) {
-      setError(res.error ?? 'ส่งคำตอบไม่สำเร็จ');
-      notify(res.error ?? 'ส่งคำตอบไม่สำเร็จ', 'error');
+      const why = res.error ?? 'ส่งคำตอบไม่สำเร็จ';
+      setError(`ส่งคำตอบไม่สำเร็จ: ${why} คำตอบที่เลือกไว้ยังอยู่ กดปุ่มส่งซ้ำได้เลย`);
+      notify('ส่งคำตอบไม่สำเร็จ กดส่งอีกครั้งได้เลย', 'error');
       return;
     }
     setError('');
@@ -268,10 +284,22 @@ export const LivePage = () => {
 
         {/* บอกให้เห็นชัดว่าระบบยังตรวจหากิจกรรมอยู่ตลอด ไม่ได้ค้าง */}
         <p className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
-          <span className="inline-flex items-center gap-1.5 font-semibold text-mint-700">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-mint-500" aria-hidden="true" />
-            เชื่อมต่ออยู่
-          </span>
+          {sending ? (
+            <span className="inline-flex items-center gap-1.5 font-semibold text-brand-700">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+              กำลังส่งคำตอบ อาจใช้เวลาสักครู่
+            </span>
+          ) : misses > 0 ? (
+            <span className="inline-flex items-center gap-1.5 font-semibold text-peach-700">
+              <span className="h-2 w-2 animate-ping rounded-full bg-peach-500" aria-hidden="true" />
+              สัญญาณสะดุด กำลังลองเชื่อมต่อใหม่
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 font-semibold text-mint-700">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-mint-500" aria-hidden="true" />
+              เชื่อมต่ออยู่
+            </span>
+          )}
           <span>
             ตรวจหากิจกรรมใหม่อัตโนมัติทุก {(answered ? STUDENT_IDLE_POLL_MS : STUDENT_POLL_MS) / 1000} วินาที
           </span>

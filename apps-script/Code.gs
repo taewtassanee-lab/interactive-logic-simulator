@@ -66,6 +66,19 @@ const LIVE_HEADERS = [
   'เวลาที่ใช้ (วินาที)',
 ];
 
+/**
+ * บังคับให้คอลัมน์ที่ระบุเก็บเป็นข้อความล้วน
+ *
+ * Google Sheets แปลงข้อความอย่าง "5/1" เป็นวันที่ให้เองโดยอัตโนมัติ
+ * ทำให้ชื่อห้องเรียนและรหัสคู่ที่เขียนลงไปเปลี่ยนรูป พออ่านกลับมาเทียบจึงไม่ตรง
+ * ข้อมูลดูเหมือนหายทั้งที่เขียนสำเร็จ และไม่มีข้อความแจ้งเตือนใด ๆ
+ */
+function forceTextColumns(sheet, columns) {
+  columns.forEach(function (col) {
+    sheet.getRange(1, col, sheet.getMaxRows(), 1).setNumberFormat('@');
+  });
+}
+
 function jsonOut(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(
     ContentService.MimeType.JSON,
@@ -83,6 +96,8 @@ function getSheet() {
     sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
     sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight('bold').setBackground('#dee7ff');
     sheet.setFrozenRows(1);
+    // ห้องเรียน รหัสคู่ และเลขที่ ต้องเป็นข้อความ ไม่ให้ถูกแปลงเป็นวันที่หรือตัวเลข
+    forceTextColumns(sheet, [2, 3, 5, 7]);
   }
   return sheet;
 }
@@ -97,6 +112,8 @@ function getLiveSheet() {
     sheet.getRange(1, 1, 1, LIVE_HEADERS.length).setValues([LIVE_HEADERS]);
     sheet.getRange(1, 1, 1, LIVE_HEADERS.length).setFontWeight('bold').setBackground('#ffe6cc');
     sheet.setFrozenRows(1);
+    // ห้องเรียน รหัสกิจกรรม เลขที่ รหัสคู่ และคำตอบ ต้องเป็นข้อความล้วน
+    forceTextColumns(sheet, [2, 3, 6, 7, 8]);
   }
   return sheet;
 }
@@ -533,6 +550,9 @@ function doGet(e) {
 function ตั้งค่าเริ่มต้น() {
   const sheet = getSheet();
   const live = getLiveSheet();
+  // ตั้งรูปแบบซ้ำให้ชีตที่สร้างไว้ก่อนหน้านี้ด้วย กันชื่อห้องอย่าง 5/1 กลายเป็นวันที่
+  forceTextColumns(sheet, [2, 3, 5, 7]);
+  forceTextColumns(live, [2, 3, 6, 7, 8]);
   Logger.log('สร้างชีต "%s" เรียบร้อย มีข้อมูลอยู่ %s แถว', SHEET_NAME, sheet.getLastRow() - 1);
   Logger.log('สร้างชีต "%s" เรียบร้อย มีข้อมูลอยู่ %s แถว', SHEET_LIVE, live.getLastRow() - 1);
   if (CLASS_SECRET === 'CHANGE_ME_CLASS' || TEACHER_KEY === 'CHANGE_ME_TEACHER') {

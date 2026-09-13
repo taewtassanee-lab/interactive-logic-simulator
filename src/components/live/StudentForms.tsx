@@ -39,9 +39,9 @@ const WordCloudForm = ({ preset, disabled, onSubmit }: FormProps) => {
           maxLength={40}
           placeholder={`คำที่ ${i + 1}${i === 0 ? '' : ' (ไม่บังคับ)'}`}
           onChange={(e) => {
-            const next = [...words];
-            next[i] = e.target.value;
-            setWords(next);
+            const value = e.target.value;
+            // ใช้รูปแบบฟังก์ชัน กันค่าที่พิมพ์ช่องอื่นหายเมื่อแตะเร็วติดกัน
+            setWords((prev) => prev.map((w, k) => (k === i ? value : w)));
           }}
           aria-label={`คำที่ ${i + 1}`}
           className={inputClass}
@@ -93,11 +93,9 @@ const QuizForm = ({ preset, disabled, onSubmit }: FormProps) => {
                   type="button"
                   disabled={disabled}
                   aria-pressed={active}
-                  onClick={() => {
-                    const next = [...picked];
-                    next[qi] = ci;
-                    setPicked(next);
-                  }}
+                  onClick={() =>
+                    setPicked((prev) => prev.map((p, k) => (k === qi ? ci : p)))
+                  }
                   className={`flex items-center gap-2.5 rounded-xl border-2 px-3 py-2 text-left text-sm transition ${
                     active
                       ? 'border-brand-400 bg-brand-50 font-semibold text-brand-800'
@@ -167,9 +165,11 @@ const MatchForm = ({ preset, disabled, onSubmit }: FormProps) => {
     if (disabled) return;
     if (links[id]) {
       // แตะซ้ำที่ข้อที่โยงไว้แล้ว = ยกเลิกการโยง
-      const next = { ...links };
-      delete next[id];
-      setLinks(next);
+      setLinks((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
       setActiveCondition(id);
       return;
     }
@@ -179,7 +179,7 @@ const MatchForm = ({ preset, disabled, onSubmit }: FormProps) => {
   const tapAction = (actionId: string) => {
     if (disabled || !activeCondition) return;
     if (linkedActions.has(actionId)) return;
-    setLinks({ ...links, [activeCondition]: actionId });
+    setLinks((prev) => ({ ...prev, [activeCondition]: actionId }));
     setActiveCondition(null);
   };
 
@@ -350,9 +350,8 @@ const ShortAnswerForm = ({ preset, disabled, onSubmit }: FormProps) => {
             rows={2}
             maxLength={200}
             onChange={(e) => {
-              const next = [...texts];
-              next[i] = e.target.value;
-              setTexts(next);
+              const value = e.target.value;
+              setTexts((prev) => prev.map((t, k) => (k === i ? value : t)));
             }}
             className={`${inputClass} resize-y leading-relaxed`}
           />
