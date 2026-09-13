@@ -33,6 +33,22 @@ export const STUDENT_IDLE_POLL_MS = 15000;
 
 const IDENTITY_KEY = 'ils_live_identity_v1';
 
+/**
+ * ทำชื่อห้องให้อยู่ในรูปเดียวกันก่อนใช้จับคู่ระหว่างจอครูกับเครื่องนักเรียน
+ *
+ * ในห้องเรียนจริงครูอาจพิมพ์ "ม.5/1" แต่นักเรียนพิมพ์ "5/1" หรือ "ม.5-1"
+ * ถ้าเทียบตัวอักษรแบบตรงตัวจะกลายเป็นคนละห้อง นักเรียนก็จะไม่เห็นกิจกรรมเลย
+ * ทั้งที่ทุกอย่างทำงานปกติ จึงตัดช่องว่าง ตัดคำนำหน้า ม. และถือขีดกลางเท่ากับทับ
+ *
+ * ใช้เฉพาะเป็นกุญแจจับคู่เท่านั้น ชื่อที่ผู้ใช้พิมพ์ยังแสดงตามเดิมบนหน้าจอ
+ */
+export const normalizeRoom = (value: string): string =>
+  String(value ?? '')
+    .replace(/\s+/g, '')
+    .replace(/^ม\.?/, '')
+    .replace(/[-–—]/g, '/')
+    .toLowerCase();
+
 export const isLiveEnabled = (): boolean => Boolean(SYNC_CONFIG.endpoint.trim());
 
 /** ข้อความที่สคริปต์รุ่นเก่าตอบกลับมาเมื่อยังไม่รู้จักคำสั่งกิจกรรมสด */
@@ -93,13 +109,19 @@ export const startLiveActivity = async (
   teacherKey: string,
   session: Omit<LiveSession, 'open' | 'openedAt'>,
 ): Promise<ApiResult<{ session: LiveSession }>> =>
-  post<{ session: LiveSession }>({ action: 'liveStart', teacherKey, ...session });
+  post<{ session: LiveSession }>({
+    action: 'liveStart',
+    teacherKey,
+    ...session,
+    classroom: normalizeRoom(session.classroom),
+  });
 
 /** ปิดรับคำตอบ แต่ยังเก็บคำตอบเดิมไว้ให้ดูบนจอ */
 export const closeLiveActivity = async (
   teacherKey: string,
   classroom: string,
-): Promise<ApiResult<unknown>> => post({ action: 'liveClose', teacherKey, classroom });
+): Promise<ApiResult<unknown>> =>
+  post({ action: 'liveClose', teacherKey, classroom: normalizeRoom(classroom) });
 
 /** ดึงคำตอบทั้งหมดของกิจกรรมที่กำลังเปิดอยู่ */
 export const fetchLiveResponses = async (
@@ -110,7 +132,7 @@ export const fetchLiveResponses = async (
   const res = await get<{ responses?: LiveResponse[]; session?: LiveSession | null }>({
     action: 'liveResponses',
     key: teacherKey,
-    classroom,
+    classroom: normalizeRoom(classroom),
     activityId,
   });
   if (!res.ok) return res as ApiResult<{ responses: LiveResponse[]; session: LiveSession | null }>;
@@ -130,7 +152,7 @@ export const clearLiveResponses = async (
   classroom: string,
   activityId: string,
 ): Promise<ApiResult<unknown>> =>
-  post({ action: 'liveClear', teacherKey, classroom, activityId });
+  post({ action: 'liveClear', teacherKey, classroom: normalizeRoom(classroom), activityId });
 
 /** ดึงภาพ SOS ที่นักเรียนส่งมา คืนค่าเป็น data URL พร้อมแสดงบนจอ */
 export const fetchSosImage = async (
@@ -157,7 +179,7 @@ export const pollLiveSession = async (
   get<{ session: LiveSession | null }>({
     action: 'livePoll',
     classSecret: SYNC_CONFIG.classSecret,
-    classroom,
+    classroom: normalizeRoom(classroom),
   });
 
 /** ส่งคำตอบเข้ากิจกรรมที่เปิดอยู่ */
@@ -168,7 +190,7 @@ export const submitLiveResponse = async (
   post<{ imageId?: string }>({
     action: 'liveRespond',
     classSecret: SYNC_CONFIG.classSecret,
-    response,
+    response: { ...response, classroom: normalizeRoom(response.classroom) },
     image,
   });
 

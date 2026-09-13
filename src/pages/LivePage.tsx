@@ -18,6 +18,7 @@ import {
   STUDENT_IDLE_POLL_MS,
   STUDENT_POLL_MS,
   isLiveEnabled,
+  normalizeRoom,
   loadIdentity,
   pollLiveSession,
   saveIdentity,
@@ -300,6 +301,14 @@ export const LivePage = () => {
             </p>
             <p className="mt-1 text-xs leading-relaxed text-slate-600">
               ไม่ต้องปิดหน้านี้ พอครูเปิดแล้วโจทย์จะขึ้นเองภายในไม่กี่วินาที
+            </p>
+            <p className="mx-auto mt-3 max-w-sm rounded-2xl border-2 border-slate-200 bg-white px-3.5 py-2.5 text-xs leading-relaxed text-slate-600">
+              เครื่องนี้ลงทะเบียนไว้ที่ห้อง{' '}
+              <strong className="font-mono text-sm text-slate-800">
+                {normalizeRoom(identity.classroom)}
+              </strong>
+              <br />
+              ถ้าครูประกาศรหัสห้องไม่ตรงกับนี้ ให้กด &quot;เปลี่ยนชื่อผู้ตอบ&quot; แล้วกรอกใหม่
             </p>
           </div>
         )}

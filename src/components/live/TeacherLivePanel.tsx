@@ -18,6 +18,7 @@ import {
   clearLiveResponses,
   closeLiveActivity,
   fetchLiveResponses,
+  normalizeRoom,
   startLiveActivity,
 } from '../../utils/live';
 import { LiveResultView, ResponderCounter, liveResponsesToCsv } from './TeacherViews';
@@ -240,6 +241,18 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
           <p className="mb-3 flex items-start gap-2 rounded-2xl border-2 border-bubble-200 bg-bubble-50 px-3.5 py-2.5 text-sm leading-relaxed text-bubble-900">
             <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
             {error}
+          </p>
+        )}
+
+        {/* ประกาศรหัสห้องให้ตรงกันทั้งห้อง เป็นสาเหตุอันดับหนึ่งที่นักเรียนไม่เห็นกิจกรรม */}
+        {classroom.trim() && (
+          <p className="mb-3 rounded-2xl border-2 border-dashed border-mint-300 bg-mint-50/70 px-3.5 py-2.5 text-sm leading-relaxed text-mint-900">
+            บอกนักเรียนให้กรอกห้องเรียนว่า{' '}
+            <strong className="rounded-lg bg-white px-2 py-0.5 font-mono text-base text-slate-800">
+              {normalizeRoom(classroom)}
+            </strong>{' '}
+            ระบบมองข้ามช่องว่าง คำนำหน้า &quot;ม.&quot; และขีดกลางให้แล้ว
+            ดังนั้น ม.5/1 กับ 5/1 กับ ม.5-1 ถือเป็นห้องเดียวกัน
           </p>
         )}
 
