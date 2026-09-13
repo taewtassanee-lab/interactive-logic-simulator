@@ -19,6 +19,7 @@ import { Button, Card, EmptyState, Pill, ProgressBar } from '../components/Ui';
 import { formatThaiDateTime } from '../utils/format';
 import { TeacherLivePanel } from '../components/live/TeacherLivePanel';
 import { BigTimer, NamePicker } from '../components/live/ClassTools';
+import { ActivityRecords } from '../components/live/ActivityRecords';
 import {
   deletePairRow,
   fetchDashboard,
@@ -27,11 +28,13 @@ import {
   type ProgressRow,
 } from '../utils/sync';
 
-type DashboardView = 'summary' | 'live' | 'tools';
+type DashboardView = 'summary' | 'live' | 'records' | 'tools';
 
 const DASHBOARD_VIEWS: { id: DashboardView; label: string }[] = [
   { id: 'summary', label: 'สรุปผลรายคู่' },
   { id: 'live', label: 'ห้องกิจกรรมสด' },
+  // แยกจากห้องกิจกรรมสด เพราะใช้คนละเวลา ห้องสดใช้ตอนสอน ส่วนนี้ใช้ตอนเก็บหลักฐานหลังสอน
+  { id: 'records', label: 'บันทึกกิจกรรม' },
   { id: 'tools', label: 'เครื่องมือหน้าชั้น' },
 ];
 
@@ -345,6 +348,8 @@ export const DashboardPage = () => {
       </div>
 
       {view === 'live' && <TeacherLivePanel teacherKey={teacherKey} rows={rows} />}
+
+      {view === 'records' && <ActivityRecords teacherKey={teacherKey} rows={rows} />}
 
       {view === 'tools' && (
         <>
