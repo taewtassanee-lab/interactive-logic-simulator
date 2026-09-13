@@ -29,6 +29,9 @@ interface Props {
   rows: ProgressRow[];
 }
 
+/** จำห้องที่ครูใช้ล่าสุด จะได้ไม่ต้องพิมพ์ใหม่ทุกคาบ */
+const LAST_ROOM_KEY = 'ils_live_last_classroom';
+
 const downloadCsv = (csv: string, name: string) => {
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
   const a = document.createElement('a');
@@ -47,7 +50,13 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
     [rows],
   );
 
-  const [classroom, setClassroom] = useState('');
+  const [classroom, setClassroom] = useState(() => {
+    try {
+      return localStorage.getItem(LAST_ROOM_KEY) ?? '';
+    } catch {
+      return '';
+    }
+  });
   const [session, setSession] = useState<LiveSession | null>(null);
   const [responses, setResponses] = useState<LiveResponse[]>([]);
   const [busy, setBusy] = useState(false);
@@ -60,6 +69,16 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
   useEffect(() => {
     if (!classroom && classrooms.length) setClassroom(classrooms[0]);
   }, [classroom, classrooms]);
+
+  // จำห้องล่าสุดไว้ เพราะกิจกรรมแรกของคาบเปิดก่อนที่นักเรียนจะกรอกข้อมูลคู่
+  useEffect(() => {
+    if (!classroom.trim()) return;
+    try {
+      localStorage.setItem(LAST_ROOM_KEY, classroom.trim());
+    } catch {
+      /* เบราว์เซอร์บางเครื่องปิด localStorage ไว้ ไม่กระทบการใช้งาน */
+    }
+  }, [classroom]);
 
   const preset: LiveActivityPreset | undefined = useMemo(
     () => LIVE_ACTIVITIES.find((a) => a.id === session?.presetId),
@@ -93,8 +112,8 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
   }, [session?.open, session?.activityId, classroom]);
 
   const open = async (p: LiveActivityPreset) => {
-    if (!classroom) {
-      notify('เลือกห้องเรียนก่อนเปิดกิจกรรม', 'warn');
+    if (!classroom.trim()) {
+      notify('พิมพ์ชื่อห้องเรียนก่อนเปิดกิจกรรม เช่น ม.5/1', 'warn');
       return;
     }
     setBusy(true);
@@ -166,24 +185,26 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
         icon={<Radio className="h-5 w-5 text-bubble-600" aria-hidden="true" />}
         actions={
           <div className="flex flex-wrap items-center gap-2">
+            {/* ใช้ช่องพิมพ์ ไม่ใช่ช่องเลือก เพราะกิจกรรมแรกของคาบ (คลาวด์คำ อุ่นเครื่อง)
+                เปิดก่อนที่นักเรียนจะกรอกข้อมูลคู่ ตอนนั้นระบบจึงยังไม่รู้จักห้องใด ๆ เลย */}
             <label className="flex items-center gap-2 text-sm text-slate-600">
               ห้องเรียน
-              <select
+              <input
+                list="ils-classroom-options"
                 value={classroom}
+                placeholder="เช่น ม.5/1"
                 onChange={(e) => {
                   setClassroom(e.target.value);
                   setSession(null);
                   setResponses([]);
                 }}
-                className="rounded-xl border-2 border-slate-200 bg-white px-2.5 py-1.5 text-sm font-semibold text-slate-700"
-              >
-                {classrooms.length === 0 && <option value="">ยังไม่มีห้องเรียน</option>}
+                className="w-32 rounded-xl border-2 border-slate-200 bg-white px-2.5 py-1.5 text-sm font-semibold text-slate-700 outline-none focus:border-think-400 focus:ring-4 focus:ring-think-100"
+              />
+              <datalist id="ils-classroom-options">
                 {classrooms.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
+                  <option key={c} value={c} />
                 ))}
-              </select>
+              </datalist>
             </label>
             <Button variant="secondary" disabled={polling} onClick={() => void refresh()}>
               {polling ? (
@@ -327,7 +348,7 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
                       <Button
                         variant={active ? 'secondary' : 'primary'}
                         className="mt-2.5"
-                        disabled={busy || !classroom}
+                        disabled={busy || !classroom.trim()}
                         onClick={() => void open(a)}
                       >
                         <Play className="h-4 w-4" aria-hidden="true" />
