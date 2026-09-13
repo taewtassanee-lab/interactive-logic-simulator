@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Dices, Maximize2, Pause, Play, RotateCcw, Timer, X } from 'lucide-react';
+import { Dices, Maximize2, Pause, Play, RotateCcw, Timer } from 'lucide-react';
 import { Button, Card, EmptyState, Pill } from '../Ui';
+import { FullscreenStage } from './FullscreenStage';
 import { formatClock } from '../../utils/format';
 import type { ProgressRow } from '../../utils/sync';
 
@@ -38,6 +39,7 @@ export const NamePicker = ({ rows }: { rows: ProgressRow[] }) => {
   const [winners, setWinners] = useState<string[]>([]);
   /** ชื่อที่ถูกสุ่มไปแล้ว จะไม่ถูกสุ่มซ้ำจนกว่าจะกดล้าง เพื่อให้ทุกคนได้มีโอกาสนำเสนอ */
   const [used, setUsed] = useState<string[]>([]);
+  const [full, setFull] = useState(false);
 
   const candidates = useMemo(() => buildCandidates(rows, mode), [rows, mode]);
   const pool = candidates.filter((c) => !used.includes(c));
@@ -63,6 +65,82 @@ export const NamePicker = ({ rows }: { rows: ProgressRow[] }) => {
       }
     }, 75);
   }, [spinning, pool, count]);
+
+  /** ปุ่มสั่งงานชุดเดียวกัน ใช้ทั้งในการ์ดและบนจอฉาย */
+  const controls = (big?: boolean) => (
+    <>
+      <Button variant="purple" disabled={spinning || pool.length === 0} onClick={spin}>
+        <Dices className="h-4 w-4" aria-hidden="true" />
+        {pool.length === 0 ? 'สุ่มครบทุกคนแล้ว' : 'สุ่มเลย'}
+      </Button>
+      {used.length > 0 && (
+        <Button variant="secondary" onClick={() => setUsed([])}>
+          <RotateCcw className="h-4 w-4" aria-hidden="true" />
+          ล้างรายชื่อที่สุ่มไปแล้ว
+        </Button>
+      )}
+      <Pill tone="slate">
+        เหลือให้สุ่ม {pool.length} จาก {candidates.length}
+      </Pill>
+      {!big && candidates.length > 0 && (
+        <Button variant="ghost" onClick={() => setFull(true)}>
+          <Maximize2 className="h-4 w-4" aria-hidden="true" />
+          ฉายเต็มจอ
+        </Button>
+      )}
+    </>
+  );
+
+  /** พื้นที่แสดงผลการสุ่ม ขนาดตัวอักษรต่างกันระหว่างในการ์ดกับบนจอฉาย */
+  const stage = (big: boolean) => (
+    <div
+      className={
+        big
+          ? 'flex w-full flex-col items-center justify-center gap-4 text-center'
+          : 'flex min-h-[132px] flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-peach-200 bg-gradient-to-b from-lemon-50 to-white px-4 py-6 text-center'
+      }
+      aria-live="polite"
+    >
+      {spinning ? (
+        <p
+          className={`font-display font-bold text-peach-600 ${big ? 'animate-pulse text-[6vw] leading-tight' : 'text-2xl'}`}
+        >
+          {flash}
+        </p>
+      ) : winners.length ? (
+        winners.map((w, i) => (
+          <p
+            key={w}
+            className={`font-display font-bold text-brand-700 ${big ? 'text-[5vw] leading-tight' : 'text-2xl'}`}
+          >
+            <span className={`mr-3 text-slate-400 ${big ? 'text-[3vw]' : 'text-base'}`}>
+              {i + 1}.
+            </span>
+            {w}
+          </p>
+        ))
+      ) : (
+        <p className={big ? 'text-[2vw] text-slate-400' : 'text-sm text-slate-500'}>
+          กดปุ่ม &quot;สุ่มเลย&quot; เพื่อเริ่ม
+        </p>
+      )}
+    </div>
+  );
+
+  if (full) {
+    return (
+      <FullscreenStage
+        title="สุ่มชื่อผู้นำเสนอ"
+        headerRight={
+          <Pill tone="peach">{mode === 'pair' ? 'สุ่มเป็นคู่' : 'สุ่มรายคน'} · ครั้งละ {count}</Pill>
+        }
+        footer={controls(true)}
+        onExit={() => setFull(false)}
+      >
+        {stage(true)}
+      </FullscreenStage>
+    );
+  }
 
   return (
     <Card
@@ -116,39 +194,9 @@ export const NamePicker = ({ rows }: { rows: ProgressRow[] }) => {
             </label>
           </div>
 
-          <div
-            className="flex min-h-[132px] flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-peach-200 bg-gradient-to-b from-lemon-50 to-white px-4 py-6 text-center"
-            aria-live="polite"
-          >
-            {spinning ? (
-              <p className="font-display text-2xl font-bold text-peach-600">{flash}</p>
-            ) : winners.length ? (
-              winners.map((w, i) => (
-                <p key={w} className="font-display text-2xl font-bold text-brand-700">
-                  <span className="mr-2 text-base text-slate-400">{i + 1}.</span>
-                  {w}
-                </p>
-              ))
-            ) : (
-              <p className="text-sm text-slate-500">กดปุ่มด้านล่างเพื่อเริ่มสุ่ม</p>
-            )}
-          </div>
+          {stage(false)}
 
-          <div className="flex flex-wrap items-center gap-2">
-            <Button variant="purple" disabled={spinning || pool.length === 0} onClick={spin}>
-              <Dices className="h-4 w-4" aria-hidden="true" />
-              {pool.length === 0 ? 'สุ่มครบทุกคนแล้ว' : 'สุ่มเลย'}
-            </Button>
-            {used.length > 0 && (
-              <Button variant="secondary" onClick={() => setUsed([])}>
-                <RotateCcw className="h-4 w-4" aria-hidden="true" />
-                ล้างรายชื่อที่สุ่มไปแล้ว
-              </Button>
-            )}
-            <Pill tone="slate">
-              เหลือให้สุ่ม {pool.length} จาก {candidates.length}
-            </Pill>
-          </div>
+          <div className="flex flex-wrap items-center gap-2">{controls(false)}</div>
         </div>
       )}
     </Card>
@@ -244,30 +292,34 @@ export const BigTimer = () => {
         <RotateCcw className="h-4 w-4" aria-hidden="true" />
         ตั้งใหม่
       </Button>
-      <Button variant="ghost" onClick={() => setFull((v) => !v)}>
-        {full ? <X className="h-4 w-4" aria-hidden="true" /> : <Maximize2 className="h-4 w-4" aria-hidden="true" />}
-        {full ? 'ออกจากจอเต็ม' : 'ฉายเต็มจอ'}
-      </Button>
+      {!full && (
+        <Button variant="ghost" onClick={() => setFull(true)}>
+          <Maximize2 className="h-4 w-4" aria-hidden="true" />
+          ฉายเต็มจอ
+        </Button>
+      )}
     </div>
   );
 
   if (full) {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-white px-6">
-        <p className="font-display text-2xl font-bold text-slate-500">
-          {done ? 'หมดเวลาแล้ว' : 'เวลาที่เหลือของกิจกรรมนี้'}
-        </p>
+      <FullscreenStage
+        title={done ? 'หมดเวลาแล้ว' : 'เวลาที่เหลือของกิจกรรมนี้'}
+        footer={controls}
+        onExit={() => setFull(false)}
+      >
         {clock}
-        <div className="h-4 w-full max-w-3xl overflow-hidden rounded-full bg-slate-100">
+        <div className="mt-6 h-4 w-full max-w-4xl overflow-hidden rounded-full bg-slate-100">
           <div
             className={`h-full rounded-full transition-all duration-1000 ${
-              urgent || done ? 'bg-gradient-to-r from-peach-400 to-bubble-500' : 'bg-gradient-to-r from-brand-400 to-brand-600'
+              urgent || done
+                ? 'bg-gradient-to-r from-peach-400 to-bubble-500'
+                : 'bg-gradient-to-r from-brand-400 to-brand-600'
             }`}
             style={{ width: `${percent}%` }}
           />
         </div>
-        {controls}
-      </div>
+      </FullscreenStage>
     );
   }
 
