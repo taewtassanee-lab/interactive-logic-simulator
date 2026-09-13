@@ -15,8 +15,8 @@ import { useToast } from '../components/Toast';
 import { StudentAnswerForm, type AnswerDraft } from '../components/live/StudentForms';
 import { getPreset, TYPE_LABELS } from '../data/liveActivities';
 import {
+  STUDENT_IDLE_POLL_MS,
   STUDENT_POLL_MS,
-  STUDENT_POLL_TIMEOUT_MS,
   isLiveEnabled,
   loadIdentity,
   pollLiveSession,
@@ -56,8 +56,8 @@ export const LivePage = () => {
 
   /** เวลาที่เริ่มเห็นโจทย์ ใช้คำนวณเวลาที่ใช้ตอบเพื่อจัดอันดับ */
   const startedAt = useRef(Date.now());
-  /** เวลาที่เริ่มรอกิจกรรม ใช้หยุดถามอัตโนมัติเมื่อรอนานเกินไป */
-  const waitingSince = useRef(Date.now());
+  /** เวลาที่ตรวจหากิจกรรมล่าสุด แสดงบนหน้าจอให้นักเรียนเห็นว่าระบบยังทำงานอยู่ */
+  const [checkedAt, setCheckedAt] = useState<Date | null>(null);
 
   const preset = session ? getPreset(session.presetId) : undefined;
   const answered = Boolean(session && answeredId === session.activityId);
@@ -66,12 +66,11 @@ export const LivePage = () => {
   const check = useCallback(
     async (manual = false) => {
       if (!identity?.classroom) return;
-      if (manual) {
-        setLoading(true);
-        waitingSince.current = Date.now();
-      }
+      // แสดงวงหมุนเฉพาะตอนนักเรียนกดเอง รอบอัตโนมัติทำเงียบ ๆ ไม่ให้จอกระพริบ
+      if (manual) setLoading(true);
       const res = await pollLiveSession(identity.classroom);
       setLoading(false);
+      setCheckedAt(new Date());
       if (!res.ok) {
         setError(res.error ?? 'ตรวจสอบกิจกรรมไม่สำเร็จ');
         return;
@@ -82,7 +81,6 @@ export const LivePage = () => {
         if (next && next.activityId !== prev?.activityId) {
           // เจอกิจกรรมใหม่ เริ่มจับเวลาตอบใหม่
           startedAt.current = Date.now();
-          setEditing(false);
         }
         return next;
       });
@@ -98,16 +96,31 @@ export const LivePage = () => {
     if (identity?.classroom) void checkRef.current(true);
   }, [identity?.classroom]);
 
-  // ถามซ้ำเฉพาะตอนยังไม่ได้ตอบ และหยุดเองเมื่อรอนานเกินกำหนด
+  /**
+   * ตรวจหากิจกรรมใหม่ตลอดเวลาที่เปิดหน้านี้อยู่ ไม่มีการหยุดเองเงียบ ๆ
+   * ตอนยังไม่ได้ตอบจะถามถี่เพราะนักเรียนกำลังรอโจทย์
+   * ตอบแล้วยังถามต่อแต่ห่างขึ้น เพื่อให้กิจกรรมถัดไปที่ครูเปิดเด้งขึ้นเองโดยไม่ต้องกดปุ่ม
+   */
   useEffect(() => {
-    if (!identity?.classroom || answered) return;
+    if (!identity?.classroom) return;
+    const every = answered ? STUDENT_IDLE_POLL_MS : STUDENT_POLL_MS;
     const id = window.setInterval(() => {
+      // แท็บถูกซ่อนอยู่ไม่ต้องถาม แล้วค่อยไล่ให้ทันตอนกลับมา
       if (document.hidden) return;
-      if (Date.now() - waitingSince.current > STUDENT_POLL_TIMEOUT_MS) return;
       void checkRef.current();
-    }, STUDENT_POLL_MS);
+    }, every);
     return () => window.clearInterval(id);
   }, [identity?.classroom, answered]);
+
+  // กลับมาที่แท็บนี้เมื่อไร ตรวจให้ทันทีโดยไม่ต้องรอรอบถัดไป
+  useEffect(() => {
+    if (!identity?.classroom) return;
+    const onVisible = () => {
+      if (!document.hidden) void checkRef.current();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [identity?.classroom]);
 
   const send = async (draft: AnswerDraft) => {
     if (!session || !identity) return;
@@ -252,14 +265,41 @@ export const LivePage = () => {
           </p>
         )}
 
+        {/* บอกให้เห็นชัดว่าระบบยังตรวจหากิจกรรมอยู่ตลอด ไม่ได้ค้าง */}
+        <p className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
+          <span className="inline-flex items-center gap-1.5 font-semibold text-mint-700">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-mint-500" aria-hidden="true" />
+            เชื่อมต่ออยู่
+          </span>
+          <span>
+            ตรวจหากิจกรรมใหม่อัตโนมัติทุก {(answered ? STUDENT_IDLE_POLL_MS : STUDENT_POLL_MS) / 1000} วินาที
+          </span>
+          {checkedAt && (
+            <span>
+              · ตรวจล่าสุด{' '}
+              {checkedAt.toLocaleTimeString('th-TH', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+              })}{' '}
+              น.
+            </span>
+          )}
+        </p>
+
         {!session && (
           <div className="rounded-2xl border-2 border-dashed border-think-200 bg-think-50/70 px-4 py-6 text-center">
+            <span
+              className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-think-100"
+              aria-hidden="true"
+            >
+              <span className="h-3 w-3 animate-ping rounded-full bg-think-500" />
+            </span>
             <p className="font-display text-sm font-bold text-think-900">
-              ตอนนี้ครูยังไม่ได้เปิดกิจกรรม
+              กำลังรอครูเปิดกิจกรรม
             </p>
             <p className="mt-1 text-xs leading-relaxed text-slate-600">
-              เมื่อครูบอกว่าเปิดแล้ว ให้กดปุ่ม &quot;ดูกิจกรรมล่าสุด&quot; ด้านบน
-              ระบบจะตรวจให้เองเป็นระยะด้วย
+              ไม่ต้องปิดหน้านี้ พอครูเปิดแล้วโจทย์จะขึ้นเองภายในไม่กี่วินาที
             </p>
           </div>
         )}

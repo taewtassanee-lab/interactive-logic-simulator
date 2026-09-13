@@ -96,15 +96,34 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
         return;
       }
       setError('');
-      setResponses(res.data?.responses ?? []);
-      if (res.data?.session) setSession(res.data.session);
+      const live = res.data?.session ?? null;
+      if (live) setSession(live);
+
+      /**
+       * ถ้าถามโดยยังไม่รู้รหัสกิจกรรม (เช่นเพิ่งเปิดหน้ามา) เซิร์ฟเวอร์จะส่งคำตอบของห้องนี้มาทั้งหมด
+       * จึงต้องกรองเหลือเฉพาะกิจกรรมที่กำลังเปิดอยู่ ไม่งั้นคำตอบของกิจกรรมก่อนหน้าจะปนขึ้นจอ
+       */
+      const all = res.data?.responses ?? [];
+      const wanted = session?.activityId || live?.activityId || '';
+      setResponses(wanted ? all.filter((r) => r.activityId === wanted) : all);
     },
     [classroom, teacherKey, session?.activityId],
   );
 
-  /** จอครูมีเครื่องเดียว จึงถามหาคำตอบใหม่ถี่ได้โดยไม่กระทบโควตา */
   const refreshRef = useRef(refresh);
   refreshRef.current = refresh;
+
+  /**
+   * ดึงกิจกรรมที่ค้างอยู่จากเซิร์ฟเวอร์ทุกครั้งที่เปิดหน้านี้หรือเปลี่ยนห้อง
+   * ถ้าไม่ทำ ครูที่สลับไปดูแท็บอื่นแล้วกลับมา หรือเผลอรีเฟรชหน้า
+   * จะเห็นว่า "ยังไม่ได้เปิดกิจกรรม" ทั้งที่นักเรียนกำลังตอบอยู่
+   */
+  useEffect(() => {
+    if (!classroom.trim() || !teacherKey) return;
+    void refreshRef.current(true);
+  }, [classroom, teacherKey]);
+
+  /** จอครูมีเครื่องเดียว จึงถามหาคำตอบใหม่ถี่ได้โดยไม่กระทบโควตา */
   useEffect(() => {
     if (!session?.open || !classroom) return;
     const id = window.setInterval(() => void refreshRef.current(true), TEACHER_POLL_MS);
