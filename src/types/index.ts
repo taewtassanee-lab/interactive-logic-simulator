@@ -4,6 +4,7 @@ export type TabId =
   | 'start'
   | 'simulator'
   | 'knowledge'
+  | 'live'
   | 'worksheet'
   | 'summary'
   | 'teacher'

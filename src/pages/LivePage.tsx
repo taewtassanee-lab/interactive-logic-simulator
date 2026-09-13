@@ -1,0 +1,324 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  CircleCheck,
+  Hand,
+  Loader2,
+  PencilLine,
+  RefreshCw,
+  Radio,
+  TriangleAlert,
+  UserRound,
+} from 'lucide-react';
+import { Button, Card, Pill, TextField } from '../components/Ui';
+import { useApp } from '../context/AppContext';
+import { useToast } from '../components/Toast';
+import { StudentAnswerForm, type AnswerDraft } from '../components/live/StudentForms';
+import { getPreset, TYPE_LABELS } from '../data/liveActivities';
+import {
+  STUDENT_POLL_MS,
+  STUDENT_POLL_TIMEOUT_MS,
+  isLiveEnabled,
+  loadIdentity,
+  pollLiveSession,
+  saveIdentity,
+  submitLiveResponse,
+} from '../utils/live';
+import type { LiveIdentity, LiveSession } from '../types/live';
+
+/**
+ * หน้ากิจกรรมสดของนักเรียน
+ *
+ * ใช้ได้ทั้งบนเครื่องหลักและไอแพดเครื่องผู้ช่วย เพราะกิจกรรมสดเป็นการตอบรายบุคคล
+ * ไม่ใช่ข้อมูลของคู่ จึงไม่ทำให้ข้อมูลในชีตของคู่เขียนทับกัน
+ *
+ * เครื่องนักเรียนจะถามหากิจกรรมใหม่เฉพาะตอนยังไม่ได้ตอบเท่านั้น
+ * เพื่อประหยัดโควตาการประมวลผลของ Apps Script เมื่อเปิดพร้อมกันทั้งห้อง
+ */
+export const LivePage = () => {
+  const { state } = useApp();
+  const { notify } = useToast();
+
+  const [identity, setIdentity] = useState<LiveIdentity | null>(() => loadIdentity());
+  const [draftId, setDraftId] = useState<LiveIdentity>(() => ({
+    classroom: loadIdentity()?.classroom || state.pair.classroom,
+    studentName: loadIdentity()?.studentName || '',
+    studentNumber: loadIdentity()?.studentNumber || '',
+    pairCode: loadIdentity()?.pairCode || state.pair.pairCode,
+  }));
+
+  const [session, setSession] = useState<LiveSession | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
+  /** รหัสกิจกรรมที่ตอบไปแล้วบนเครื่องนี้ ใช้ตัดสินว่าจะแสดงฟอร์มหรือหน้าขอบคุณ */
+  const [answeredId, setAnsweredId] = useState('');
+  const [editing, setEditing] = useState(false);
+
+  /** เวลาที่เริ่มเห็นโจทย์ ใช้คำนวณเวลาที่ใช้ตอบเพื่อจัดอันดับ */
+  const startedAt = useRef(Date.now());
+  /** เวลาที่เริ่มรอกิจกรรม ใช้หยุดถามอัตโนมัติเมื่อรอนานเกินไป */
+  const waitingSince = useRef(Date.now());
+
+  const preset = session ? getPreset(session.presetId) : undefined;
+  const answered = Boolean(session && answeredId === session.activityId);
+  const showForm = Boolean(session?.open && preset && (!answered || editing));
+
+  const check = useCallback(
+    async (manual = false) => {
+      if (!identity?.classroom) return;
+      if (manual) {
+        setLoading(true);
+        waitingSince.current = Date.now();
+      }
+      const res = await pollLiveSession(identity.classroom);
+      setLoading(false);
+      if (!res.ok) {
+        setError(res.error ?? 'ตรวจสอบกิจกรรมไม่สำเร็จ');
+        return;
+      }
+      setError('');
+      const next = res.data?.session ?? null;
+      setSession((prev) => {
+        if (next && next.activityId !== prev?.activityId) {
+          // เจอกิจกรรมใหม่ เริ่มจับเวลาตอบใหม่
+          startedAt.current = Date.now();
+          setEditing(false);
+        }
+        return next;
+      });
+    },
+    [identity?.classroom],
+  );
+
+  const checkRef = useRef(check);
+  checkRef.current = check;
+
+  // ถามครั้งแรกทันทีที่รู้ว่าเป็นใคร
+  useEffect(() => {
+    if (identity?.classroom) void checkRef.current(true);
+  }, [identity?.classroom]);
+
+  // ถามซ้ำเฉพาะตอนยังไม่ได้ตอบ และหยุดเองเมื่อรอนานเกินกำหนด
+  useEffect(() => {
+    if (!identity?.classroom || answered) return;
+    const id = window.setInterval(() => {
+      if (document.hidden) return;
+      if (Date.now() - waitingSince.current > STUDENT_POLL_TIMEOUT_MS) return;
+      void checkRef.current();
+    }, STUDENT_POLL_MS);
+    return () => window.clearInterval(id);
+  }, [identity?.classroom, answered]);
+
+  const send = async (draft: AnswerDraft) => {
+    if (!session || !identity) return;
+    setSending(true);
+    const res = await submitLiveResponse(
+      {
+        activityId: session.activityId,
+        classroom: identity.classroom,
+        studentName: identity.studentName,
+        studentNumber: identity.studentNumber,
+        pairCode: identity.pairCode,
+        answer: draft.answer,
+        score: draft.score,
+        total: draft.total,
+        seconds: Math.round((Date.now() - startedAt.current) / 1000),
+      },
+      draft.image,
+    );
+    setSending(false);
+    if (!res.ok) {
+      setError(res.error ?? 'ส่งคำตอบไม่สำเร็จ');
+      notify(res.error ?? 'ส่งคำตอบไม่สำเร็จ', 'error');
+      return;
+    }
+    setError('');
+    setAnsweredId(session.activityId);
+    setEditing(false);
+    notify('ส่งคำตอบเรียบร้อยแล้ว', 'success');
+  };
+
+  /* ---------- ยังไม่ได้ตั้งค่าที่เก็บข้อมูล ---------- */
+  if (!isLiveEnabled()) {
+    return (
+      <Card
+        title="กิจกรรมสดยังไม่พร้อมใช้งาน"
+        subtitle="ต้องตั้งค่าที่เก็บข้อมูลก่อน"
+        icon={<Radio className="h-5 w-5 text-slate-400" aria-hidden="true" />}
+      >
+        <p className="text-sm leading-relaxed text-slate-600">
+          ระบบยังไม่ได้เชื่อมต่อกับที่เก็บข้อมูลของครู จึงยังรับคำตอบกิจกรรมสดไม่ได้
+          ให้ครูตั้งค่าตามคู่มือติดตั้งแดชบอร์ดก่อน
+        </p>
+      </Card>
+    );
+  }
+
+  /* ---------- ยังไม่รู้ว่าเป็นใคร ---------- */
+  if (!identity) {
+    const ready = draftId.classroom.trim() && draftId.studentName.trim();
+    return (
+      <Card
+        title="เข้าร่วมกิจกรรมสด"
+        subtitle="กรอกครั้งเดียว เครื่องนี้จะจำไว้ให้ตลอดคาบ"
+        icon={<UserRound className="h-5 w-5 text-brand-600" aria-hidden="true" />}
+      >
+        <div className="grid gap-3 sm:grid-cols-2">
+          <TextField
+            label="ห้องเรียน"
+            required
+            value={draftId.classroom}
+            onChange={(v) => setDraftId({ ...draftId, classroom: v })}
+            placeholder="เช่น ม.5/1"
+            hint="ต้องตรงกับห้องที่ครูเลือกไว้บนจอหน้าชั้น"
+          />
+          <TextField
+            label="ชื่อ-สกุลของฉัน"
+            required
+            value={draftId.studentName}
+            onChange={(v) => setDraftId({ ...draftId, studentName: v })}
+            placeholder="เช่น สมชาย ใจดี"
+          />
+          <TextField
+            label="เลขที่"
+            value={draftId.studentNumber}
+            onChange={(v) => setDraftId({ ...draftId, studentNumber: v })}
+            inputMode="numeric"
+            placeholder="เช่น 12"
+          />
+          <TextField
+            label="รหัสคู่ (ถ้ามี)"
+            value={draftId.pairCode}
+            onChange={(v) => setDraftId({ ...draftId, pairCode: v })}
+            placeholder="เช่น Pair01"
+          />
+        </div>
+        <Button
+          variant="primary"
+          className="mt-4"
+          disabled={!ready}
+          onClick={() => {
+            const clean: LiveIdentity = {
+              classroom: draftId.classroom.trim(),
+              studentName: draftId.studentName.trim(),
+              studentNumber: draftId.studentNumber.trim(),
+              pairCode: draftId.pairCode.trim(),
+            };
+            saveIdentity(clean);
+            setIdentity(clean);
+          }}
+        >
+          <Hand className="h-4 w-4" aria-hidden="true" />
+          เข้าร่วมกิจกรรม
+        </Button>
+      </Card>
+    );
+  }
+
+  /* ---------- เข้าร่วมแล้ว ---------- */
+  return (
+    <div className="space-y-4">
+      <Card
+        title="กิจกรรมสด"
+        subtitle={`${identity.studentName} · ห้อง ${identity.classroom}`}
+        icon={<Radio className="h-5 w-5 text-bubble-600" aria-hidden="true" />}
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Button variant="secondary" disabled={loading} onClick={() => void check(true)}>
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <RefreshCw className="h-4 w-4" aria-hidden="true" />
+              )}
+              ดูกิจกรรมล่าสุด
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setIdentity(null);
+                setSession(null);
+                setAnsweredId('');
+              }}
+            >
+              เปลี่ยนชื่อผู้ตอบ
+            </Button>
+          </div>
+        }
+      >
+        {error && (
+          <p className="mb-3 flex items-start gap-2 rounded-2xl border-2 border-bubble-200 bg-bubble-50 px-3.5 py-2.5 text-sm leading-relaxed text-bubble-900">
+            <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            {error}
+          </p>
+        )}
+
+        {!session && (
+          <div className="rounded-2xl border-2 border-dashed border-think-200 bg-think-50/70 px-4 py-6 text-center">
+            <p className="font-display text-sm font-bold text-think-900">
+              ตอนนี้ครูยังไม่ได้เปิดกิจกรรม
+            </p>
+            <p className="mt-1 text-xs leading-relaxed text-slate-600">
+              เมื่อครูบอกว่าเปิดแล้ว ให้กดปุ่ม &quot;ดูกิจกรรมล่าสุด&quot; ด้านบน
+              ระบบจะตรวจให้เองเป็นระยะด้วย
+            </p>
+          </div>
+        )}
+
+        {session && (
+          <div>
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <Pill tone={session.open ? 'mint' : 'slate'}>
+                {session.open ? 'กำลังเปิดรับคำตอบ' : 'ปิดรับคำตอบแล้ว'}
+              </Pill>
+              <Pill tone="think">{TYPE_LABELS[session.type] ?? session.type}</Pill>
+            </div>
+            <h2 className="font-display text-lg font-bold text-slate-800">{session.title}</h2>
+            <p className="mt-1 text-sm leading-relaxed text-slate-600">{session.prompt}</p>
+          </div>
+        )}
+      </Card>
+
+      {showForm && preset && (
+        <Card
+          title={editing ? 'แก้ไขคำตอบของฉัน' : 'คำตอบของฉัน'}
+          subtitle={sending ? 'กำลังส่ง...' : 'ส่งแล้วแก้ไขได้ ระบบจะเก็บคำตอบล่าสุดไว้'}
+          icon={<PencilLine className="h-5 w-5 text-brand-600" aria-hidden="true" />}
+        >
+          <StudentAnswerForm preset={preset} disabled={sending} onSubmit={(d) => void send(d)} />
+        </Card>
+      )}
+
+      {answered && !editing && session && (
+        <Card
+          title="ส่งคำตอบเรียบร้อยแล้ว"
+          subtitle="ดูผลรวมของทั้งห้องได้จากจอหน้าชั้นเรียน"
+          icon={<CircleCheck className="h-5 w-5 text-mint-600" aria-hidden="true" />}
+        >
+          <p className="text-sm leading-relaxed text-slate-600">
+            คำตอบของ <strong>{identity.studentName}</strong> ถูกบันทึกแล้ว
+            ถ้าต้องการเปลี่ยนคำตอบ กดปุ่มด้านล่างได้เลย ระบบจะเก็บคำตอบล่าสุดไว้แทนของเดิม
+          </p>
+          {session.open && (
+            <Button variant="secondary" className="mt-3" onClick={() => setEditing(true)}>
+              <PencilLine className="h-4 w-4" aria-hidden="true" />
+              แก้ไขคำตอบ
+            </Button>
+          )}
+        </Card>
+      )}
+
+      {session && !session.open && !answered && (
+        <Card
+          title="ครูปิดรับคำตอบของกิจกรรมนี้แล้ว"
+          subtitle="รอกิจกรรมถัดไปได้เลย"
+          icon={<TriangleAlert className="h-5 w-5 text-peach-600" aria-hidden="true" />}
+        >
+          <p className="text-sm leading-relaxed text-slate-600">
+            กิจกรรมนี้ปิดรับคำตอบไปแล้ว เมื่อครูเปิดกิจกรรมถัดไป
+            ให้กดปุ่ม &quot;ดูกิจกรรมล่าสุด&quot; ด้านบนเพื่อเข้าร่วม
+          </p>
+        </Card>
+      )}
+    </div>
+  );
+};

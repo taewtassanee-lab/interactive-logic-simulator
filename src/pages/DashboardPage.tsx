@@ -17,6 +17,8 @@ import {
 import { useToast } from '../components/Toast';
 import { Button, Card, EmptyState, Pill, ProgressBar } from '../components/Ui';
 import { formatThaiDateTime } from '../utils/format';
+import { TeacherLivePanel } from '../components/live/TeacherLivePanel';
+import { BigTimer, NamePicker } from '../components/live/ClassTools';
 import {
   deletePairRow,
   fetchDashboard,
@@ -24,6 +26,14 @@ import {
   rowsToCsv,
   type ProgressRow,
 } from '../utils/sync';
+
+type DashboardView = 'summary' | 'live' | 'tools';
+
+const DASHBOARD_VIEWS: { id: DashboardView; label: string }[] = [
+  { id: 'summary', label: 'สรุปผลรายคู่' },
+  { id: 'live', label: 'ห้องกิจกรรมสด' },
+  { id: 'tools', label: 'เครื่องมือหน้าชั้น' },
+];
 
 const TEACHER_KEY_STORAGE = 'ils_teacher_key';
 const AUTO_REFRESH_MS = 30000;
@@ -80,6 +90,8 @@ export const DashboardPage = () => {
   const [lastLoadedAt, setLastLoadedAt] = useState<Date | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [keyword, setKeyword] = useState('');
+  /** มุมมองย่อยของแดชบอร์ด แยกส่วนสรุปผล กิจกรรมสด และเครื่องมือหน้าชั้นออกจากกัน */
+  const [view, setView] = useState<DashboardView>('summary');
   /** แถวที่กำลังรอการยืนยันลบ null = ไม่มีหน้าต่างยืนยันเปิดอยู่ */
   const [pendingDelete, setPendingDelete] = useState<ProgressRow | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -311,6 +323,38 @@ export const DashboardPage = () => {
   /* ---------- แดชบอร์ด ---------- */
   return (
     <div className="space-y-4">
+      {/* แถบสลับมุมมอง แยกงาน 3 อย่างของครูออกจากกันไม่ให้หน้าจอยาวเกินไป */}
+      <div className="flex gap-1.5 overflow-x-auto" role="tablist" aria-label="มุมมองแดชบอร์ด">
+        {DASHBOARD_VIEWS.map((v) => (
+          <button
+            key={v.id}
+            type="button"
+            role="tab"
+            aria-selected={view === v.id}
+            onClick={() => setView(v.id)}
+            className={`shrink-0 rounded-2xl px-4 py-2 font-display text-sm font-semibold transition-all duration-150 active:translate-y-[2px] ${
+              view === v.id
+                ? 'bg-gradient-to-b from-think-400 to-think-600 text-white'
+                : 'bg-white text-slate-500 hover:text-think-600'
+            }`}
+            style={{ boxShadow: view === v.id ? '0 4px 0 0 #6b4fbb' : '0 3px 0 0 #e2e8f0' }}
+          >
+            {v.label}
+          </button>
+        ))}
+      </div>
+
+      {view === 'live' && <TeacherLivePanel teacherKey={teacherKey} rows={rows} />}
+
+      {view === 'tools' && (
+        <>
+          <BigTimer />
+          <NamePicker rows={rows} />
+        </>
+      )}
+
+      {view === 'summary' && (
+        <>
       <Card
         title="แดชบอร์ดสรุปผลการทำกิจกรรม"
         subtitle={
@@ -505,6 +549,8 @@ export const DashboardPage = () => {
           </div>
         )}
       </Card>
+        </>
+      )}
 
       {/* ---------- หน้าต่างยืนยันก่อนลบ ---------- */}
       {pendingDelete && (

@@ -5,6 +5,7 @@ import {
   GraduationCap,
   LayoutDashboard,
   Library,
+  Radio,
   Lock,
   PlayCircle,
   Rocket,
@@ -22,6 +23,7 @@ import { SummaryPage } from './pages/SummaryPage';
 import { TeacherGuidePage } from './pages/TeacherGuidePage';
 import { DashboardPage } from './pages/DashboardPage';
 import { KnowledgePage } from './pages/KnowledgePage';
+import { LivePage } from './pages/LivePage';
 import { TEACHER_INFO } from './config';
 import type { TabId } from './types';
 
@@ -38,6 +40,8 @@ const TABS: TabDef[] = [
   // คลังความรู้มาก่อนจำลองตรรกะ ให้ผู้เรียนอ่านทำความเข้าใจก่อนลงมือทำ
   { id: 'knowledge', label: 'คลังความรู้', icon: Library, requiresStart: false },
   { id: 'simulator', label: 'จำลองตรรกะ', icon: PlayCircle, requiresStart: true },
+  // กิจกรรมสดเป็นการตอบรายบุคคล ไอแพดเครื่องผู้ช่วยจึงเข้าร่วมได้ด้วย ไม่ต้องกดเริ่มกิจกรรมก่อน
+  { id: 'live', label: 'กิจกรรมสด', icon: Radio, requiresStart: false },
   { id: 'worksheet', label: 'ใบงานดิจิทัล', icon: FileText, requiresStart: true },
   { id: 'summary', label: 'สรุปและส่งงาน', icon: ClipboardList, requiresStart: true },
   { id: 'teacher', label: 'คู่มือครู', icon: GraduationCap, requiresStart: false },
@@ -119,6 +123,7 @@ const App = () => {
         {tab === 'start' && <StartPage onStarted={() => setTab('simulator')} />}
         {tab === 'simulator' && <SimulatorPage />}
         {tab === 'knowledge' && <KnowledgePage />}
+        {tab === 'live' && <LivePage />}
         {tab === 'worksheet' && <WorksheetPage />}
         {tab === 'summary' && <SummaryPage onNavigate={goTo} />}
         {tab === 'teacher' && <TeacherGuidePage />}
