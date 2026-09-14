@@ -155,12 +155,15 @@ export const BugBuddy = ({ size = 64, className = '' }: { size?: number; classNa
 
 /* ---------- ลูกบาศก์ไอโซเมตริก แทนข้อสอบ 1 ข้อใน Array ---------- */
 
-type CubeTone = 'brand' | 'think' | 'mint' | 'ghost';
+type CubeTone = 'brand' | 'think' | 'mint' | 'peach' | 'bubble' | 'lemon' | 'ghost';
 
 const CUBE_COLORS: Record<CubeTone, { top: string; left: string; right: string; text: string }> = {
   brand: { top: '#9db4ff', left: '#5b73f8', right: '#3641c7', text: '#ffffff' },
   think: { top: '#d6adff', left: '#a855f7', right: '#7c28c4', text: '#ffffff' },
   mint: { top: '#78e7b6', left: '#1abb79', right: '#0e7851', text: '#ffffff' },
+  peach: { top: '#ffb782', left: '#fb7c25', right: '#c4520c', text: '#ffffff' },
+  bubble: { top: '#ff9ec4', left: '#f2497f', right: '#bb1c56', text: '#ffffff' },
+  lemon: { top: '#ffd75e', left: '#f0ab08', right: '#b87706', text: '#5a3a01' },
   ghost: { top: '#e2e8f0', left: '#cbd5e1', right: '#94a3b8', text: '#64748b' },
 };
 

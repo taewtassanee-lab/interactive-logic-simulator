@@ -1,9 +1,23 @@
 import { useState } from 'react';
-import { Dices, Eraser, Plus, RotateCcw, Trash2 } from 'lucide-react';
-import { Button, Card, Pill } from './Ui';
+import { Dices, Eraser, Lightbulb, Plus, RotateCcw, Trash2 } from 'lucide-react';
+import { Button, Card } from './Ui';
 import { IsoCube } from './Illustrations';
 
 const INITIAL = ['Q1', 'Q2', 'Q3', 'Q4'];
+
+/**
+ * ชุดสีของลูกบาศก์ ผูกกับ "ตัวข้อสอบ" ไม่ใช่ "ตำแหน่ง"
+ *
+ * ทำแบบนี้เพราะเป็นหัวใจของบทเรียน เมื่อลบช่องหน้าออก ช่องหลังจะเลื่อนขึ้นมาแทน
+ * ถ้าทุกลูกสีเดียวกันผู้เรียนจะไม่เห็นว่าอะไรขยับ เห็นแค่จำนวนลูกลดลง
+ * พอแต่ละข้อสอบมีสีประจำตัว ผู้เรียนจะเห็นสีของ Q2 เลื่อนมาอยู่ตำแหน่ง [0] ชัดเจน
+ */
+const CUBE_TONES = ['brand', 'bubble', 'lemon', 'mint', 'peach', 'think'] as const;
+
+const toneOf = (code: string): (typeof CUBE_TONES)[number] => {
+  const n = Number(code.replace(/\D/g, ''));
+  return CUBE_TONES[(Number.isFinite(n) ? n - 1 : 0) % CUBE_TONES.length];
+};
 const MAX_ITEMS = 9;
 
 /** หาชื่อข้อสอบถัดไปที่ยังไม่ถูกใช้ กันไม่ให้เกิดชื่อซ้ำซึ่งทำให้ผู้เรียนสับสน */
@@ -88,20 +102,57 @@ export const ArrayPlayground = () => {
       icon={<Dices className="h-5 w-5 text-think-600" aria-hidden="true" />}
     >
       {/* ---------- ค่าปัจจุบัน ---------- */}
-      <div className="mb-3 flex flex-wrap items-center gap-2">
-        <Pill tone="brand">Array.Width = {items.length}</Pill>
-        <Pill tone={items.length ? 'think' : 'slate'}>
-          Index ที่ใช้ได้: {items.length ? `0 ถึง ${items.length - 1}` : 'ไม่มี'}
-        </Pill>
-        {picked !== null && items[picked] !== undefined && (
-          <Pill tone="mint">
-            Array.At({picked}) = {items[picked]}
-          </Pill>
-        )}
+      <div className="mb-3 grid gap-2 sm:grid-cols-3">
+        <div
+          className="rounded-2xl border-2 border-brand-200 bg-gradient-to-b from-brand-50 to-white px-3.5 py-2.5"
+          style={{ boxShadow: '0 4px 0 0 rgba(99,102,241,0.22)' }}
+        >
+          <p className="text-[11px] font-bold uppercase tracking-wide text-brand-700">Array.Width</p>
+          <p className="font-display text-2xl font-bold leading-tight text-brand-800">
+            {items.length}
+          </p>
+        </div>
+        <div
+          className="rounded-2xl border-2 border-think-200 bg-gradient-to-b from-think-50 to-white px-3.5 py-2.5"
+          style={{ boxShadow: '0 4px 0 0 rgba(139,92,246,0.22)' }}
+        >
+          <p className="text-[11px] font-bold uppercase tracking-wide text-think-700">
+            Index ที่ใช้ได้
+          </p>
+          <p className="font-mono text-xl font-bold leading-tight text-think-800">
+            {items.length ? `0 – ${items.length - 1}` : 'ไม่มี'}
+          </p>
+        </div>
+        <div
+          className={`rounded-2xl border-2 px-3.5 py-2.5 transition ${
+            picked !== null && items[picked] !== undefined
+              ? 'border-mint-300 bg-gradient-to-b from-mint-50 to-white'
+              : 'border-dashed border-slate-200 bg-white'
+          }`}
+          style={{
+            boxShadow:
+              picked !== null && items[picked] !== undefined
+                ? '0 4px 0 0 rgba(16,185,129,0.22)'
+                : undefined,
+          }}
+        >
+          <p className="text-[11px] font-bold uppercase tracking-wide text-mint-700">
+            ค่าที่สุ่มได้ล่าสุด
+          </p>
+          <p
+            className={`font-mono text-xl font-bold leading-tight ${
+              picked !== null && items[picked] !== undefined ? 'text-mint-800' : 'text-slate-300'
+            }`}
+          >
+            {picked !== null && items[picked] !== undefined
+              ? `At(${picked}) = ${items[picked]}`
+              : 'ยังไม่ได้สุ่ม'}
+          </p>
+        </div>
       </div>
 
       {/* ---------- ช่องข้อมูล ---------- */}
-      <div className="mb-3 rounded-[1.25rem] border-2 border-brand-200 bg-gradient-to-b from-brand-50 to-white p-3">
+      <div className="mb-3 rounded-[1.25rem] border-2 border-brand-200 bg-gradient-to-br from-brand-50 via-white to-bubble-50 p-4">
         {items.length === 0 ? (
           <p className="rounded-2xl border-2 border-dashed border-mint-300 bg-mint-50 px-3 py-4 text-center font-mono text-sm font-semibold text-mint-800">
             [ ] Array ว่าง — Array.Width = 0
@@ -113,7 +164,7 @@ export const ArrayPlayground = () => {
                 <IsoCube
                   label={code}
                   index={i}
-                  tone={picked === i ? 'think' : 'brand'}
+                  tone={toneOf(code)}
                   highlighted={picked === i}
                 />
                 <button
@@ -173,10 +224,21 @@ export const ArrayPlayground = () => {
         ))}
       </div>
 
-      <p className="mt-3 rounded-2xl border-2 border-dashed border-think-200 bg-think-50/70 px-3.5 py-2.5 text-xs leading-relaxed text-think-900">
-        <strong>ลองสังเกต:</strong> กด &quot;ลบ&quot; ที่ช่องแรกดู แล้วดูว่าเลข Index ของช่องที่เหลือ
-        เปลี่ยนไปอย่างไร ช่องที่อยู่ข้างหลังจะเลื่อนขึ้นมาแทนที่เสมอ นี่คือเหตุผลที่ต้องอ่านค่าออกมาก่อนแล้วจึงลบ
-      </p>
+      <div
+        className="mt-3 rounded-2xl border-2 border-lemon-300 bg-gradient-to-r from-lemon-50 via-peach-50 to-white px-4 py-3"
+        style={{ boxShadow: '0 4px 0 0 rgba(245,158,11,0.25)' }}
+      >
+        <p className="mb-1 flex items-center gap-1.5 font-display text-xs font-bold uppercase tracking-wide text-peach-700">
+          <Lightbulb className="h-4 w-4" aria-hidden="true" />
+          ลองสังเกตดู
+        </p>
+        <p className="text-[15px] leading-relaxed text-slate-700">
+          กด <strong className="text-bubble-700">ลบ</strong> ที่ช่องแรกดู
+          แล้วสังเกตว่า<strong>สีของลูกบาศก์</strong>เลื่อนตำแหน่งอย่างไร
+          ช่องที่อยู่ข้างหลังจะเลื่อนขึ้นมาแทนที่เสมอ และเลข Index จะเปลี่ยนตาม
+          นี่คือเหตุผลที่ต้องอ่านค่าออกมาเก็บไว้ก่อนแล้วจึงค่อยลบ
+        </p>
+      </div>
     </Card>
   );
 };
