@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Compass, Mouse, Rocket, Send, UserCheck, Users } from 'lucide-react';
+import { Compass, ListChecks, Mouse, Rocket, Send, UserCheck, Users } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 import { useApp } from '../context/AppContext';
 import { useToast } from '../components/Toast';
@@ -15,6 +15,52 @@ interface FieldErrors {
   driverName?: string;
   navigatorName?: string;
 }
+
+/**
+ * ขั้นตอนการทำกิจกรรม 6 ขั้น พร้อมชุดสีประจำข้อ
+ *
+ * เดิมเก็บสีไว้เป็นอาร์เรย์ 5 ค่าแต่มีขั้นตอน 6 ข้อ ข้อสุดท้ายจึงไม่ได้สีพื้น
+ * กลายเป็นเลขขาวบนวงกลมขาว มองไม่เห็นเลข จับคู่ข้อความกับสีไว้ด้วยกันแบบนี้
+ * ทำให้เพิ่มหรือลดขั้นตอนแล้วสีไม่มีทางขาดอีก
+ */
+const ACTIVITY_STEPS = [
+  {
+    text: 'กรอกข้อมูลผู้เรียนและกดปุ่ม "เริ่มกิจกรรม"',
+    tone: 'from-brand-400 to-brand-600',
+    border: 'border-brand-200',
+    edge: 'rgba(99,102,241,0.35)',
+  },
+  {
+    text: 'อ่านหน้า "คลังความรู้" ให้เข้าใจ Array และ Function ก่อน',
+    tone: 'from-think-400 to-think-600',
+    border: 'border-think-200',
+    edge: 'rgba(139,92,246,0.35)',
+  },
+  {
+    text: 'เรียงบล็อกคำสั่งในหน้า "จำลองตรรกะ" แล้ว Run เพื่อดูผล',
+    tone: 'from-bubble-400 to-bubble-600',
+    border: 'border-bubble-200',
+    edge: 'rgba(236,72,153,0.32)',
+  },
+  {
+    text: 'แก้ Bug ทั้ง 2 ภารกิจให้ผ่าน',
+    tone: 'from-lemon-400 to-peach-500',
+    border: 'border-lemon-200',
+    edge: 'rgba(245,158,11,0.35)',
+  },
+  {
+    text: 'บันทึกคำตอบในหน้า "ใบงานดิจิทัล"',
+    tone: 'from-mint-400 to-mint-600',
+    border: 'border-mint-200',
+    edge: 'rgba(16,185,129,0.32)',
+  },
+  {
+    text: 'ดาวน์โหลด PDF และส่งงานพร้อมไฟล์ .capx',
+    tone: 'from-peach-400 to-peach-600',
+    border: 'border-peach-200',
+    edge: 'rgba(249,115,22,0.35)',
+  },
+] as const;
 
 export const StartPage = ({ onStarted }: { onStarted: () => void }) => {
   const { state, update, lastSavedAt } = useApp();
@@ -67,8 +113,9 @@ export const StartPage = ({ onStarted }: { onStarted: () => void }) => {
             </p>
           </div>
         </div>
-        <p className="text-sm leading-relaxed text-slate-600">
-          กิจกรรมนี้ให้นักเรียนจับคู่กันแบบ Pair Programming เพื่อเรียนรู้การทำงานของ{' '}
+        <p className="rounded-[1.25rem] border-2 border-brand-100 bg-gradient-to-br from-brand-50/80 via-white to-think-50/60 px-4 py-3.5 text-base leading-loose text-slate-700 sm:text-[17px]">
+          กิจกรรมนี้ให้นักเรียนจับคู่กันแบบ <strong className="text-brand-800">Pair Programming</strong>{' '}
+          เพื่อเรียนรู้การทำงานของ{' '}
           <Tooltip term="Array">
             ตัวแปรชุดที่เก็บข้อมูลหลายค่าไว้ในที่เดียว ในระบบนี้ใช้เก็บข้อสอบทั้ง 4 ข้อ อ้างถึงแต่ละช่องด้วยเลขตำแหน่ง
           </Tooltip>{' '}
@@ -84,28 +131,26 @@ export const StartPage = ({ onStarted }: { onStarted: () => void }) => {
         </p>
         <TeacherCard className="mt-4" />
 
-        <ol className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {[
-            'กรอกข้อมูลผู้เรียนและกดปุ่ม "เริ่มกิจกรรม"',
-            'อ่านหน้า "คลังความรู้" ให้เข้าใจ Array และ Function ก่อน',
-            'เรียงบล็อกคำสั่งในหน้า "จำลองตรรกะ" แล้ว Run เพื่อดูผล',
-            'แก้ Bug ทั้ง 2 ภารกิจให้ผ่าน',
-            'บันทึกคำตอบในหน้า "ใบงานดิจิทัล"',
-            'ดาวน์โหลด PDF และส่งงานพร้อมไฟล์ .capx',
-          ].map((step, i) => (
+        <h3 className="mt-5 flex items-center gap-2 font-display text-base font-bold text-slate-800">
+          <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-b from-brand-400 to-brand-600 text-white shadow-clay-sm">
+            <ListChecks className="h-4 w-4" aria-hidden="true" />
+          </span>
+          ขั้นตอนการทำกิจกรรม 6 ขั้น
+        </h3>
+
+        <ol className="mt-2.5 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+          {ACTIVITY_STEPS.map((step, i) => (
             <li
-              key={step}
-              className="flex items-start gap-2.5 rounded-2xl border-2 border-slate-100 bg-white px-3 py-2.5 text-sm text-slate-600"
-              style={{ boxShadow: '0 4px 0 0 rgba(203,213,225,0.5)' }}
+              key={step.text}
+              className={`flex items-start gap-3 rounded-2xl border-2 bg-white px-3.5 py-3 text-[15px] font-medium leading-relaxed text-slate-700 transition-transform duration-150 hover:-translate-y-0.5 ${step.border}`}
+              style={{ boxShadow: `0 5px 0 0 ${step.edge}` }}
             >
               <span
-                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-display text-xs font-bold text-white shadow-clay-sm ${
-                  ['bg-brand-500', 'bg-think-500', 'bg-bubble-500', 'bg-lemon-500', 'bg-mint-500'][i]
-                }`}
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-b font-display text-base font-bold text-white shadow-clay-sm ${step.tone}`}
               >
                 {i + 1}
               </span>
-              <span>{step}</span>
+              <span className="min-w-0 pt-0.5">{step.text}</span>
             </li>
           ))}
         </ol>

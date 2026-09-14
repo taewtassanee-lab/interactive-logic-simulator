@@ -54,7 +54,7 @@ export const Tooltip = ({ term, children }: { term: string; children: ReactNode 
     <span className="relative inline-flex items-center">
       <button
         type="button"
-        className="inline-flex items-center gap-1 rounded-lg bg-think-50 px-1.5 py-0.5 font-semibold text-think-700 underline decoration-think-300 decoration-wavy underline-offset-4 transition hover:bg-think-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-think-400"
+        className="inline-flex items-center gap-1 rounded-xl border-2 border-think-200 bg-gradient-to-b from-think-50 to-think-100 px-2 py-0.5 font-display font-bold text-think-800 transition hover:-translate-y-px hover:border-think-300 hover:from-think-100 hover:to-think-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-think-200"
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
         onFocus={() => setOpen(true)}
@@ -70,7 +70,7 @@ export const Tooltip = ({ term, children }: { term: string; children: ReactNode 
         <span
           id={id}
           role="tooltip"
-          className="absolute bottom-full left-1/2 z-40 mb-2 w-64 -translate-x-1/2 animate-pop rounded-2xl bg-slate-800 px-3.5 py-2.5 text-xs font-normal leading-relaxed text-white shadow-lg"
+          className="absolute bottom-full left-1/2 z-40 mb-2 w-72 -translate-x-1/2 animate-pop rounded-2xl border-2 border-slate-700 bg-slate-800 px-4 py-3 text-[13px] font-normal leading-relaxed text-white shadow-xl"
         >
           {children}
           <span

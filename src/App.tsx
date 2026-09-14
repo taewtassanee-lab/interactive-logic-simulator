@@ -83,7 +83,7 @@ const App = () => {
       <Header onReset={handleReset} isAssistant={state.session.deviceMode === 'assistant'} />
 
       <nav
-        className="sticky top-[64px] z-20 border-b-2 border-white bg-white/95 sm:top-[72px]"
+        className="sticky top-[64px] z-20 border-b-2 border-white bg-white sm:top-[72px]"
         aria-label="เมนูหลัก"
       >
         {/* ตัดขึ้นบรรทัดใหม่แทนการเลื่อนแนวนอน เพราะบนไอแพดแนวตั้งแถบเมนูยาวเกินจอ
