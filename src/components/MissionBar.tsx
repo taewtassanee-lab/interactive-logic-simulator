@@ -1,5 +1,14 @@
 import { useState } from 'react';
-import { ArrowRight, CircleCheck, Lightbulb, PartyPopper, Target } from 'lucide-react';
+import {
+  ArrowRight,
+  CircleCheck,
+  Lightbulb,
+  PartyPopper,
+  Search,
+  Target,
+  TriangleAlert,
+  Wrench,
+} from 'lucide-react';
 import { BADGES, MISSIONS, type MissionKey } from '../data/missions';
 import type { MissionState } from '../types';
 import { Button } from './Ui';
@@ -121,22 +130,45 @@ export const MissionBar = ({ missions }: { missions: MissionState }) => {
           <BugBuddy size={64} className="hidden shrink-0 animate-float sm:block" />
 
           <div className="min-w-0 flex-1">
-            <h2 className="font-display text-base font-bold text-slate-800">{current.title}</h2>
+            <h2 className="font-display text-xl font-bold text-slate-800">{current.title}</h2>
 
-            <dl className="mt-2 space-y-1.5 text-sm leading-relaxed text-slate-600">
-              <div className="flex gap-2">
-                <dt className="w-16 shrink-0 font-semibold text-bubble-700">อาการ</dt>
-                <dd>{current.symptom}</dd>
+            {/*
+              แยกเป็น 3 กล่องสีแทนตารางคำอธิบายแบบเดิม
+              เพราะเดิมเป็นข้อความสามบรรทัดติดกัน ผู้เรียนกวาดตาแล้วแยกไม่ออกว่า
+              บรรทัดไหนคือปัญหา บรรทัดไหนคือสิ่งที่ต้องลงมือทำ
+              เรียงตามลำดับการคิด เห็นอาการ หาสาเหตุ แล้วลงมือแก้
+            */}
+            <div className="mt-3 grid gap-2.5 xl:grid-cols-3">
+              <div className="rounded-2xl border-2 border-bubble-200 bg-gradient-to-b from-bubble-50 to-white px-3.5 py-3">
+                <p className="mb-1 flex items-center gap-1.5 font-display text-xs font-bold uppercase tracking-wide text-bubble-700">
+                  <TriangleAlert className="h-4 w-4" aria-hidden="true" />
+                  อาการที่เห็น
+                </p>
+                <p className="text-[15px] leading-relaxed text-slate-700">{current.symptom}</p>
               </div>
-              <div className="flex gap-2">
-                <dt className="w-16 shrink-0 font-semibold text-peach-700">สาเหตุ</dt>
-                <dd>{current.cause}</dd>
+
+              <div className="rounded-2xl border-2 border-lemon-200 bg-gradient-to-b from-lemon-50 to-white px-3.5 py-3">
+                <p className="mb-1 flex items-center gap-1.5 font-display text-xs font-bold uppercase tracking-wide text-peach-700">
+                  <Search className="h-4 w-4" aria-hidden="true" />
+                  สาเหตุ
+                </p>
+                <p className="text-[15px] leading-relaxed text-slate-700">{current.cause}</p>
               </div>
-              <div className="flex gap-2">
-                <dt className="w-16 shrink-0 font-semibold text-mint-700">เป้าหมาย</dt>
-                <dd>{current.goal}</dd>
+
+              {/* กล่องเป้าหมายเน้นที่สุด เพราะเป็นสิ่งเดียวที่ผู้เรียนต้องลงมือทำ */}
+              <div
+                className="rounded-2xl border-2 border-mint-300 bg-gradient-to-b from-mint-50 to-white px-3.5 py-3"
+                style={{ boxShadow: '0 5px 0 0 rgba(16,185,129,0.28)' }}
+              >
+                <p className="mb-1 flex items-center gap-1.5 font-display text-xs font-bold uppercase tracking-wide text-mint-800">
+                  <Wrench className="h-4 w-4" aria-hidden="true" />
+                  ต้องทำอะไร
+                </p>
+                <p className="text-[15px] font-semibold leading-relaxed text-slate-800">
+                  {current.goal}
+                </p>
               </div>
-            </dl>
+            </div>
 
             {/* ---------- คำใบ้ไล่ระดับ ---------- */}
             {!isPassed && (
@@ -156,7 +188,8 @@ export const MissionBar = ({ missions }: { missions: MissionState }) => {
                 )}
                 {hintLevel < current.hints.length && (
                   <Button
-                    variant="secondary"
+                    variant="purple"
+                    className="px-5 py-3 text-base"
                     onClick={() => {
                       setHintLevel((v) => v + 1);
                       // นับจำนวนคำใบ้ที่เปิด ใช้ทำรายงานให้ครูเห็นว่าคู่ไหนต้องการความช่วยเหลือมาก
@@ -165,10 +198,10 @@ export const MissionBar = ({ missions }: { missions: MissionState }) => {
                       }));
                     }}
                   >
-                    <Lightbulb className="h-4 w-4 text-lemon-500" aria-hidden="true" />
+                    <Lightbulb className="h-5 w-5" aria-hidden="true" />
                     {hintLevel === 0
-                      ? 'ขอคำใบ้'
-                      : `ขอคำใบ้เพิ่ม (${hintLevel}/${current.hints.length})`}
+                      ? 'ติดตรงไหน กดขอคำใบ้'
+                      : `ขอคำใบ้เพิ่ม (เปิดแล้ว ${hintLevel} จาก ${current.hints.length})`}
                   </Button>
                 )}
               </div>
