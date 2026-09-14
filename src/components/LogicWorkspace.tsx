@@ -15,6 +15,7 @@ import {
 import { BLOCK_MAP } from '../data/blocks';
 import type { BlockId, LogicReport, WorkspaceBlock } from '../types';
 import { Button, Card, EmptyState } from './Ui';
+import { InlineBlockPicker } from './InlineBlockPicker';
 
 interface Props {
   blocks: WorkspaceBlock[];
@@ -31,6 +32,7 @@ interface Props {
   onStep: () => void;
   onResetSim: () => void;
   onToggleHints: () => void;
+  onAdd: (id: BlockId) => void;
 }
 
 export const LogicWorkspace = ({
@@ -48,12 +50,21 @@ export const LogicWorkspace = ({
   onStep,
   onResetSim,
   onToggleHints,
+  onAdd,
 }: Props) => (
   <Card
     title="พื้นที่เรียงลำดับตรรกะ"
     subtitle="เรียงบล็อกจากบนลงล่างตามลำดับการทำงานของระบบ"
     icon={<Blocks className="h-5 w-5 text-think-600" aria-hidden="true" />}
   >
+    {/*
+      ตัวเลือกบล็อกอยู่ในกรอบเดียวกับพื้นที่วางบล็อก แสดงเฉพาะจอที่ยังไม่ถึง 3 คอลัมน์
+      จอกว้างมีคลังบล็อกเป็นคอลัมน์ซ้ายให้เห็นคู่กันอยู่แล้ว จึงไม่ต้องแสดงซ้ำ
+    */}
+    <div className="xl:hidden">
+      <InlineBlockPicker onAdd={onAdd} />
+    </div>
+
     {/* ---------- แถบปุ่มควบคุม ---------- */}
     <div className="mb-4 flex flex-wrap gap-2">
       <Button variant="primary" onClick={onRun} disabled={blocks.length === 0}>

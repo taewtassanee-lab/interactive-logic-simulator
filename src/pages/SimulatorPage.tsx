@@ -179,7 +179,11 @@ export const SimulatorPage = () => {
 
       {/* 3 คอลัมน์บนจอใหญ่ เรียงลงมาบนมือถือ */}
       <div className="grid gap-4 xl:grid-cols-[minmax(0,300px)_minmax(0,1fr)_minmax(0,340px)]">
-        <BlockLibrary onAdd={handleAdd} />
+        {/* คลังบล็อกเต็มรูปแบบใช้เฉพาะจอกว้างที่วางได้ 3 คอลัมน์
+            จอเล็กกว่านั้นใช้ตัวเลือกย่อที่อยู่ในกรอบเดียวกับพื้นที่เรียงตรรกะแทน */}
+        <div className="hidden xl:block">
+          <BlockLibrary onAdd={handleAdd} />
+        </div>
 
         <LogicWorkspace
           blocks={blocks}
@@ -196,6 +200,7 @@ export const SimulatorPage = () => {
           onStep={handleStep}
           onResetSim={handleResetSim}
           onToggleHints={() => setHintsOpen((v) => !v)}
+          onAdd={handleAdd}
         />
 
         <StateMonitor
