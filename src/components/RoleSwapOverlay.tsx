@@ -1,6 +1,6 @@
 import { ArrowLeftRight, Compass, Mouse, Repeat2, TriangleAlert } from 'lucide-react';
-import { APP_CONFIG } from '../config';
 import { useRoleTimer } from '../context/RoleTimerContext';
+import { useSettings } from '../context/SettingsContext';
 import { Button } from './Ui';
 
 /**
@@ -13,6 +13,7 @@ import { Button } from './Ui';
 export const RoleSwapOverlay = () => {
   const { mustSwitch, currentDriver, currentNavigator, switchCount, markSwitched, postpone } =
     useRoleTimer();
+  const { settings } = useSettings();
 
   if (!mustSwitch) return null;
 
@@ -38,7 +39,7 @@ export const RoleSwapOverlay = () => {
               หมดเวลา ต้องสลับบทบาทก่อน
             </h2>
             <p id="swap-desc" className="text-sm text-slate-500">
-              ครบ {Math.round(APP_CONFIG.roleSwitchSeconds / 60)} นาทีแล้ว
+              ครบ {settings.roleSwitchMinutes} นาทีแล้ว
               ทำงานต่อไม่ได้จนกว่าจะสลับที่นั่งจริง
             </p>
           </div>

@@ -213,6 +213,10 @@ export const LIVE_ACTIVITIES: LiveActivityPreset[] = [
 export const getPreset = (id: string): LiveActivityPreset | undefined =>
   LIVE_ACTIVITIES.find((a) => a.id === id);
 
+/** ชุดข้อสอบก่อนเรียนตั้งต้น ใช้เป็นจุดเริ่มให้ครูแก้ในหน้าตั้งค่าระบบ */
+export const QUIZ_PRETEST_FALLBACK =
+  LIVE_ACTIVITIES.find((a) => a.id === 'pretest_5')?.questions ?? [];
+
 export const STEP_LABELS: Record<number, string> = {
   1: 'ขั้นที่ 1 Gathering รวบรวมข้อมูล',
   2: 'ขั้นที่ 2 Processing วิเคราะห์และสรุป',

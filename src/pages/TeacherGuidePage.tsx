@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { BookOpen, ChevronDown, Clock, GraduationCap, Printer, Users2 } from 'lucide-react';
-import { APP_CONFIG } from '../config';
+import { useSettings } from '../context/SettingsContext';
 import { GPAS_STEPS, GUIDE_SECTIONS } from '../data/teacherGuide';
 import { Button, Card } from '../components/Ui';
 import { TeacherBanner, TeacherCard } from '../components/TeacherCard';
 
 export const TeacherGuidePage = () => {
+  const { settings } = useSettings();
   const [openId, setOpenId] = useState<string | null>('objective');
   const totalMinutes = GPAS_STEPS.reduce((sum, s) => sum + s.minutes, 0);
 
@@ -13,7 +14,7 @@ export const TeacherGuidePage = () => {
     <div className="space-y-4">
       <Card
         title="คู่มือครูผู้สอน"
-        subtitle={`${APP_CONFIG.courseName} ${APP_CONFIG.gradeLevel} | ${APP_CONFIG.unitName}`}
+        subtitle={`${settings.courseName} ${settings.gradeLevel} | ${settings.unitName}`}
         icon={<GraduationCap className="h-5 w-5 text-brand-600" aria-hidden="true" />}
         actions={
           <Button variant="secondary" onClick={() => window.print()} className="no-print">

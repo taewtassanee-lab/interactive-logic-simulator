@@ -14,6 +14,8 @@ import {
 import { Button, Card, Pill } from '../Ui';
 import { useToast } from '../Toast';
 import { LIVE_ACTIVITIES, STEP_LABELS, TYPE_LABELS } from '../../data/liveActivities';
+import { useSettings } from '../../context/SettingsContext';
+import { applyOverrides } from '../../utils/activityOverrides';
 import {
   TEACHER_POLL_MS,
   clearLiveResponses,
@@ -46,6 +48,7 @@ const downloadCsv = (csv: string, name: string) => {
 
 export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
   const { notify } = useToast();
+  const { settings } = useSettings();
 
   /** ห้องเรียนทั้งหมดที่มีข้อมูลในระบบ ใช้ให้ครูเลือกโดยไม่ต้องพิมพ์เอง */
   const classrooms = useMemo(
@@ -85,9 +88,15 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
     }
   }, [classroom]);
 
-  const preset: LiveActivityPreset | undefined = useMemo(
-    () => LIVE_ACTIVITIES.find((a) => a.id === session?.presetId),
-    [session?.presetId],
+  const preset: LiveActivityPreset | undefined = useMemo(() => {
+    const base = LIVE_ACTIVITIES.find((a) => a.id === session?.presetId);
+    return base ? applyOverrides(base, settings) : undefined;
+  }, [session?.presetId, settings]);
+
+  /** คลังกิจกรรมที่รวมชื่อและโจทย์ที่ครูแก้ไว้แล้ว */
+  const activities = useMemo(
+    () => LIVE_ACTIVITIES.map((a) => applyOverrides(a, settings)),
+    [settings],
   );
 
   /**
@@ -252,11 +261,11 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
 
   const grouped = useMemo(() => {
     const map = new Map<number, LiveActivityPreset[]>();
-    LIVE_ACTIVITIES.forEach((a) => {
+    activities.forEach((a) => {
       map.set(a.step, [...(map.get(a.step) ?? []), a]);
     });
     return [...map.entries()].sort((a, b) => a[0] - b[0]);
-  }, []);
+  }, [activities]);
 
   return (
     <div className="space-y-4">

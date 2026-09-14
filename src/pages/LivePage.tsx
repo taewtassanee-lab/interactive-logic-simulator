@@ -14,6 +14,8 @@ import { useApp } from '../context/AppContext';
 import { useToast } from '../components/Toast';
 import { StudentAnswerForm, type AnswerDraft } from '../components/live/StudentForms';
 import { getPreset, TYPE_LABELS } from '../data/liveActivities';
+import { useSettings } from '../context/SettingsContext';
+import { applyOverrides } from '../utils/activityOverrides';
 import {
   STUDENT_IDLE_POLL_MS,
   STUDENT_POLL_MS,
@@ -38,6 +40,7 @@ import type { LiveIdentity, LiveSession } from '../types/live';
 export const LivePage = () => {
   const { state } = useApp();
   const { notify } = useToast();
+  const { settings } = useSettings();
 
   const [identity, setIdentity] = useState<LiveIdentity | null>(() => loadIdentity());
   const [draftId, setDraftId] = useState<LiveIdentity>(() => ({
@@ -64,7 +67,9 @@ export const LivePage = () => {
   /** ลำดับคำขอ ใช้ทิ้งผลที่มาถึงช้ากว่าคำขอที่ใหม่กว่า กันกิจกรรมเก่าย้อนกลับมาทับ */
   const reqSeq = useRef(0);
 
-  const preset = session ? getPreset(session.presetId) : undefined;
+  const basePreset = session ? getPreset(session.presetId) : undefined;
+  // ใช้ชื่อและโจทย์ที่ครูแก้ไว้ในหน้าตั้งค่าระบบ ถ้าไม่ได้แก้จะได้ข้อความตั้งต้น
+  const preset = basePreset ? applyOverrides(basePreset, settings) : undefined;
   const answered = Boolean(session && answeredId === session.activityId);
   const showForm = Boolean(session?.open && preset && (!answered || editing));
 

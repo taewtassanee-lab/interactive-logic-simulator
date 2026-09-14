@@ -48,8 +48,10 @@ export const SimulatorPage = () => {
       const alreadyM1 = state.missions.mission1Passed;
       const alreadyM2 = state.missions.mission2Passed;
 
+      const now = new Date().toISOString();
       update((prev) => ({
         missions: {
+          ...prev.missions,
           mission1Passed: prev.missions.mission1Passed || r.mission1Passed,
           mission2Passed: prev.missions.mission2Passed || r.mission2Passed,
           // นับคะแนนเฉพาะรอบที่ระบบทำงานจบอย่างถูกต้อง
@@ -58,6 +60,11 @@ export const SimulatorPage = () => {
             r.finalState.status === 'completed'
               ? Math.max(prev.missions.bestScore, r.finalState.score)
               : prev.missions.bestScore,
+          // เก็บร่องรอยการลงมือทำ ใช้ทำรายงานให้ครูเห็นกระบวนการไม่ใช่แค่ผลลัพธ์
+          runCount: prev.missions.runCount + 1,
+          mission1At: prev.missions.mission1At ?? (r.mission1Passed ? now : null),
+          mission2At: prev.missions.mission2At ?? (r.mission2Passed ? now : null),
+          lastBlockCount: blocks.length,
         },
         lastDebugLog: r.finalState.log,
       }));
@@ -68,7 +75,7 @@ export const SimulatorPage = () => {
         notify('ได้รับเหรียญ Logic Master ครบทั้ง 2 ภารกิจแล้ว', 'success');
       }
     },
-    [notify, state.missions.mission1Passed, state.missions.mission2Passed, update],
+    [blocks.length, notify, state.missions.mission1Passed, state.missions.mission2Passed, update],
   );
 
   /* ---------- จัดการบล็อกใน Workspace ---------- */

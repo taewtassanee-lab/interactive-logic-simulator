@@ -23,6 +23,11 @@ export const createInitialState = (): AppState => ({
     mission1Passed: false,
     mission2Passed: false,
     bestScore: 0,
+    runCount: 0,
+    hintsUsed: 0,
+    mission1At: null,
+    mission2At: null,
+    lastBlockCount: 0,
   },
   worksheet: {
     q1Observation: '',

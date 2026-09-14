@@ -163,6 +163,17 @@ export interface MissionState {
   mission1Passed: boolean; // ระบบสุ่มข้อสอบซ้ำ
   mission2Passed: boolean; // ทำครบแต่ไม่เข้าหน้าสรุปผล
   bestScore: number;
+  /**
+   * ร่องรอยการลงมือทำ ใช้ทำรายงานให้ครูเห็นกระบวนการ ไม่ใช่แค่ผลลัพธ์ผ่านหรือไม่ผ่าน
+   * ตอบตัวชี้วัดเรื่องทักษะการแก้ปัญหาได้ตรงกว่าการดูแค่ช่องผ่าน
+   */
+  runCount: number;
+  hintsUsed: number;
+  /** เวลาที่ผ่านภารกิจแต่ละข้อครั้งแรก */
+  mission1At: string | null;
+  mission2At: string | null;
+  /** จำนวนบล็อกที่วางไว้ในรอบที่จำลองล่าสุด */
+  lastBlockCount: number;
 }
 
 export type BadgeId = 'array_detective' | 'bug_hunter' | 'logic_master';

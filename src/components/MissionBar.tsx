@@ -4,6 +4,7 @@ import { BADGES, MISSIONS, type MissionKey } from '../data/missions';
 import type { MissionState } from '../types';
 import { Button } from './Ui';
 import { BugBuddy, Medal3D } from './Illustrations';
+import { useApp } from '../context/AppContext';
 
 /**
  * แถบภารกิจที่อยู่บนสุดของหน้าจำลองตรรกะ
@@ -15,6 +16,7 @@ import { BugBuddy, Medal3D } from './Illustrations';
  * เพราะนักเรียนที่เก่งอาจมองออกทั้งสองจุดพร้อมกัน
  */
 export const MissionBar = ({ missions }: { missions: MissionState }) => {
+  const { update } = useApp();
   const passed: Record<MissionKey, boolean> = {
     mission1: missions.mission1Passed,
     mission2: missions.mission2Passed,
@@ -153,7 +155,16 @@ export const MissionBar = ({ missions }: { missions: MissionState }) => {
                   </ul>
                 )}
                 {hintLevel < current.hints.length && (
-                  <Button variant="secondary" onClick={() => setHintLevel((v) => v + 1)}>
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      setHintLevel((v) => v + 1);
+                      // นับจำนวนคำใบ้ที่เปิด ใช้ทำรายงานให้ครูเห็นว่าคู่ไหนต้องการความช่วยเหลือมาก
+                      update((prev) => ({
+                        missions: { ...prev.missions, hintsUsed: prev.missions.hintsUsed + 1 },
+                      }));
+                    }}
+                  >
                     <Lightbulb className="h-4 w-4 text-lemon-500" aria-hidden="true" />
                     {hintLevel === 0
                       ? 'ขอคำใบ้'

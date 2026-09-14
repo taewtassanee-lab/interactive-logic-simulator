@@ -24,7 +24,7 @@ import { TeacherGuidePage } from './pages/TeacherGuidePage';
 import { DashboardPage } from './pages/DashboardPage';
 import { KnowledgePage } from './pages/KnowledgePage';
 import { LivePage } from './pages/LivePage';
-import { TEACHER_INFO } from './config';
+import { useSettings } from './context/SettingsContext';
 import type { TabId } from './types';
 
 interface TabDef {
@@ -51,6 +51,9 @@ const TABS: TabDef[] = [
 const App = () => {
   const { state, resetAll } = useApp();
   const { notify } = useToast();
+  const { settings } = useSettings();
+  // ครูซ่อนแท็บบางอันได้จากหน้าตั้งค่าระบบ แท็บเริ่มต้นใช้งานเปิดไว้เสมอ
+  const tabs = TABS.filter((t) => t.id === 'start' || settings.visibleTabs.includes(t.id));
   const [tab, setTab] = useState<TabId>('start');
 
   const started = state.session.activityStarted;
@@ -86,7 +89,7 @@ const App = () => {
         {/* ตัดขึ้นบรรทัดใหม่แทนการเลื่อนแนวนอน เพราะบนไอแพดแนวตั้งแถบเมนูยาวเกินจอ
             แล้วไม่มีอะไรบอกว่าปัดต่อได้ ทำให้แท็บท้าย ๆ เหมือนหายไปทั้งที่มีอยู่ */}
         <div className="mx-auto flex max-w-[1400px] flex-wrap gap-1.5 px-2 py-2 sm:px-5">
-          {TABS.map((t) => {
+          {tabs.map((t) => {
             const Icon = t.icon;
             const locked = t.requiresStart && !started;
             const active = tab === t.id;
@@ -148,7 +151,7 @@ const App = () => {
             ชั้นมัธยมศึกษาปีที่ 5
           </p>
           <p className="mt-1 font-semibold text-slate-600">
-            ผู้สอน: {TEACHER_INFO.name} | {TEACHER_INFO.school}
+            ผู้สอน: {settings.teacherName} | {settings.school}
           </p>
           <p className="mt-1">
             ข้อมูลทั้งหมดถูกบันทึกไว้ในเบราว์เซอร์ของเครื่องนี้เท่านั้น ไม่ได้ส่งขึ้นเซิร์ฟเวอร์

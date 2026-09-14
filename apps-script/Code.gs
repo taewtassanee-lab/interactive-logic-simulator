@@ -50,6 +50,12 @@ const HEADERS = [
   'ไฟล์ .capx',
   'สลับบทบาท (ครั้ง)',
   'รหัสเครื่อง',
+  'กด Run (ครั้ง)',
+  'เปิดคำใบ้ (ครั้ง)',
+  'บล็อกที่วาง',
+  'ผ่านภารกิจ 1 เมื่อ',
+  'ผ่านภารกิจ 2 เมื่อ',
+  'Debug Log',
 ];
 
 const LIVE_HEADERS = [
@@ -140,6 +146,13 @@ function buildRow(p) {
     p.capxFileName || '',
     Number(p.roleSwitchCount) || 0,
     p.deviceId || '',
+    Number(p.runCount) || 0,
+    Number(p.hintsUsed) || 0,
+    Number(p.blockCount) || 0,
+    p.mission1At || '',
+    p.mission2At || '',
+    // ตัดความยาวกันเกินขีดจำกัดของเซลล์ในชีต
+    String(p.debugLog || '').slice(0, 40000),
   ];
 }
 
@@ -334,6 +347,24 @@ function clearLiveResponses(classroom, activityId) {
   return removed;
 }
 
+/* ==================== ค่าตั้งระบบที่ครูแก้ได้เอง ==================== */
+
+/**
+ * เก็บค่าตั้งไว้ใน Script Properties ไม่ใช่ในชีต
+ * เพราะเครื่องนักเรียนทุกเครื่องต้องอ่านค่านี้ตอนเปิดแอป การอ่าน Properties เร็วกว่ามาก
+ */
+const SETTINGS_KEY = 'app_settings';
+
+function getStoredSettings() {
+  const raw = PropertiesService.getScriptProperties().getProperty(SETTINGS_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch (err) {
+    return null;
+  }
+}
+
 /* ==================== ตัวรับคำขอ ==================== */
 
 /** รับข้อมูลจากเว็บแอปของนักเรียน คำสั่งลบ และคำสั่งกิจกรรมสดจากแดชบอร์ดของครู */
@@ -425,6 +456,21 @@ function doPost(e) {
       return jsonOut({ ok: true, removed: removedCount });
     }
 
+    /* ---------- บันทึกค่าตั้งระบบ ใช้รหัสครู ---------- */
+    if (action === 'saveSettings') {
+      if (body.teacherKey !== TEACHER_KEY) {
+        return jsonOut({ ok: false, error: 'รหัสครูไม่ถูกต้อง ไม่มีสิทธิ์ทำรายการนี้' });
+      }
+      if (!body.settings) {
+        return jsonOut({ ok: false, error: 'ไม่มีข้อมูลค่าตั้งที่ส่งมา' });
+      }
+      PropertiesService.getScriptProperties().setProperty(
+        SETTINGS_KEY,
+        JSON.stringify(body.settings),
+      );
+      return jsonOut({ ok: true });
+    }
+
     /* ---------- คำสั่งของนักเรียน ใช้รหัสห้องเรียน ---------- */
     if (action === 'liveRespond') {
       if (body.classSecret !== CLASS_SECRET) {
@@ -475,6 +521,14 @@ function doGet(e) {
   try {
     const params = (e && e.parameter) || {};
     const action = params.action || '';
+
+    /* ---------- ทุกเครื่องดึงค่าตั้งระบบตอนเปิดแอป ---------- */
+    if (action === 'getSettings') {
+      if (params.classSecret !== CLASS_SECRET) {
+        return jsonOut({ ok: false, error: 'รหัสห้องเรียนไม่ถูกต้อง' });
+      }
+      return jsonOut({ ok: true, settings: getStoredSettings() });
+    }
 
     /* ---------- นักเรียนถามว่าตอนนี้เปิดกิจกรรมอะไรอยู่ ---------- */
     if (action === 'livePoll') {
@@ -531,6 +585,12 @@ function doGet(e) {
         pdfGenerated: v[11] === 'แล้ว',
         capxFileName: String(v[12] || ''),
         roleSwitchCount: Number(v[13]) || 0,
+        runCount: Number(v[15]) || 0,
+        hintsUsed: Number(v[16]) || 0,
+        blockCount: Number(v[17]) || 0,
+        mission1At: v[18] ? String(v[18]) : '',
+        mission2At: v[19] ? String(v[19]) : '',
+        debugLog: String(v[20] || ''),
       });
     }
 

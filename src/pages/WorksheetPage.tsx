@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { APP_CONFIG } from '../config';
 import { useApp } from '../context/AppContext';
+import { useSettings } from '../context/SettingsContext';
 import { useToast } from '../components/Toast';
 import { useWorksheetPdf } from '../hooks/useWorksheetPdf';
 import { Button, Card, ProgressBar, TextArea, Tooltip } from '../components/Ui';
@@ -33,6 +34,7 @@ const CORRECT_Q2 = 'Num';
 const CORRECT_Q3 = 'เปลี่ยนไปหน้า Summary';
 
 export const WorksheetPage = () => {
+  const { settings } = useSettings();
   const { state, update, lastSavedAt } = useApp();
   const { notify } = useToast();
   const { exportPdf, printNode, busy } = useWorksheetPdf();
@@ -95,7 +97,7 @@ export const WorksheetPage = () => {
       {/* ---------- หัวใบงาน ---------- */}
       <Card
         title={APP_CONFIG.worksheetTitle}
-        subtitle={`${APP_CONFIG.courseName} ${APP_CONFIG.gradeLevel} ${APP_CONFIG.semester}`}
+        subtitle={`${settings.courseName} ${settings.gradeLevel} ${settings.semester}`}
         icon={<FileText className="h-5 w-5 text-brand-600" aria-hidden="true" />}
         actions={
           lastSavedAt ? (
@@ -105,7 +107,7 @@ export const WorksheetPage = () => {
           ) : null
         }
       >
-        <p className="mb-3 text-sm text-slate-600">{APP_CONFIG.unitName}</p>
+        <p className="mb-3 text-sm text-slate-600">{settings.unitName}</p>
         <div className="grid gap-2 rounded-xl bg-slate-50 p-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
           <p>
             <span className="text-slate-500">ห้องเรียน: </span>

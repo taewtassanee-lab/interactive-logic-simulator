@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Compass, Mouse, Rocket, Send, UserCheck, Users } from 'lucide-react';
-import { APP_CONFIG } from '../config';
+import { useSettings } from '../context/SettingsContext';
 import { useApp } from '../context/AppContext';
 import { useToast } from '../components/Toast';
 import { RoleTimer } from '../components/RoleTimer';
@@ -22,6 +22,7 @@ export const StartPage = ({ onStarted }: { onStarted: () => void }) => {
   const [errors, setErrors] = useState<FieldErrors>({});
 
   const pair = state.pair;
+  const { settings } = useSettings();
   const isAssistant = state.session.deviceMode === 'assistant';
 
   const setField = (key: keyof typeof pair, value: string) => {
@@ -58,7 +59,7 @@ export const StartPage = ({ onStarted }: { onStarted: () => void }) => {
               ยินดีต้อนรับสู่กิจกรรมถอดรหัสตรรกะระบบแบบทดสอบสุ่ม
             </h2>
             <p className="mt-1 text-sm text-white/90">
-              {APP_CONFIG.courseName} {APP_CONFIG.gradeLevel} {APP_CONFIG.semester}
+              {settings.courseName} {settings.gradeLevel} {settings.semester}
             </p>
             <p className="mt-2 inline-flex items-center gap-1.5 rounded-full border-2 border-white/40 bg-white/20 px-3 py-1 font-display text-xs font-bold text-white">
               <Rocket className="h-3.5 w-3.5" aria-hidden="true" />

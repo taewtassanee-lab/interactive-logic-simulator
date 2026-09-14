@@ -20,6 +20,8 @@ import { formatThaiDateTime } from '../utils/format';
 import { TeacherLivePanel } from '../components/live/TeacherLivePanel';
 import { BigTimer, NamePicker } from '../components/live/ClassTools';
 import { ActivityRecords } from '../components/live/ActivityRecords';
+import { SimulatorReport } from '../components/live/SimulatorReport';
+import { AdminPanel } from '../components/live/AdminPanel';
 import {
   deletePairRow,
   fetchDashboard,
@@ -28,14 +30,16 @@ import {
   type ProgressRow,
 } from '../utils/sync';
 
-type DashboardView = 'summary' | 'live' | 'records' | 'tools';
+type DashboardView = 'summary' | 'sim' | 'live' | 'records' | 'tools' | 'admin';
 
 const DASHBOARD_VIEWS: { id: DashboardView; label: string }[] = [
   { id: 'summary', label: 'สรุปผลรายคู่' },
+  { id: 'sim', label: 'รายงานกิจกรรมจำลอง' },
   { id: 'live', label: 'ห้องกิจกรรมสด' },
   // แยกจากห้องกิจกรรมสด เพราะใช้คนละเวลา ห้องสดใช้ตอนสอน ส่วนนี้ใช้ตอนเก็บหลักฐานหลังสอน
   { id: 'records', label: 'บันทึกกิจกรรม' },
   { id: 'tools', label: 'เครื่องมือหน้าชั้น' },
+  { id: 'admin', label: 'ตั้งค่าระบบ' },
 ];
 
 const TEACHER_KEY_STORAGE = 'ils_teacher_key';
@@ -349,7 +353,11 @@ export const DashboardPage = () => {
 
       {view === 'live' && <TeacherLivePanel teacherKey={teacherKey} rows={rows} />}
 
+      {view === 'sim' && <SimulatorReport rows={rows} />}
+
       {view === 'records' && <ActivityRecords teacherKey={teacherKey} rows={rows} />}
+
+      {view === 'admin' && <AdminPanel teacherKey={teacherKey} />}
 
       {view === 'tools' && (
         <>

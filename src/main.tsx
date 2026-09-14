@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import { AppProvider } from './context/AppContext';
 import { RoleTimerProvider } from './context/RoleTimerContext';
+import { SettingsProvider } from './context/SettingsContext';
 import { ToastProvider } from './components/Toast';
 import './index.css';
 
@@ -12,11 +13,13 @@ if (!rootElement) throw new Error('ไม่พบ element #root ในหน้
 createRoot(rootElement).render(
   <StrictMode>
     <ToastProvider>
-      <AppProvider>
-        <RoleTimerProvider>
-          <App />
-        </RoleTimerProvider>
-      </AppProvider>
+      <SettingsProvider>
+        <AppProvider>
+          <RoleTimerProvider>
+            <App />
+          </RoleTimerProvider>
+        </AppProvider>
+      </SettingsProvider>
     </ToastProvider>
   </StrictMode>,
 );

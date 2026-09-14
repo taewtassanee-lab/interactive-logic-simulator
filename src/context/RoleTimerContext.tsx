@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { APP_CONFIG } from '../config';
 import { useApp } from './AppContext';
+import { useSettings } from './SettingsContext';
 import { useToast } from '../components/Toast';
 
 /**
@@ -43,6 +44,9 @@ const RoleTimerContext = createContext<RoleTimerValue | null>(null);
 export const RoleTimerProvider = ({ children }: { children: ReactNode }) => {
   const { state, update } = useApp();
   const { notify } = useToast();
+  const { settings } = useSettings();
+  /** ครูตั้งเวลาสลับบทบาทเองได้จากหน้าตั้งค่าระบบ ถ้ายังไม่เคยตั้งจะใช้ค่าในโค้ด */
+  const roundSeconds = settings.roleSwitchMinutes * 60;
 
   const [seconds, setSeconds] = useState(APP_CONFIG.roleSwitchSeconds);
   const [running, setRunning] = useState(false);
@@ -55,6 +59,11 @@ export const RoleTimerProvider = ({ children }: { children: ReactNode }) => {
       intervalRef.current = null;
     }
   }, []);
+
+  /** ค่าตั้งจากเซิร์ฟเวอร์มาถึงหลังหน้าโหลดเสร็จ ถ้ายังไม่เริ่มจับเวลาให้ปรับตามค่าใหม่ */
+  useEffect(() => {
+    if (!running && !state.session.roleSwitchCount) setSeconds(roundSeconds);
+  }, [roundSeconds, running, state.session.roleSwitchCount]);
 
   useEffect(() => {
     if (!running) {
@@ -76,18 +85,18 @@ export const RoleTimerProvider = ({ children }: { children: ReactNode }) => {
   }, [seconds, running, alerted, notify]);
 
   const start = useCallback(() => {
-    setSeconds((prev) => (prev === 0 ? APP_CONFIG.roleSwitchSeconds : prev));
+    setSeconds((prev) => (prev === 0 ? roundSeconds : prev));
     setAlerted(false);
     setRunning(true);
-  }, []);
+  }, [roundSeconds]);
 
   const pause = useCallback(() => setRunning(false), []);
 
   const reset = useCallback(() => {
     setRunning(false);
     setAlerted(false);
-    setSeconds(APP_CONFIG.roleSwitchSeconds);
-  }, []);
+    setSeconds(roundSeconds);
+  }, [roundSeconds]);
 
   const markSwitched = useCallback(() => {
     const now = new Date().toISOString();
@@ -101,12 +110,12 @@ export const RoleTimerProvider = ({ children }: { children: ReactNode }) => {
         roleSwitchLog: [...prev.session.roleSwitchLog, now],
       },
     }));
-    setSeconds(APP_CONFIG.roleSwitchSeconds);
+    setSeconds(roundSeconds);
     setAlerted(false);
     // เริ่มจับเวลารอบใหม่ทันที ผู้เรียนจะได้ไม่ลืมกด Start
     setRunning(true);
     notify('สลับบทบาทเรียบร้อย เริ่มจับเวลารอบใหม่แล้ว', 'success');
-  }, [notify, update]);
+  }, [notify, roundSeconds, update]);
 
   const { driverName, navigatorName } = state.pair;
   const first = state.session.driverIsFirstPerson;

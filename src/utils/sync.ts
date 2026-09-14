@@ -26,6 +26,15 @@ export interface ProgressRow {
   pdfGenerated: boolean;
   capxFileName: string;
   roleSwitchCount: number;
+  /* ---------- ร่องรอยการทำกิจกรรมจำลอง ใช้ทำรายงานรายคู่ ---------- */
+  runCount: number;
+  hintsUsed: number;
+  blockCount: number;
+  /** เวลาที่ผ่านภารกิจแต่ละข้อครั้งแรก */
+  mission1At: string;
+  mission2At: string;
+  /** สรุป Debug Log รอบล่าสุด เก็บเป็นข้อความบรรทัดเดียวเพื่อลงเซลล์เดียว */
+  debugLog: string;
   updatedAt?: string;
   deviceId?: string;
 }
@@ -64,6 +73,20 @@ export const buildProgressRow = (state: AppState): ProgressRow => ({
   pdfGenerated: Boolean(state.pdfGeneratedAt),
   capxFileName: state.capxFile?.name ?? '',
   roleSwitchCount: state.session.roleSwitchCount,
+  runCount: state.missions.runCount,
+  hintsUsed: state.missions.hintsUsed,
+  blockCount: state.missions.lastBlockCount,
+  mission1At: state.missions.mission1At ?? '',
+  mission2At: state.missions.mission2At ?? '',
+  /**
+   * ส่ง Debug Log ไปด้วยเพื่อให้ครูเห็นกระบวนการแก้ Bug ไม่ใช่แค่ผลผ่านหรือไม่ผ่าน
+   * ตัดเหลือ 40 บรรทัดท้ายสุด กันเซลล์ในชีตยาวเกินขีดจำกัด
+   * ยังคงหลักเดิมคือไม่ส่งข้อความเรียงความในใบงานขึ้นเซิร์ฟเวอร์
+   */
+  debugLog: state.lastDebugLog
+    .slice(-40)
+    .map((l) => `${l.time} ${l.message}`)
+    .join(' | '),
   deviceId: getDeviceId(),
 });
 
@@ -115,7 +138,20 @@ export const fetchDashboard = async (teacherKey: string): Promise<DashboardResul
     if (!data.ok) {
       return { ok: false, rows: [], error: data.error || 'รหัสครูไม่ถูกต้อง' };
     }
-    return { ok: true, rows: data.rows ?? [] };
+    /**
+     * แถวที่บันทึกไว้ก่อนระบบเริ่มเก็บร่องรอยการทำกิจกรรมจำลอง จะไม่มีช่องเหล่านี้เลย
+     * เติมค่าศูนย์ให้ครบ หน้ารายงานจะได้แสดงเลข 0 แทนที่จะเป็นช่องว่างลอย ๆ
+     */
+    const rows = (data.rows ?? []).map((r) => ({
+      ...r,
+      runCount: Number(r.runCount) || 0,
+      hintsUsed: Number(r.hintsUsed) || 0,
+      blockCount: Number(r.blockCount) || 0,
+      mission1At: r.mission1At ?? '',
+      mission2At: r.mission2At ?? '',
+      debugLog: r.debugLog ?? '',
+    }));
+    return { ok: true, rows };
   } catch {
     return {
       ok: false,
@@ -176,6 +212,12 @@ export const rowsToCsv = (rows: ProgressRow[]): string => {
     'สร้าง PDF',
     'ไฟล์ .capx',
     'สลับบทบาท',
+    'กด Run (ครั้ง)',
+    'เปิดคำใบ้ (ครั้ง)',
+    'บล็อกที่วาง',
+    'ผ่านภารกิจ 1 เมื่อ',
+    'ผ่านภารกิจ 2 เมื่อ',
+    'Debug Log',
     'อัปเดตล่าสุด',
   ];
   const esc = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
@@ -194,6 +236,12 @@ export const rowsToCsv = (rows: ProgressRow[]): string => {
       r.pdfGenerated ? 'แล้ว' : 'ยังไม่ได้สร้าง',
       r.capxFileName,
       r.roleSwitchCount,
+      r.runCount,
+      r.hintsUsed,
+      r.blockCount,
+      r.mission1At ? new Date(r.mission1At).toLocaleString('th-TH') : '',
+      r.mission2At ? new Date(r.mission2At).toLocaleString('th-TH') : '',
+      r.debugLog,
       r.updatedAt ? new Date(r.updatedAt).toLocaleString('th-TH') : '',
     ]
       .map(esc)
