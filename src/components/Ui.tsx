@@ -4,6 +4,50 @@ import { Mascot } from './Illustrations';
 
 /* ---------- การ์ดพื้นฐานแบบ 3 มิติ ---------- */
 
+/**
+ * สีประจำส่วนของการ์ด ใช้แยกแต่ละหัวข้อใหญ่ออกจากกันด้วยสายตา
+ * เว้นว่างไว้ได้ การ์ดจะใช้หัวสีขาวแบบเดิม
+ */
+export type CardAccent = 'brand' | 'think' | 'mint' | 'peach' | 'bubble' | 'lemon' | 'slate';
+
+const CARD_ACCENTS: Record<CardAccent, { head: string; bar: string; chip: string }> = {
+  brand: {
+    head: 'bg-gradient-to-r from-brand-100 via-brand-50 to-white border-brand-200',
+    bar: 'bg-gradient-to-b from-brand-400 to-brand-600',
+    chip: 'bg-gradient-to-br from-brand-50 to-brand-100',
+  },
+  think: {
+    head: 'bg-gradient-to-r from-think-100 via-think-50 to-white border-think-200',
+    bar: 'bg-gradient-to-b from-think-400 to-think-600',
+    chip: 'bg-gradient-to-br from-think-50 to-think-100',
+  },
+  mint: {
+    head: 'bg-gradient-to-r from-mint-100 via-mint-50 to-white border-mint-200',
+    bar: 'bg-gradient-to-b from-mint-400 to-mint-600',
+    chip: 'bg-gradient-to-br from-mint-50 to-mint-100',
+  },
+  peach: {
+    head: 'bg-gradient-to-r from-peach-100 via-peach-50 to-white border-peach-200',
+    bar: 'bg-gradient-to-b from-peach-400 to-peach-600',
+    chip: 'bg-gradient-to-br from-peach-50 to-peach-100',
+  },
+  bubble: {
+    head: 'bg-gradient-to-r from-bubble-100 via-bubble-50 to-white border-bubble-200',
+    bar: 'bg-gradient-to-b from-bubble-400 to-bubble-600',
+    chip: 'bg-gradient-to-br from-bubble-50 to-bubble-100',
+  },
+  lemon: {
+    head: 'bg-gradient-to-r from-lemon-100 via-lemon-50 to-white border-lemon-200',
+    bar: 'bg-gradient-to-b from-lemon-400 to-peach-500',
+    chip: 'bg-gradient-to-br from-lemon-50 to-lemon-100',
+  },
+  slate: {
+    head: 'bg-gradient-to-r from-slate-100 via-slate-50 to-white border-slate-200',
+    bar: 'bg-gradient-to-b from-slate-400 to-slate-600',
+    chip: 'bg-gradient-to-br from-slate-50 to-slate-100',
+  },
+};
+
 export const Card = ({
   title,
   subtitle,
@@ -11,6 +55,7 @@ export const Card = ({
   actions,
   children,
   className = '',
+  accent,
 }: {
   title?: ReactNode;
   subtitle?: ReactNode;
@@ -18,13 +63,26 @@ export const Card = ({
   actions?: ReactNode;
   children: ReactNode;
   className?: string;
-}) => (
-  <section className={`clay-card overflow-hidden ${className}`}>
+  accent?: CardAccent;
+}) => {
+  const tone = accent ? CARD_ACCENTS[accent] : null;
+  return (
+  <section className={`clay-card relative overflow-hidden ${className}`}>
+    {/* แถบสีด้านซ้าย ช่วยให้กวาดตาหาหัวข้อที่ต้องการเจอเร็วขึ้นตอนเลื่อนหน้ายาว ๆ */}
+    {tone && <span className={`absolute left-0 top-0 h-full w-1.5 ${tone.bar}`} aria-hidden="true" />}
     {(title || actions) && (
-      <header className="flex flex-wrap items-start justify-between gap-3 border-b-2 border-dashed border-slate-100 px-4 py-3.5 sm:px-5">
+      <header
+        className={`flex flex-wrap items-start justify-between gap-3 border-b-2 px-4 py-3.5 sm:px-5 ${
+          tone ? tone.head : 'border-dashed border-slate-100'
+        }`}
+      >
         <div className="flex min-w-0 items-start gap-3">
           {icon && (
-            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-white to-slate-100 shadow-clay-sm">
+            <span
+              className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl shadow-clay-sm ${
+                tone ? tone.chip : 'bg-gradient-to-br from-white to-slate-100'
+              }`}
+            >
               {icon}
             </span>
           )}
@@ -42,7 +100,8 @@ export const Card = ({
     )}
     <div className="px-4 py-4 sm:px-5">{children}</div>
   </section>
-);
+  );
+};
 
 /* ---------- Tooltip อธิบายคำศัพท์ ---------- */
 

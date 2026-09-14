@@ -206,6 +206,7 @@ const ReviewQuiz = () => {
 
   return (
     <Card
+      accent="mint"
       title="คำถามทบทวนความเข้าใจ"
       subtitle="ตอบเพื่อตรวจสอบตัวเอง ไม่มีผลต่อคะแนนในระบบ"
       icon={<ListChecks className="h-5 w-5 text-mint-600" aria-hidden="true" />}
@@ -327,6 +328,7 @@ export const KnowledgePage = () => (
 
     {/* ---------- Array ---------- */}
     <Card
+      accent="brand"
       title="ส่วนที่ 1: Array คลังเก็บข้อสอบ"
       subtitle="ตัวแปรที่เก็บข้อมูลได้หลายค่า หัวใจของระบบสุ่มไม่ซ้ำ"
       icon={<Boxes className="h-5 w-5 text-brand-600" aria-hidden="true" />}
@@ -343,6 +345,7 @@ export const KnowledgePage = () => (
 
     {/* ---------- Function ---------- */}
     <Card
+      accent="think"
       title="ส่วนที่ 2: Function ชุดคำสั่งที่เรียกใช้ซ้ำได้"
       subtitle="เขียนครั้งเดียว ใช้ได้หลายที่ แก้ที่เดียวมีผลทุกจุด"
       icon={<FunctionSquare className="h-5 w-5 text-think-600" aria-hidden="true" />}
@@ -356,6 +359,7 @@ export const KnowledgePage = () => (
 
     {/* ---------- เทคนิคที่ใช้ในไฟล์จริง ---------- */}
     <Card
+      accent="mint"
       title="ส่วนที่ 3: เทคนิคเพิ่มเติมที่ใช้ในไฟล์จริง"
       subtitle="3 เรื่องที่จะเจอใน Event Sheet ของโปรเจกต์ แต่ไม่มีในเว็บจำลอง"
       icon={<Boxes className="h-5 w-5 text-mint-600" aria-hidden="true" />}
@@ -365,6 +369,7 @@ export const KnowledgePage = () => (
 
     {/* ---------- ตารางเทียบเว็บจำลองกับของจริง ---------- */}
     <Card
+      accent="peach"
       title="ส่วนที่ 4: จากเว็บจำลอง สู่ Event Sheet จริง"
       subtitle="บล็อกในเว็บนี้ตรงกับคำสั่งใดใน Construct 2 ใช้เป็นแผนที่ตอนลงมือทำจริง"
       icon={<ArrowLeftRight className="h-5 w-5 text-think-600" aria-hidden="true" />}
@@ -405,6 +410,7 @@ export const KnowledgePage = () => (
 
     {/* ---------- นำมาประกอบกัน ---------- */}
     <Card
+      accent="brand"
       title="ส่วนที่ 5: โครงตรรกะทั้งหมดของระบบ"
       subtitle="ตรรกะทั้งหมดที่ต้องเขียนใน Event Sheet"
       icon={<BookOpenCheck className="h-5 w-5 text-mint-600" aria-hidden="true" />}
@@ -467,6 +473,7 @@ export const KnowledgePage = () => (
 
     {/* ---------- ข้อผิดพลาดที่พบบ่อย ---------- */}
     <Card
+      accent="bubble"
       title="ส่วนที่ 6: ข้อผิดพลาดที่พบบ่อย"
       subtitle="อ่านไว้ก่อน จะได้ไม่เสียเวลาหาสาเหตุนาน"
       icon={<TriangleAlert className="h-5 w-5 text-bubble-600" aria-hidden="true" />}
@@ -505,6 +512,7 @@ export const KnowledgePage = () => (
 
     {/* ---------- คำศัพท์ ---------- */}
     <Card
+      accent="slate"
       title="คำศัพท์ที่ควรรู้"
       subtitle="ศัพท์ที่จะเจอทั้งในเว็บนี้และใน Construct 2"
       icon={<CircleHelp className="h-5 w-5 text-slate-500" aria-hidden="true" />}

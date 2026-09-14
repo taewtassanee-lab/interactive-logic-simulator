@@ -97,6 +97,7 @@ export const ArrayPlayground = () => {
 
   return (
     <Card
+      accent="lemon"
       title="ลองเล่น Array ด้วยตัวเอง"
       subtitle="กดปุ่มแล้วสังเกตว่าเลข Index และ Array.Width เปลี่ยนอย่างไร เล่นผิดได้ ไม่มีผลต่อคะแนน"
       icon={<Dices className="h-5 w-5 text-think-600" aria-hidden="true" />}
