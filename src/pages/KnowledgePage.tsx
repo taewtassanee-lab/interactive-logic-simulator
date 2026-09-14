@@ -117,15 +117,16 @@ const ConceptList = ({
                   </span>
                 )}
               </span>
+              {/* ใช้คำแทนเครื่องหมายบวกลบ ผู้เรียนจะได้รู้ทันทีว่ากดแล้วเกิดอะไรขึ้น
+                  กำหนดความกว้างขั้นต่ำไว้ ปุ่มจะได้ไม่ขยับตอนสลับคำ */}
               <span
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border-2 font-display text-lg font-bold transition ${
+                className={`flex min-w-[5.5rem] shrink-0 items-center justify-center rounded-xl border-2 px-3 py-1.5 font-display text-sm font-bold transition ${
                   open
-                    ? `border-white/70 bg-white/70 ${text}`
-                    : 'border-slate-200 bg-white text-slate-400'
+                    ? `border-white/70 bg-white/80 ${text}`
+                    : 'border-brand-200 bg-white text-brand-700'
                 }`}
-                aria-hidden="true"
               >
-                {open ? '−' : '+'}
+                {open ? 'ปิด' : 'เปิดอ่าน'}
               </span>
             </button>
 
