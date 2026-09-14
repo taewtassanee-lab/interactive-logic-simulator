@@ -21,7 +21,7 @@ import {
   getWorksheetFields,
   getWorksheetProgress,
 } from '../utils/format';
-import type { DebugRow, WorksheetData } from '../types';
+import type { DebugRow, PersonReflection, WorksheetData } from '../types';
 
 const Q3_CHOICES = [
   'เปลี่ยนไปหน้า Summary',
@@ -41,6 +41,7 @@ export const WorksheetPage = () => {
   const [showMissing, setShowMissing] = useState(false);
 
   const w = state.worksheet;
+  const pair = state.pair;
   const progress = getWorksheetProgress(w);
   const missing = getMissingWorksheetFields(w);
   const totalFields = getWorksheetFields(w).length;
@@ -368,102 +369,165 @@ export const WorksheetPage = () => {
         icon={<span className="flex h-6 w-6 items-center justify-center rounded-md bg-think-100 text-xs font-bold text-think-800">3</span>}
       >
         <div className="space-y-5">
-          <fieldset>
-            <legend className="mb-2 text-sm font-medium text-slate-700">
-              1. ฉันได้ปฏิบัติหน้าที่ใดบ้าง
-              <span className="ml-1 text-bubble-600" aria-hidden="true">
-                *
-              </span>
-            </legend>
-            <div className="flex flex-wrap gap-3">
-              {(
-                [
-                  { key: 'driver' as const, label: 'Driver (ควบคุมเมาส์และคีย์บอร์ด)' },
-                  { key: 'navigator' as const, label: 'Navigator (ตรวจตรรกะและให้คำแนะนำ)' },
-                ]
-              ).map((role) => (
-                <label
-                  key={role.key}
-                  className={`flex cursor-pointer items-center gap-2.5 rounded-lg border px-3 py-2.5 text-sm transition ${
-                    w.rolesPlayed[role.key]
-                      ? 'border-think-500 bg-think-50 font-medium text-think-900'
-                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={w.rolesPlayed[role.key]}
-                    onChange={(e) =>
-                      setW({ rolesPlayed: { ...w.rolesPlayed, [role.key]: e.target.checked } })
-                    }
-                    className="h-4 w-4 accent-think-600"
-                  />
-                  {role.label}
-                </label>
-              ))}
-            </div>
-          </fieldset>
-
           <TextArea
-            label="2. Web App ช่วยให้เข้าใจ Array และ Function อย่างไร"
+            label="1. Web App ช่วยให้เข้าใจ Array และ Function อย่างไร (ตอบร่วมกันทั้งคู่)"
             value={w.q3AppHelp}
             onChange={(v) => setW({ q3AppHelp: v })}
-            placeholder="เขียนจากประสบการณ์ของตนเอง ว่าส่วนใดของเว็บช่วยให้เข้าใจ และเข้าใจเรื่องอะไรเพิ่มขึ้น"
-            rows={3}
-            required
-          />
-          <TextArea
-            label="3. สิ่งที่คู่ของฉันทำได้ดีในการทำงานร่วมกันคืออะไร"
-            value={w.q3PartnerGood}
-            onChange={(v) => setW({ q3PartnerGood: v })}
-            placeholder="ยกตัวอย่างสิ่งที่คู่ของตนทำระหว่างกิจกรรมนี้จริง ๆ"
-            rows={3}
-            required
-          />
-          <TextArea
-            label="4. สิ่งที่ต้องพัฒนาต่อไปในการแก้ปัญหา Bug คืออะไร"
-            value={w.q3ToImprove}
-            onChange={(v) => setW({ q3ToImprove: v })}
-            placeholder="ระบุสิ่งที่ตนเองทำได้ยังไม่ดีในครั้งนี้ และจะปรับอย่างไรในครั้งหน้า"
+            placeholder="เขียนว่าส่วนใดของเว็บช่วยให้เข้าใจ และเข้าใจเรื่องอะไรเพิ่มขึ้น"
             rows={3}
             required
           />
 
-          <fieldset>
-            <legend className="mb-2 text-sm font-medium text-slate-700">
-              5. ประเมินความร่วมมือในการทำงานคู่
+          {/*
+            ข้อ 2 แยกช่องรายคน เพราะคำถามใช้สรรพนามรายบุคคลว่า "คู่ของฉัน" และ "ฉันต้องพัฒนา"
+            ถ้าใช้ช่องเดียวต่อคู่จะกลายเป็นคนหนึ่งเขียนแทนอีกคน ผิดเจตนาของคำถาม
+            และครูใช้เป็นหลักฐานการประเมินรายบุคคลไม่ได้
+            ทั้งคู่ผลัดกันพิมพ์ที่เครื่อง Driver เครื่องเดียว ข้อมูลจึงไม่แยกกันคนละชุด
+          */}
+          <div>
+            <p className="mb-1 text-sm font-medium text-slate-700">
+              2. สะท้อนการทำงานร่วมกัน
               <span className="ml-1 text-bubble-600" aria-hidden="true">
                 *
               </span>
-            </legend>
-            <div className="flex flex-wrap items-center gap-2">
-              {[1, 2, 3, 4, 5].map((n) => {
-                const active = w.collaborationRating >= n;
+            </p>
+            <p className="mb-2.5 text-xs text-slate-500">
+              ส่วนนี้ต้องเขียน<strong>ทั้งสองคน</strong> ผลัดกันพิมพ์ที่เครื่องนี้ได้เลย
+              คำตอบของแต่ละคนจะแยกกันอยู่คนละช่องและลงในไฟล์ PDF ทั้งคู่
+            </p>
+
+            <div className="grid gap-3 lg:grid-cols-2">
+              {w.reflections.map((r, i) => {
+                const name = i === 0 ? pair.driverName : pair.navigatorName;
+                const number = i === 0 ? pair.driverNumber : pair.navigatorNumber;
+                const tone = i === 0 ? 'brand' : 'think';
+                const setR = (patch: Partial<PersonReflection>) =>
+                  setW({
+                    reflections: w.reflections.map((x, k) =>
+                      k === i ? { ...x, ...patch } : x,
+                    ) as [PersonReflection, PersonReflection],
+                  });
+
                 return (
-                  <button
-                    key={n}
-                    type="button"
-                    onClick={() => setW({ collaborationRating: n })}
-                    aria-pressed={w.collaborationRating === n}
-                    aria-label={`ให้คะแนน ${n} ดาว`}
-                    className="rounded-md p-1 transition hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-lemon-400"
+                  <div
+                    key={i}
+                    className={`rounded-[1.25rem] border-2 p-3.5 ${
+                      tone === 'brand'
+                        ? 'border-brand-200 bg-gradient-to-b from-brand-50/60 to-white'
+                        : 'border-think-200 bg-gradient-to-b from-think-50/60 to-white'
+                    }`}
                   >
-                    <Star
-                      className={`h-8 w-8 ${
-                        active ? 'fill-lemon-400 text-lemon-500' : 'text-slate-300'
-                      }`}
-                      aria-hidden="true"
-                    />
-                  </button>
+                    <p className="mb-3 flex items-center gap-2">
+                      <span
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-b font-display text-sm font-bold text-white shadow-clay-sm ${
+                          tone === 'brand'
+                            ? 'from-brand-400 to-brand-600'
+                            : 'from-think-400 to-think-600'
+                        }`}
+                      >
+                        {i + 1}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block truncate font-display text-sm font-bold text-slate-800">
+                          {name || `ผู้เรียนคนที่ ${i + 1}`}
+                        </span>
+                        <span className="block text-xs text-slate-500">
+                          {number ? `เลขที่ ${number}` : 'ยังไม่ได้กรอกชื่อในหน้าเริ่มต้นใช้งาน'}
+                        </span>
+                      </span>
+                    </p>
+
+                    <fieldset className="mb-3">
+                      <legend className="mb-1.5 text-xs font-semibold text-slate-600">
+                        บทบาทที่ฉันได้ลงมือทำ
+                      </legend>
+                      <div className="flex flex-wrap gap-2">
+                        {(
+                          [
+                            { key: 'driver' as const, label: 'Driver' },
+                            { key: 'navigator' as const, label: 'Navigator' },
+                          ]
+                        ).map((role) => (
+                          <label
+                            key={role.key}
+                            className={`flex cursor-pointer items-center gap-2 rounded-xl border-2 px-3 py-1.5 text-sm transition ${
+                              r.rolesPlayed[role.key]
+                                ? 'border-mint-400 bg-mint-50 font-semibold text-mint-900'
+                                : 'border-slate-200 bg-white text-slate-600'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={r.rolesPlayed[role.key]}
+                              onChange={(e) =>
+                                setR({
+                                  rolesPlayed: {
+                                    ...r.rolesPlayed,
+                                    [role.key]: e.target.checked,
+                                  },
+                                })
+                              }
+                              className="h-4 w-4 accent-mint-600"
+                            />
+                            {role.label}
+                          </label>
+                        ))}
+                      </div>
+                    </fieldset>
+
+                    <div className="space-y-3">
+                      <TextArea
+                        label="สิ่งที่คู่ของฉันทำได้ดี"
+                        value={r.partnerGood}
+                        onChange={(v) => setR({ partnerGood: v })}
+                        placeholder="ยกตัวอย่างสิ่งที่คู่ของตนทำระหว่างกิจกรรมนี้จริง ๆ"
+                        rows={3}
+                      />
+                      <TextArea
+                        label="สิ่งที่ฉันต้องพัฒนาต่อไป"
+                        value={r.toImprove}
+                        onChange={(v) => setR({ toImprove: v })}
+                        placeholder="ระบุสิ่งที่ตนเองทำได้ยังไม่ดี และจะปรับอย่างไรในครั้งหน้า"
+                        rows={3}
+                      />
+                    </div>
+
+                    <fieldset className="mt-3">
+                      <legend className="mb-1.5 text-xs font-semibold text-slate-600">
+                        คะแนนความร่วมมือในการทำงานคู่
+                      </legend>
+                      <div className="flex flex-wrap items-center gap-1">
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <button
+                            key={n}
+                            type="button"
+                            onClick={() => setR({ collaborationRating: n })}
+                            aria-pressed={r.collaborationRating === n}
+                            aria-label={`${name || `ผู้เรียนคนที่ ${i + 1}`} ให้คะแนน ${n} ดาว`}
+                            className="rounded-md p-0.5 transition hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-lemon-400"
+                          >
+                            <Star
+                              className={`h-7 w-7 ${
+                                r.collaborationRating >= n
+                                  ? 'fill-lemon-400 text-lemon-500'
+                                  : 'text-slate-300'
+                              }`}
+                              aria-hidden="true"
+                            />
+                          </button>
+                        ))}
+                        <span className="ml-1.5 text-xs font-medium text-slate-600">
+                          {r.collaborationRating > 0
+                            ? `${r.collaborationRating} จาก 5`
+                            : 'ยังไม่ให้คะแนน'}
+                        </span>
+                      </div>
+                    </fieldset>
+                  </div>
                 );
               })}
-              <span className="ml-2 text-sm font-medium text-slate-600">
-                {w.collaborationRating > 0
-                  ? `${w.collaborationRating} จาก 5 คะแนน`
-                  : 'ยังไม่ได้ให้คะแนน'}
-              </span>
             </div>
-          </fieldset>
+          </div>
         </div>
       </Card>
 

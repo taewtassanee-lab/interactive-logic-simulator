@@ -1,5 +1,5 @@
 import { APP_CONFIG } from '../config';
-import type { AppState } from '../types';
+import type { AppState, PersonReflection, WorksheetData } from '../types';
 
 export const createInitialState = (): AppState => ({
   pair: {
@@ -51,16 +51,56 @@ export const createInitialState = (): AppState => ({
         evidence: '',
       },
     ],
-    rolesPlayed: { driver: false, navigator: false },
     q3AppHelp: '',
-    q3PartnerGood: '',
-    q3ToImprove: '',
-    collaborationRating: 0,
+    reflections: [
+      { rolesPlayed: { driver: false, navigator: false }, partnerGood: '', toImprove: '', collaborationRating: 0 },
+      { rolesPlayed: { driver: false, navigator: false }, partnerGood: '', toImprove: '', collaborationRating: 0 },
+    ],
   },
   capxFile: null,
   lastDebugLog: [],
   pdfGeneratedAt: null,
 });
+
+/**
+ * ย้ายคำตอบส่วนที่ 3 จากรูปแบบเดิมที่มีช่องเดียวต่อคู่ มาเป็นแยกรายคน
+ *
+ * ข้อมูลเดิมที่นักเรียนพิมพ์ไว้แล้วจะถูกยกไปเป็นคำตอบของผู้เรียนคนที่ 1
+ * เพื่อไม่ให้คำตอบที่กรอกไปแล้วหายไปเมื่ออัปเดตระบบ
+ */
+type LegacyWorksheet = Partial<WorksheetData> & {
+  rolesPlayed?: { driver?: boolean; navigator?: boolean };
+  q3PartnerGood?: string;
+  q3ToImprove?: string;
+  collaborationRating?: number;
+};
+
+const emptyReflection = (): PersonReflection => ({
+  rolesPlayed: { driver: false, navigator: false },
+  partnerGood: '',
+  toImprove: '',
+  collaborationRating: 0,
+});
+
+const mergeReflections = (saved?: LegacyWorksheet): [PersonReflection, PersonReflection] => {
+  const list = saved?.reflections;
+  if (Array.isArray(list) && list.length === 2) {
+    return [
+      { ...emptyReflection(), ...list[0], rolesPlayed: { ...emptyReflection().rolesPlayed, ...list[0]?.rolesPlayed } },
+      { ...emptyReflection(), ...list[1], rolesPlayed: { ...emptyReflection().rolesPlayed, ...list[1]?.rolesPlayed } },
+    ];
+  }
+  const legacy: PersonReflection = {
+    rolesPlayed: {
+      driver: Boolean(saved?.rolesPlayed?.driver),
+      navigator: Boolean(saved?.rolesPlayed?.navigator),
+    },
+    partnerGood: saved?.q3PartnerGood ?? '',
+    toImprove: saved?.q3ToImprove ?? '',
+    collaborationRating: Number(saved?.collaborationRating) || 0,
+  };
+  return [legacy, emptyReflection()];
+};
 
 /** รวมข้อมูลที่โหลดมากับค่าเริ่มต้น กัน error เมื่อเวอร์ชันข้อมูลเก่าไม่มีบางฟิลด์ */
 const mergeState = (saved: Partial<AppState>): AppState => {
@@ -78,7 +118,7 @@ const mergeState = (saved: Partial<AppState>): AppState => {
     worksheet: {
       ...base.worksheet,
       ...(saved.worksheet ?? {}),
-      rolesPlayed: { ...base.worksheet.rolesPlayed, ...(saved.worksheet?.rolesPlayed ?? {}) },
+      reflections: mergeReflections(saved.worksheet),
       debugRows:
         saved.worksheet?.debugRows && saved.worksheet.debugRows.length === 2
           ? saved.worksheet.debugRows.map((row, i) => ({

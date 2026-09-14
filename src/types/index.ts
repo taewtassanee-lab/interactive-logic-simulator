@@ -188,6 +188,22 @@ export interface DebugRow {
   evidence: string; // หลักฐานจาก State Monitor
 }
 
+/**
+ * คำตอบสะท้อนตนเองของผู้เรียนหนึ่งคน
+ *
+ * แยกเก็บรายคนเพราะคำถามส่วนนี้ใช้สรรพนามรายบุคคล เช่น "คู่ของฉัน" และ "ฉันต้องพัฒนา"
+ * ถ้าเก็บช่องเดียวต่อคู่ จะกลายเป็นคนหนึ่งเขียนแทนอีกคน ซึ่งผิดเจตนาของคำถาม
+ * และใช้เป็นหลักฐานการประเมินรายบุคคลไม่ได้
+ */
+export interface PersonReflection {
+  /** บทบาทที่คนนี้ได้ลงมือทำจริงระหว่างกิจกรรม */
+  rolesPlayed: { driver: boolean; navigator: boolean };
+  partnerGood: string;
+  toImprove: string;
+  /** คะแนนความร่วมมือ 1-5 */
+  collaborationRating: number;
+}
+
 export interface WorksheetData {
   /* ส่วนที่ 1 */
   q1Observation: string;
@@ -200,11 +216,10 @@ export interface WorksheetData {
   /* ส่วนที่ 2 */
   debugRows: DebugRow[];
   /* ส่วนที่ 3 */
-  rolesPlayed: { driver: boolean; navigator: boolean };
+  /** คำตอบร่วมของคู่ เป็นความเห็นต่อตัวสื่อ ไม่ใช่การประเมินตัวบุคคล */
   q3AppHelp: string;
-  q3PartnerGood: string;
-  q3ToImprove: string;
-  collaborationRating: number; // 1-5
+  /** ดัชนี 0 คือผู้เรียนที่กรอกชื่อในช่อง Driver ดัชนี 1 คือช่อง Navigator */
+  reflections: [PersonReflection, PersonReflection];
 }
 
 /* ---------- ไฟล์ผลงาน ---------- */

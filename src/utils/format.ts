@@ -118,30 +118,36 @@ export const getWorksheetFields = (w: WorksheetData): WorksheetField[] => [
     filled: w.debugRows[1].evidence.trim().length > 0,
   },
   {
-    key: 'roles',
-    label: 'ส่วนที่ 3 ข้อ 1: บทบาทที่ได้ปฏิบัติ',
-    filled: w.rolesPlayed.driver || w.rolesPlayed.navigator,
-  },
-  {
     key: 'appHelp',
-    label: 'ส่วนที่ 3 ข้อ 2: Web App ช่วยให้เข้าใจ Array และ Function อย่างไร',
+    label: 'ส่วนที่ 3: Web App ช่วยให้เข้าใจ Array และ Function อย่างไร',
     filled: w.q3AppHelp.trim().length >= 10,
   },
-  {
-    key: 'partnerGood',
-    label: 'ส่วนที่ 3 ข้อ 3: สิ่งที่คู่ของฉันทำได้ดี',
-    filled: w.q3PartnerGood.trim().length >= 5,
-  },
-  {
-    key: 'toImprove',
-    label: 'ส่วนที่ 3 ข้อ 4: สิ่งที่ต้องพัฒนาต่อไป',
-    filled: w.q3ToImprove.trim().length >= 5,
-  },
-  {
-    key: 'rating',
-    label: 'ส่วนที่ 3 ข้อ 5: คะแนนความร่วมมือในการทำงานคู่',
-    filled: w.collaborationRating > 0,
-  },
+  // นับคำตอบสะท้อนตนเองแยกรายคน ใบงานจะครบ 100% ก็ต่อเมื่อเขียนครบทั้งสองคน
+  ...w.reflections.flatMap((r, i): WorksheetField[] => {
+    const who = `ผู้เรียนคนที่ ${i + 1}`;
+    return [
+      {
+        key: `roles${i}`,
+        label: `ส่วนที่ 3 (${who}): บทบาทที่ได้ปฏิบัติ`,
+        filled: r.rolesPlayed.driver || r.rolesPlayed.navigator,
+      },
+      {
+        key: `partnerGood${i}`,
+        label: `ส่วนที่ 3 (${who}): สิ่งที่คู่ของฉันทำได้ดี`,
+        filled: r.partnerGood.trim().length >= 5,
+      },
+      {
+        key: `toImprove${i}`,
+        label: `ส่วนที่ 3 (${who}): สิ่งที่ต้องพัฒนาต่อไป`,
+        filled: r.toImprove.trim().length >= 5,
+      },
+      {
+        key: `rating${i}`,
+        label: `ส่วนที่ 3 (${who}): คะแนนความร่วมมือ`,
+        filled: r.collaborationRating > 0,
+      },
+    ];
+  }),
 ];
 
 export const getWorksheetProgress = (w: WorksheetData): number => {

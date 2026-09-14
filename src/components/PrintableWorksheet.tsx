@@ -67,7 +67,7 @@ const show = (v: string) => (v.trim() ? v.trim() : EMPTY);
 export const PrintableWorksheet = forwardRef<HTMLDivElement, { state: AppState }>(
   ({ state }, ref) => {
     const { pair, worksheet, missions, session, capxFile, lastDebugLog } = state;
-    const stars = '★'.repeat(worksheet.collaborationRating) + '☆'.repeat(5 - worksheet.collaborationRating);
+    const stars = (n: number) => '★'.repeat(n) + '☆'.repeat(5 - n);
 
     return (
       <div ref={ref} style={S.page}>
@@ -173,37 +173,62 @@ export const PrintableWorksheet = forwardRef<HTMLDivElement, { state: AppState }
         {/* ---------- ส่วนที่ 3 ---------- */}
         <p style={S.sectionTitle}>ส่วนที่ 3 สรุปประเมินตนเอง (Metacognition)</p>
 
-        <p style={S.qLabel}>1. ฉันได้ปฏิบัติหน้าที่ใดบ้าง</p>
-        <div style={S.answer}>
-          {worksheet.rolesPlayed.driver ? '[✓]' : '[  ]'} Driver &nbsp;&nbsp;&nbsp;
-          {worksheet.rolesPlayed.navigator ? '[✓]' : '[  ]'} Navigator &nbsp;&nbsp;&nbsp;
-          (สลับบทบาทระหว่างกิจกรรม {session.roleSwitchCount} ครั้ง)
-          {session.roleSwitchLog.length > 0 && (
-            <span style={{ display: 'block', marginTop: '4px', fontSize: '11.5px', color: '#475569' }}>
-              เวลาที่สลับ:{' '}
-              {session.roleSwitchLog
-                .map((t) =>
-                  new Date(t).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
-                )
-                .join(' น. / ')}{' '}
-              น.
-            </span>
-          )}
-        </div>
-
-        <p style={S.qLabel}>2. Web App ช่วยให้เข้าใจ Array และ Function อย่างไร</p>
+        <p style={S.qLabel}>1. Web App ช่วยให้เข้าใจ Array และ Function อย่างไร (ตอบร่วมกัน)</p>
         <div style={S.answer}>{show(worksheet.q3AppHelp)}</div>
 
-        <p style={S.qLabel}>3. สิ่งที่คู่ของฉันทำได้ดีในการทำงานร่วมกันคืออะไร</p>
-        <div style={S.answer}>{show(worksheet.q3PartnerGood)}</div>
+        <p style={S.qLabel}>
+          2. การสะท้อนตนเองรายบุคคล (สลับบทบาทระหว่างกิจกรรม {session.roleSwitchCount} ครั้ง)
+        </p>
+        {session.roleSwitchLog.length > 0 && (
+          <p style={{ margin: '0 0 6px', fontSize: '11.5px', color: '#475569' }}>
+            เวลาที่สลับ:{' '}
+            {session.roleSwitchLog
+              .map((t) =>
+                new Date(t).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+              )
+              .join(' น. / ')}{' '}
+            น.
+          </p>
+        )}
 
-        <p style={S.qLabel}>4. สิ่งที่ต้องพัฒนาต่อไปในการแก้ปัญหา Bug คืออะไร</p>
-        <div style={S.answer}>{show(worksheet.q3ToImprove)}</div>
-
-        <p style={S.qLabel}>5. ประเมินความร่วมมือในการทำงานคู่</p>
-        <div style={S.answer}>
-          {stars} ({worksheet.collaborationRating} จาก 5 คะแนน)
-        </div>
+        {/* หนึ่งตารางต่อหนึ่งคน ครูจึงใช้เป็นหลักฐานการประเมินรายบุคคลได้ */}
+        <table style={S.table}>
+          <thead>
+            <tr>
+              <th style={{ ...S.th, width: '28%' }}>ผู้เรียน</th>
+              <th style={{ ...S.th, width: '18%' }}>บทบาทที่ได้ทำ</th>
+              <th style={S.th}>สิ่งที่คู่ของฉันทำได้ดี</th>
+              <th style={S.th}>สิ่งที่ฉันต้องพัฒนาต่อไป</th>
+              <th style={{ ...S.th, width: '16%' }}>ความร่วมมือ</th>
+            </tr>
+          </thead>
+          <tbody>
+            {worksheet.reflections.map((r, i) => {
+              const name = i === 0 ? pair.driverName : pair.navigatorName;
+              const number = i === 0 ? pair.driverNumber : pair.navigatorNumber;
+              const roles = [
+                r.rolesPlayed.driver ? 'Driver' : '',
+                r.rolesPlayed.navigator ? 'Navigator' : '',
+              ]
+                .filter(Boolean)
+                .join(' / ');
+              return (
+                <tr key={i}>
+                  <td style={S.td}>
+                    {show(name || `ผู้เรียนคนที่ ${i + 1}`)}
+                    {number ? ` (เลขที่ ${number})` : ''}
+                  </td>
+                  <td style={S.td}>{roles || '-'}</td>
+                  <td style={S.td}>{show(r.partnerGood)}</td>
+                  <td style={S.td}>{show(r.toImprove)}</td>
+                  <td style={S.td}>
+                    {stars(r.collaborationRating)} ({r.collaborationRating}/5)
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
 
         {/* ---------- ผลการผ่านภารกิจ ---------- */}
         <p style={S.sectionTitle}>ผลการผ่านภารกิจจากระบบจำลอง</p>
