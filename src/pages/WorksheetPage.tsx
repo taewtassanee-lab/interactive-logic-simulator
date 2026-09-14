@@ -7,6 +7,7 @@ import {
   ListChecks,
   Loader2,
   Star,
+  Target,
   Wrench,
 } from 'lucide-react';
 import { APP_CONFIG } from '../config';
@@ -166,6 +167,39 @@ export const WorksheetPage = () => {
         )}
       </Card>
 
+      {/* ---------- ก่อนลงมือ: เป้าหมายที่คู่ตั้งเอง ---------- */}
+      {/* วางไว้ก่อนส่วนที่ 1 เพราะต้องเขียนก่อนเริ่มทำจริง ไม่ใช่ย้อนเขียนทีหลัง
+          เป็นช่วงเดียวในใบงานที่ผู้เรียนเป็นคนกำหนดเป้าหมายเอง ไม่ใช่ครูกำหนดให้ */}
+      <Card
+        accent="lemon"
+        title="ก่อนลงมือ: เป้าหมายของคู่เรา"
+        subtitle="เขียนก่อนเริ่มทำภารกิจ แล้วกลับมาอ่านอีกครั้งตอนท้ายคาบ"
+        icon={<Target className="h-5 w-5 text-peach-600" aria-hidden="true" />}
+      >
+        <p className="mb-3 rounded-2xl border-2 border-dashed border-lemon-300 bg-lemon-50/70 px-3.5 py-2.5 text-sm leading-relaxed text-slate-700">
+          คุยกับคู่ของตัวเองสั้น ๆ แล้วตกลงกันว่าคาบนี้เราจะทำอะไรให้สำเร็จ
+          เป้าหมายที่ตั้งเองจะทำให้รู้ว่าต้องโฟกัสตรงไหน และตอนจบคาบจะวัดได้ว่าทำได้ตามที่ตั้งใจหรือไม่
+        </p>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <TextArea
+            label="1. คาบนี้คู่เราตั้งเป้าว่าจะทำอะไรให้สำเร็จ"
+            value={w.goalTarget}
+            onChange={(v) => setW({ goalTarget: v })}
+            placeholder="เขียนให้วัดได้ เช่น แก้ Bug ให้ผ่านทั้ง 2 ภารกิจโดยเปิดคำใบ้ไม่เกิน 1 ครั้ง และเขียน Event Sheet ให้สลับหน้า Layout ได้เอง"
+            rows={3}
+            required
+          />
+          <TextArea
+            label="2. เราจะไปให้ถึงเป้าหมายนั้นได้อย่างไร"
+            value={w.goalHow}
+            onChange={(v) => setW({ goalHow: v })}
+            placeholder="ตกลงวิธีทำงานร่วมกัน เช่น อ่านโจทย์ให้จบก่อนแตะเมาส์ Navigator อ่าน State Monitor ออกเสียงทุกครั้งที่ Run และลองเองก่อน 2 รอบจึงเปิดคำใบ้"
+            rows={3}
+            required
+          />
+        </div>
+      </Card>
+
       {/* ---------- ส่วนที่ 1 ---------- */}
       <Card
         title="ส่วนที่ 1: การวิเคราะห์ตรรกะแบบทดสอบบน Interactive Web App"
@@ -314,6 +348,22 @@ export const WorksheetPage = () => {
                 </div>
               </div>
 
+              {/* ช่องนี้ต้องเขียนก่อนกด Run จึงแยกกรอบและวางไว้เหนือช่องสาเหตุ
+                  ถ้าปล่อยให้อยู่แถวเดียวกัน ผู้เรียนจะย้อนมาเขียนทีหลังเมื่อรู้คำตอบแล้ว */}
+              <div
+                className="mb-3 rounded-2xl border-2 border-think-200 bg-think-50/60 px-3.5 py-3"
+                style={{ boxShadow: '0 4px 0 0 rgba(139,92,246,0.2)' }}
+              >
+                <TextArea
+                  label="แผนที่วางไว้ก่อนลงมือ (เขียนก่อนกด Run)"
+                  value={row.plan}
+                  onChange={(v) => setRow(index, { plan: v })}
+                  placeholder="เดาไว้ก่อนว่าปัญหาน่าจะอยู่ตรงไหน และจะลองอะไรเป็นอย่างแรก เช่น คิดว่าคำสั่งลบข้อสอบยังไม่ได้อยู่ใน Function จะลองย้ายเข้าไปแล้ว Run ดู Array.Width"
+                  rows={2}
+                  required
+                />
+              </div>
+
               <div className="grid gap-3 lg:grid-cols-2">
                 <TextArea
                   label="สาเหตุที่พบจากการดู Web App / Event Sheet"
@@ -378,15 +428,35 @@ export const WorksheetPage = () => {
             required
           />
 
+          {/* ช่องเดียวในใบงานที่ไม่มีคำตอบถูกผิดตายตัว ทุกคู่จึงได้คิดต่อยอดเอง
+              ไม่ใช่เฉพาะกลุ่มที่ทำเสร็จก่อนแล้วได้ภารกิจเสริม */}
+          <div
+            className="rounded-2xl border-2 border-bubble-200 bg-bubble-50/60 px-3.5 py-3"
+            style={{ boxShadow: '0 4px 0 0 rgba(236,72,153,0.2)' }}
+          >
+            <TextArea
+              label="2. ถ้าจะต่อยอดระบบแบบทดสอบนี้ให้ดีขึ้นอีก 1 อย่าง คู่เราจะเพิ่มอะไร และจะทำอย่างไร"
+              value={w.q4Extend}
+              onChange={(v) => setW({ q4Extend: v })}
+              placeholder="คิดเองได้เต็มที่ ข้อนี้ไม่มีคำตอบตายตัว เขียนทั้งสิ่งที่จะเพิ่ม และบอกคร่าว ๆ ว่าจะใช้ Array ตัวแปร หรือเงื่อนไขอะไรทำให้เกิดขึ้นจริง"
+              rows={3}
+              required
+            />
+            <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
+              เช่น เพิ่มระบบจับเวลารายข้อ เพิ่มพลังชีวิตที่ลดลงเมื่อตอบผิด
+              เก็บสถิติข้อที่ตอบผิดบ่อยไว้ถามซ้ำ หรือแยกระดับความยากของข้อสอบ
+            </p>
+          </div>
+
           {/*
-            ข้อ 2 แยกช่องรายคน เพราะคำถามใช้สรรพนามรายบุคคลว่า "คู่ของฉัน" และ "ฉันต้องพัฒนา"
+            ข้อ 3 แยกช่องรายคน เพราะคำถามใช้สรรพนามรายบุคคลว่า "คู่ของฉัน" และ "ฉันต้องพัฒนา"
             ถ้าใช้ช่องเดียวต่อคู่จะกลายเป็นคนหนึ่งเขียนแทนอีกคน ผิดเจตนาของคำถาม
             และครูใช้เป็นหลักฐานการประเมินรายบุคคลไม่ได้
             ทั้งคู่ผลัดกันพิมพ์ที่เครื่อง Driver เครื่องเดียว ข้อมูลจึงไม่แยกกันคนละชุด
           */}
           <div>
             <p className="mb-1 text-sm font-medium text-slate-700">
-              2. สะท้อนการทำงานร่วมกัน
+              3. สะท้อนการทำงานร่วมกัน
               <span className="ml-1 text-bubble-600" aria-hidden="true">
                 *
               </span>

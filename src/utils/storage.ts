@@ -30,6 +30,8 @@ export const createInitialState = (): AppState => ({
     lastBlockCount: 0,
   },
   worksheet: {
+    goalTarget: '',
+    goalHow: '',
     q1Observation: '',
     q2FillIn: '',
     q3Choice: '',
@@ -39,6 +41,7 @@ export const createInitialState = (): AppState => ({
       {
         point: 'จุดที่ 1 ระบบสุ่ม',
         symptom: 'สุ่มได้ข้อสอบข้อเดิมซ้ำ ๆ ไม่เปลี่ยนข้อ',
+        plan: '',
         cause: '',
         fix: '',
         evidence: '',
@@ -46,12 +49,14 @@ export const createInitialState = (): AppState => ({
       {
         point: 'จุดที่ 2 เงื่อนไขจบเกม',
         symptom: 'ทำข้อสอบครบแล้วแต่ไม่ยอมเปลี่ยนไปหน้าสรุปผล',
+        plan: '',
         cause: '',
         fix: '',
         evidence: '',
       },
     ],
     q3AppHelp: '',
+    q4Extend: '',
     reflections: [
       { rolesPlayed: { driver: false, navigator: false }, partnerGood: '', toImprove: '', collaborationRating: 0 },
       { rolesPlayed: { driver: false, navigator: false }, partnerGood: '', toImprove: '', collaborationRating: 0 },

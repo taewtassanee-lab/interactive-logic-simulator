@@ -13,6 +13,7 @@ import { Button, Card, Pill, TextField } from '../components/Ui';
 import { useApp } from '../context/AppContext';
 import { useToast } from '../components/Toast';
 import { StudentAnswerForm, type AnswerDraft } from '../components/live/StudentForms';
+import { SelfFeedback } from '../components/live/SelfFeedback';
 import { getPreset, TYPE_LABELS } from '../data/liveActivities';
 import { useSettings } from '../context/SettingsContext';
 import { applyOverrides } from '../utils/activityOverrides';
@@ -58,6 +59,8 @@ export const LivePage = () => {
   const [misses, setMisses] = useState(0);
   /** รหัสกิจกรรมที่ตอบไปแล้วบนเครื่องนี้ ใช้ตัดสินว่าจะแสดงฟอร์มหรือหน้าขอบคุณ */
   const [answeredId, setAnsweredId] = useState('');
+  // เก็บคำตอบที่ส่งสำเร็จไว้ เพื่อคืนผลให้เจ้าของคำตอบเห็นทันทีว่าถูกผิดตรงไหน
+  const [lastDraft, setLastDraft] = useState<AnswerDraft | null>(null);
   const [editing, setEditing] = useState(false);
 
   /** เวลาที่เริ่มเห็นโจทย์ ใช้คำนวณเวลาที่ใช้ตอบเพื่อจัดอันดับ */
@@ -173,6 +176,7 @@ export const LivePage = () => {
     }
     setError('');
     setAnsweredId(session.activityId);
+    setLastDraft(draft);
     setEditing(false);
     notify('ส่งคำตอบเรียบร้อยแล้ว', 'success');
   };
@@ -376,14 +380,24 @@ export const LivePage = () => {
 
       {answered && !editing && session && (
         <Card
-          title="ส่งคำตอบเรียบร้อยแล้ว"
-          subtitle="ดูผลรวมของทั้งห้องได้จากจอหน้าชั้นเรียน"
+          accent="mint"
+          title="ผลของฉัน"
+          subtitle="ตรวจให้แล้วทันที ดูว่าตรงไหนยังเข้าใจคลาดเคลื่อน"
           icon={<CircleCheck className="h-5 w-5 text-mint-600" aria-hidden="true" />}
         >
-          <p className="text-sm leading-relaxed text-slate-600">
+          <p className="mb-3 text-sm leading-relaxed text-slate-600">
             คำตอบของ <strong>{identity.studentName}</strong> ถูกบันทึกแล้ว
             ถ้าต้องการเปลี่ยนคำตอบ กดปุ่มด้านล่างได้เลย ระบบจะเก็บคำตอบล่าสุดไว้แทนของเดิม
           </p>
+
+          {/* ผลรายข้อของตัวเอง ไม่ใช่ผลรวมของทั้งห้อง ผู้เรียนจึงรู้ว่าตัวเองต้องกลับไปทบทวนเรื่องใด */}
+          {preset && lastDraft ? (
+            <SelfFeedback preset={preset} draft={lastDraft} />
+          ) : (
+            <p className="rounded-2xl bg-slate-50 px-3.5 py-2.5 text-sm leading-relaxed text-slate-500">
+              ผลรายข้อจะขึ้นให้ดูทันทีหลังกดส่งในกิจกรรมนี้ ส่วนผลรวมของทั้งห้องดูได้จากจอหน้าชั้นเรียน
+            </p>
+          )}
           {session.open && (
             <Button variant="secondary" className="mt-3" onClick={() => setEditing(true)}>
               <PencilLine className="h-4 w-4" aria-hidden="true" />

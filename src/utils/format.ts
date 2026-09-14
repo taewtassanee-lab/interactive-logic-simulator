@@ -63,6 +63,16 @@ export interface WorksheetField {
 
 export const getWorksheetFields = (w: WorksheetData): WorksheetField[] => [
   {
+    key: 'goalTarget',
+    label: 'ก่อนลงมือ: เป้าหมายที่คู่เราตั้งไว้',
+    filled: w.goalTarget.trim().length >= 10,
+  },
+  {
+    key: 'goalHow',
+    label: 'ก่อนลงมือ: ข้อตกลงว่าจะไปให้ถึงเป้าหมายอย่างไร',
+    filled: w.goalHow.trim().length >= 10,
+  },
+  {
     key: 'q1',
     label: 'ส่วนที่ 1 ข้อ 1: การเปลี่ยนแปลงของค่าใน State Monitor',
     filled: w.q1Observation.trim().length >= 10,
@@ -88,6 +98,11 @@ export const getWorksheetFields = (w: WorksheetData): WorksheetField[] => [
     filled: w.q5NoDeleteEffect.trim().length >= 10,
   },
   {
+    key: 'row1plan',
+    label: 'ส่วนที่ 2 แถวที่ 1: แผนที่วางไว้ก่อนลงมือ',
+    filled: w.debugRows[0].plan.trim().length >= 5,
+  },
+  {
     key: 'row1cause',
     label: 'ส่วนที่ 2 แถวที่ 1: สาเหตุที่พบ',
     filled: w.debugRows[0].cause.trim().length >= 5,
@@ -101,6 +116,11 @@ export const getWorksheetFields = (w: WorksheetData): WorksheetField[] => [
     key: 'row1evidence',
     label: 'ส่วนที่ 2 แถวที่ 1: หลักฐานจาก State Monitor',
     filled: w.debugRows[0].evidence.trim().length > 0,
+  },
+  {
+    key: 'row2plan',
+    label: 'ส่วนที่ 2 แถวที่ 2: แผนที่วางไว้ก่อนลงมือ',
+    filled: w.debugRows[1].plan.trim().length >= 5,
   },
   {
     key: 'row2cause',
@@ -121,6 +141,11 @@ export const getWorksheetFields = (w: WorksheetData): WorksheetField[] => [
     key: 'appHelp',
     label: 'ส่วนที่ 3: Web App ช่วยให้เข้าใจ Array และ Function อย่างไร',
     filled: w.q3AppHelp.trim().length >= 10,
+  },
+  {
+    key: 'extend',
+    label: 'ส่วนที่ 3: ข้อเสนอต่อยอดระบบแบบทดสอบ',
+    filled: w.q4Extend.trim().length >= 10,
   },
   // นับคำตอบสะท้อนตนเองแยกรายคน ใบงานจะครบ 100% ก็ต่อเมื่อเขียนครบทั้งสองคน
   ...w.reflections.flatMap((r, i): WorksheetField[] => {

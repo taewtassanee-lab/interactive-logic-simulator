@@ -183,6 +183,14 @@ export type BadgeId = 'array_detective' | 'bug_hunter' | 'logic_master';
 export interface DebugRow {
   point: string; // จุดที่พบ Bug (คงที่)
   symptom: string; // สภาพปัญหา (คงที่)
+  /**
+   * แผนที่วางไว้ก่อนลงมือแก้ (นักเรียนกรอกก่อนกด Run)
+   *
+   * แยกจากช่อง "สาเหตุ" โดยตั้งใจ เพราะสาเหตุคือสิ่งที่รู้ "หลัง" แก้ได้แล้ว
+   * ส่วนช่องนี้เก็บสมมติฐานที่ตั้งไว้ "ก่อน" จึงเป็นหลักฐานของทักษะการออกแบบและวางแผน
+   * และทำให้เห็นด้วยว่าผู้เรียนแก้ปัญหาอย่างเป็นระบบ ไม่ใช่สุ่มลองไปเรื่อย
+   */
+  plan: string;
   cause: string; // สาเหตุ (นักเรียนกรอก)
   fix: string; // แนวทางแก้ไข (นักเรียนกรอก)
   evidence: string; // หลักฐานจาก State Monitor
@@ -205,6 +213,11 @@ export interface PersonReflection {
 }
 
 export interface WorksheetData {
+  /* ก่อนลงมือ: เป้าหมายที่คู่ตั้งเอง */
+  /** เป้าหมายที่คู่นี้ตั้งไว้ว่าจะทำให้สำเร็จในคาบนี้ */
+  goalTarget: string;
+  /** ข้อตกลงหรือวิธีที่คู่นี้วางไว้ว่าจะไปให้ถึงเป้าหมาย */
+  goalHow: string;
   /* ส่วนที่ 1 */
   q1Observation: string;
   q2FillIn: string;
@@ -218,6 +231,8 @@ export interface WorksheetData {
   /* ส่วนที่ 3 */
   /** คำตอบร่วมของคู่ เป็นความเห็นต่อตัวสื่อ ไม่ใช่การประเมินตัวบุคคล */
   q3AppHelp: string;
+  /** ข้อเสนอต่อยอดระบบ เป็นช่องเดียวในใบงานที่ไม่มีคำตอบถูกผิดตายตัว */
+  q4Extend: string;
   /** ดัชนี 0 คือผู้เรียนที่กรอกชื่อในช่อง Driver ดัชนี 1 คือช่อง Navigator */
   reflections: [PersonReflection, PersonReflection];
 }

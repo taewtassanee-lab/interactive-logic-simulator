@@ -114,6 +114,15 @@ export const PrintableWorksheet = forwardRef<HTMLDivElement, { state: AppState }
           </tbody>
         </table>
 
+        {/* ---------- ก่อนลงมือ ---------- */}
+        <p style={S.sectionTitle}>ก่อนลงมือ เป้าหมายที่ผู้เรียนกำหนดเอง</p>
+
+        <p style={S.qLabel}>1. คาบนี้คู่เราตั้งเป้าว่าจะทำอะไรให้สำเร็จ</p>
+        <div style={S.answer}>{show(worksheet.goalTarget)}</div>
+
+        <p style={S.qLabel}>2. เราจะไปให้ถึงเป้าหมายนั้นได้อย่างไร</p>
+        <div style={S.answer}>{show(worksheet.goalHow)}</div>
+
         {/* ---------- ส่วนที่ 1 ---------- */}
         <p style={S.sectionTitle}>ส่วนที่ 1 การวิเคราะห์ตรรกะแบบทดสอบบน Interactive Web App</p>
 
@@ -148,11 +157,12 @@ export const PrintableWorksheet = forwardRef<HTMLDivElement, { state: AppState }
         <table style={S.table}>
           <thead>
             <tr>
-              <th style={{ ...S.th, width: '13%' }}>จุดที่พบ Bug</th>
-              <th style={{ ...S.th, width: '20%' }}>สภาพปัญหา</th>
-              <th style={{ ...S.th, width: '22%' }}>สาเหตุที่พบ</th>
-              <th style={{ ...S.th, width: '22%' }}>แนวทางการแก้ไข</th>
-              <th style={{ ...S.th, width: '23%' }}>หลักฐานจาก State Monitor</th>
+              <th style={{ ...S.th, width: '11%' }}>จุดที่พบ Bug</th>
+              <th style={{ ...S.th, width: '16%' }}>สภาพปัญหา</th>
+              <th style={{ ...S.th, width: '18%' }}>แผนที่วางไว้ก่อนลงมือ</th>
+              <th style={{ ...S.th, width: '18%' }}>สาเหตุที่พบ</th>
+              <th style={{ ...S.th, width: '18%' }}>แนวทางการแก้ไข</th>
+              <th style={{ ...S.th, width: '19%' }}>หลักฐานจาก State Monitor</th>
             </tr>
           </thead>
           <tbody>
@@ -160,6 +170,7 @@ export const PrintableWorksheet = forwardRef<HTMLDivElement, { state: AppState }
               <tr key={row.point}>
                 <td style={S.td}>{row.point}</td>
                 <td style={S.td}>{row.symptom}</td>
+                <td style={S.td}>{show(row.plan)}</td>
                 <td style={S.td}>{show(row.cause)}</td>
                 <td style={S.td}>{show(row.fix)}</td>
                 <td style={{ ...S.td, fontSize: '10.5px', lineHeight: 1.5 }}>
@@ -177,7 +188,12 @@ export const PrintableWorksheet = forwardRef<HTMLDivElement, { state: AppState }
         <div style={S.answer}>{show(worksheet.q3AppHelp)}</div>
 
         <p style={S.qLabel}>
-          2. การสะท้อนตนเองรายบุคคล (สลับบทบาทระหว่างกิจกรรม {session.roleSwitchCount} ครั้ง)
+          2. ถ้าจะต่อยอดระบบแบบทดสอบนี้ให้ดีขึ้นอีก 1 อย่าง คู่เราจะเพิ่มอะไร และจะทำอย่างไร
+        </p>
+        <div style={S.answer}>{show(worksheet.q4Extend)}</div>
+
+        <p style={S.qLabel}>
+          3. การสะท้อนตนเองรายบุคคล (สลับบทบาทระหว่างกิจกรรม {session.roleSwitchCount} ครั้ง)
         </p>
         {session.roleSwitchLog.length > 0 && (
           <p style={{ margin: '0 0 6px', fontSize: '11.5px', color: '#475569' }}>
