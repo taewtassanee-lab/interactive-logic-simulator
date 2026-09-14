@@ -22,6 +22,7 @@ import { BigTimer, NamePicker } from '../components/live/ClassTools';
 import { ActivityRecords } from '../components/live/ActivityRecords';
 import { SimulatorReport } from '../components/live/SimulatorReport';
 import { AdminPanel } from '../components/live/AdminPanel';
+import { TeacherGuidePage } from './TeacherGuidePage';
 import {
   deletePairRow,
   fetchDashboard,
@@ -30,7 +31,7 @@ import {
   type ProgressRow,
 } from '../utils/sync';
 
-type DashboardView = 'summary' | 'sim' | 'live' | 'records' | 'tools' | 'admin';
+type DashboardView = 'summary' | 'sim' | 'live' | 'records' | 'tools' | 'admin' | 'guide';
 
 const DASHBOARD_VIEWS: { id: DashboardView; label: string }[] = [
   { id: 'summary', label: 'สรุปผลรายคู่' },
@@ -40,6 +41,8 @@ const DASHBOARD_VIEWS: { id: DashboardView; label: string }[] = [
   { id: 'records', label: 'บันทึกกิจกรรม' },
   { id: 'tools', label: 'เครื่องมือหน้าชั้น' },
   { id: 'admin', label: 'ตั้งค่าระบบ' },
+  // ย้ายมาจากแท็บหน้านักเรียน แผนการสอนเป็นเอกสารของครู ไม่ใช่สิ่งที่ผู้เรียนต้องอ่าน
+  { id: 'guide', label: 'คู่มือครู' },
 ];
 
 const TEACHER_KEY_STORAGE = 'ils_teacher_key';
@@ -358,6 +361,8 @@ export const DashboardPage = () => {
       {view === 'records' && <ActivityRecords teacherKey={teacherKey} rows={rows} />}
 
       {view === 'admin' && <AdminPanel teacherKey={teacherKey} />}
+
+      {view === 'guide' && <TeacherGuidePage />}
 
       {view === 'tools' && (
         <>

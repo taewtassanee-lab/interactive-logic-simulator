@@ -7,7 +7,7 @@ export type TabId =
   | 'live'
   | 'worksheet'
   | 'summary'
-  | 'teacher'
+  | 'guide'
   | 'dashboard';
 
 /* ---------- ข้อมูลผู้เรียนและคู่ Pair Programming ---------- */

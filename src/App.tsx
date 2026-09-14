@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import {
+  BookOpenCheck,
   ClipboardList,
   FileText,
-  GraduationCap,
   LayoutDashboard,
   Library,
   Radio,
@@ -20,7 +20,7 @@ import { StartPage } from './pages/StartPage';
 import { SimulatorPage } from './pages/SimulatorPage';
 import { WorksheetPage } from './pages/WorksheetPage';
 import { SummaryPage } from './pages/SummaryPage';
-import { TeacherGuidePage } from './pages/TeacherGuidePage';
+import { StudentGuidePage } from './pages/StudentGuidePage';
 import { DashboardPage } from './pages/DashboardPage';
 import { KnowledgePage } from './pages/KnowledgePage';
 import { LivePage } from './pages/LivePage';
@@ -37,6 +37,8 @@ interface TabDef {
 
 const TABS: TabDef[] = [
   { id: 'start', label: 'เริ่มต้นใช้งาน', icon: Rocket, requiresStart: false },
+  // คู่มือนักเรียนอยู่ต้นแถวเพราะเป็นหน้าที่ผู้เรียนกลับมาเปิดตอนไม่แน่ใจว่าต้องทำอะไรต่อ
+  { id: 'guide', label: 'คู่มือนักเรียน', icon: BookOpenCheck, requiresStart: false },
   // คลังความรู้มาก่อนจำลองตรรกะ ให้ผู้เรียนอ่านทำความเข้าใจก่อนลงมือทำ
   { id: 'knowledge', label: 'คลังความรู้', icon: Library, requiresStart: false },
   { id: 'simulator', label: 'จำลองตรรกะ', icon: PlayCircle, requiresStart: true },
@@ -44,7 +46,6 @@ const TABS: TabDef[] = [
   { id: 'live', label: 'กิจกรรมสด', icon: Radio, requiresStart: false },
   { id: 'worksheet', label: 'ใบงานดิจิทัล', icon: FileText, requiresStart: true },
   { id: 'summary', label: 'สรุปและส่งงาน', icon: ClipboardList, requiresStart: true },
-  { id: 'teacher', label: 'คู่มือครู', icon: GraduationCap, requiresStart: false },
   { id: 'dashboard', label: 'แดชบอร์ดครู', icon: LayoutDashboard, requiresStart: false },
 ];
 
@@ -131,7 +132,7 @@ const App = () => {
         {tab === 'live' && <LivePage />}
         {tab === 'worksheet' && <WorksheetPage />}
         {tab === 'summary' && <SummaryPage onNavigate={goTo} />}
-        {tab === 'teacher' && <TeacherGuidePage />}
+        {tab === 'guide' && <StudentGuidePage />}
         {tab === 'dashboard' && <DashboardPage />}
       </main>
 

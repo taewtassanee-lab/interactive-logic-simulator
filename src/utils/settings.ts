@@ -1,4 +1,5 @@
 import { APP_CONFIG, SYNC_CONFIG, TEACHER_INFO } from '../config';
+import type { TabId } from '../types';
 import type { AppSettings } from '../types/settings';
 
 /**
@@ -25,10 +26,19 @@ export const defaultSettings = (): AppSettings => ({
   semester: APP_CONFIG.semester,
   unitName: APP_CONFIG.unitName,
   roleSwitchMinutes: Math.round(APP_CONFIG.roleSwitchSeconds / 60),
-  visibleTabs: ['start', 'knowledge', 'simulator', 'live', 'worksheet', 'summary', 'teacher', 'dashboard'],
+  visibleTabs: ['start', 'guide', 'knowledge', 'simulator', 'live', 'worksheet', 'summary', 'dashboard'],
   activityOverrides: {},
   pretestQuestions: null,
 });
+
+/**
+ * ค่าตั้งที่ครูเคยบันทึกไว้ยังมีแท็บ teacher ซึ่งย้ายไปอยู่ในแดชบอร์ดแล้ว
+ * แปลงเป็นแท็บคู่มือนักเรียนที่มาแทนที่ ครูจะได้ไม่ต้องไปตั้งค่าใหม่เอง
+ */
+const migrateTabs = (tabs: TabId[]): TabId[] => {
+  const next = tabs.map((t) => ((t as string) === 'teacher' ? 'guide' : t));
+  return Array.from(new Set(next)) as TabId[];
+};
 
 /** เติมช่องที่ขาดด้วยค่าตั้งต้น กันค่าตั้งรุ่นเก่าที่ยังไม่มีบางช่องทำให้หน้าจอพัง */
 export const mergeSettings = (raw: unknown): AppSettings => {
@@ -41,7 +51,9 @@ export const mergeSettings = (raw: unknown): AppSettings => {
     ...s,
     // ค่าที่ผิดรูปอาจทำให้ตัวจับเวลาพัง จึงบังคับให้อยู่ในช่วงที่ใช้สอนได้จริง
     roleSwitchMinutes: Number.isFinite(minutes) && minutes >= 1 && minutes <= 60 ? Math.round(minutes) : base.roleSwitchMinutes,
-    visibleTabs: Array.isArray(s.visibleTabs) && s.visibleTabs.length ? s.visibleTabs : base.visibleTabs,
+    visibleTabs: Array.isArray(s.visibleTabs) && s.visibleTabs.length
+      ? migrateTabs(s.visibleTabs)
+      : base.visibleTabs,
     activityOverrides:
       s.activityOverrides && typeof s.activityOverrides === 'object' ? s.activityOverrides : {},
     pretestQuestions: Array.isArray(s.pretestQuestions) && s.pretestQuestions.length

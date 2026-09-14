@@ -44,6 +44,6 @@ export const TOGGLEABLE_TABS: { id: TabId; label: string; note: string }[] = [
   { id: 'live', label: 'กิจกรรมสด', note: 'เข้าร่วมกิจกรรมที่ครูเปิดหน้าชั้น' },
   { id: 'worksheet', label: 'ใบงานดิจิทัล', note: 'ใบงาน 3 ส่วน บันทึกอัตโนมัติ' },
   { id: 'summary', label: 'สรุปและส่งงาน', note: 'ตรวจความพร้อมและสร้างไฟล์ PDF' },
-  { id: 'teacher', label: 'คู่มือครู', note: 'แผน GPAS 5 Steps สำหรับครู' },
+  { id: 'guide', label: 'คู่มือนักเรียน', note: 'วิธีทำกิจกรรม บทบาท และสิ่งที่ต้องส่ง' },
   { id: 'dashboard', label: 'แดชบอร์ดครู', note: 'ต้องใช้รหัสครูอยู่แล้ว ซ่อนได้ถ้าไม่อยากให้เห็นแท็บ' },
 ];
