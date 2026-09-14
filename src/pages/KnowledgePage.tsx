@@ -31,9 +31,30 @@ import {
 /* ---------- การ์ดแนวคิดแบบพับเก็บได้ ---------- */
 
 const TONES = {
-  brand: { ring: 'border-brand-200', head: 'bg-brand-50', num: 'from-brand-400 to-brand-600' },
-  think: { ring: 'border-think-200', head: 'bg-think-50', num: 'from-think-400 to-think-600' },
-  mint: { ring: 'border-mint-200', head: 'bg-mint-50', num: 'from-mint-400 to-mint-600' },
+  brand: {
+    ring: 'border-brand-200',
+    head: 'bg-gradient-to-r from-brand-100 to-brand-50',
+    num: 'from-brand-400 to-brand-600',
+    edge: 'rgba(99,102,241,0.28)',
+    dot: 'text-brand-500',
+    text: 'text-brand-900',
+  },
+  think: {
+    ring: 'border-think-200',
+    head: 'bg-gradient-to-r from-think-100 to-think-50',
+    num: 'from-think-400 to-think-600',
+    edge: 'rgba(139,92,246,0.28)',
+    dot: 'text-think-500',
+    text: 'text-think-900',
+  },
+  mint: {
+    ring: 'border-mint-200',
+    head: 'bg-gradient-to-r from-mint-100 to-mint-50',
+    num: 'from-mint-400 to-mint-600',
+    edge: 'rgba(16,185,129,0.28)',
+    dot: 'text-mint-600',
+    text: 'text-mint-900',
+  },
 } as const;
 
 const ConceptList = ({
@@ -44,48 +65,94 @@ const ConceptList = ({
   tone: keyof typeof TONES;
 }) => {
   const [openId, setOpenId] = useState<string | null>(sections[0]?.id ?? null);
-  const { ring, head, num } = TONES[tone];
+  /** หัวข้อที่เคยกางอ่านแล้ว ใช้ทำแถบความคืบหน้าให้ผู้เรียนรู้ว่าอ่านไปถึงไหน */
+  const [read, setRead] = useState<string[]>(sections[0]?.id ? [sections[0].id] : []);
+  const { ring, head, num, edge, dot, text } = TONES[tone];
+  const percent = Math.round((read.length / sections.length) * 100);
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2.5">
+      {/* แถบความคืบหน้า ให้รู้ว่าเหลืออีกกี่หัวข้อ ไม่ใช่เลื่อนอ่านไปเรื่อย ๆ โดยไม่รู้ปลายทาง */}
+      <div className="flex items-center gap-3 rounded-2xl border-2 border-slate-100 bg-white px-3.5 py-2">
+        <span className="shrink-0 text-xs font-semibold text-slate-500">
+          เปิดอ่านแล้ว {read.length} จาก {sections.length} หัวข้อ
+        </span>
+        <span className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100">
+          <span
+            className={`block h-full rounded-full bg-gradient-to-r transition-all duration-500 ${num}`}
+            style={{ width: `${percent}%` }}
+          />
+        </span>
+        <span className={`shrink-0 font-display text-sm font-bold ${text}`}>{percent}%</span>
+      </div>
+
       {sections.map((sec, i) => {
         const open = openId === sec.id;
         return (
           <div key={sec.id} className={`overflow-hidden rounded-[1.25rem] border-2 ${ring}`}>
             <button
               type="button"
-              onClick={() => setOpenId(open ? null : sec.id)}
+              onClick={() => {
+                setOpenId(open ? null : sec.id);
+                if (!open) setRead((prev) => (prev.includes(sec.id) ? prev : [...prev, sec.id]));
+              }}
               aria-expanded={open}
-              className={`flex w-full items-center gap-3 px-3.5 py-3 text-left transition ${
+              className={`flex w-full items-center gap-3 px-4 py-3.5 text-left transition ${
                 open ? head : 'bg-white hover:bg-slate-50'
               }`}
             >
               <span
-                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-b font-display text-xs font-bold text-white ${num}`}
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-b font-display text-base font-bold text-white ${num}`}
+                style={{ boxShadow: `0 4px 0 0 ${edge}` }}
               >
                 {i + 1}
               </span>
-              <span className="flex-1 font-display text-sm font-bold text-slate-800">
-                {sec.title}
+              <span className="min-w-0 flex-1">
+                <span className="block font-display text-[17px] font-bold leading-snug text-slate-800">
+                  {sec.title}
+                </span>
+                {!open && read.includes(sec.id) && (
+                  <span className="mt-0.5 block text-xs font-semibold text-mint-700">
+                    อ่านแล้ว · กดเพื่อเปิดดูอีกครั้ง
+                  </span>
+                )}
               </span>
-              <span className="shrink-0 text-slate-400" aria-hidden="true">
+              <span
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border-2 font-display text-lg font-bold transition ${
+                  open
+                    ? `border-white/70 bg-white/70 ${text}`
+                    : 'border-slate-200 bg-white text-slate-400'
+                }`}
+                aria-hidden="true"
+              >
                 {open ? '−' : '+'}
               </span>
             </button>
 
             {open && (
-              <div className="border-t-2 border-dashed border-slate-100 px-4 py-3">
-                <p className="rounded-2xl bg-lemon-50 px-3.5 py-2.5 text-sm leading-relaxed text-slate-700">
-                  <Lightbulb
-                    className="mr-1.5 inline h-4 w-4 text-lemon-500"
-                    aria-hidden="true"
-                  />
-                  {sec.plain}
+              <div className="border-t-2 border-dashed border-slate-100 bg-white px-4 py-4">
+                {/* คำเปรียบเทียบมาก่อนเสมอ ให้เห็นภาพก่อนแล้วค่อยลงรายละเอียดทางเทคนิค */}
+                <div
+                  className="rounded-2xl border-2 border-lemon-200 bg-gradient-to-b from-lemon-50 to-white px-4 py-3"
+                  style={{ boxShadow: '0 4px 0 0 rgba(245,158,11,0.22)' }}
+                >
+                  <p className="mb-1 flex items-center gap-1.5 font-display text-xs font-bold uppercase tracking-wide text-peach-700">
+                    <Lightbulb className="h-4 w-4" aria-hidden="true" />
+                    เปรียบเทียบให้เห็นภาพ
+                  </p>
+                  <p className="text-[15px] leading-relaxed text-slate-700">{sec.plain}</p>
+                </div>
+
+                <p className="mb-2 mt-3.5 font-display text-xs font-bold uppercase tracking-wide text-slate-500">
+                  รายละเอียดที่ต้องรู้
                 </p>
-                <ul className="mt-2.5 space-y-1.5">
+                <ul className="space-y-2">
                   {sec.technical.map((t) => (
-                    <li key={t} className="flex gap-2 text-sm leading-relaxed text-slate-600">
-                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-300" aria-hidden="true" />
+                    <li
+                      key={t}
+                      className="flex gap-2.5 rounded-xl bg-slate-50 px-3 py-2 text-[15px] leading-relaxed text-slate-700"
+                    >
+                      <CircleCheck className={`mt-0.5 h-4 w-4 shrink-0 ${dot}`} aria-hidden="true" />
                       <span>{t}</span>
                     </li>
                   ))}
