@@ -110,6 +110,13 @@ const ConceptList = ({
               <span className="min-w-0 flex-1">
                 <span className="block font-display text-[17px] font-bold leading-snug text-slate-800">
                   {sec.title}
+                  {/* ติดป้ายเฉพาะหัวข้อที่ต้องรู้ก่อนเข้าคาบ ที่เหลือปล่อยว่างไว้
+                      เพื่อไม่ให้ผู้เรียนรู้สึกว่าต้องอ่านทุกหัวข้อให้ครบก่อนจึงจะเริ่มได้ */}
+                  {sec.essential && (
+                    <span className="ml-2 inline-block whitespace-nowrap rounded-full border-2 border-mint-300 bg-mint-50 px-2 py-0.5 align-middle font-display text-[11px] font-bold text-mint-800">
+                      อ่านก่อนเรียน
+                    </span>
+                  )}
                 </span>
                 {!open && read.includes(sec.id) && (
                   <span className="mt-0.5 block text-xs font-semibold text-mint-700">
@@ -318,12 +325,43 @@ export const KnowledgePage = () => (
           </p>
         </div>
       </div>
-      <p className="mt-4 text-sm leading-relaxed text-slate-600">
-        แนะนำให้อ่านตามลำดับนี้ เริ่มจาก <strong className="text-brand-700">Array</strong>{' '}
-        เพื่อเข้าใจการเก็บข้อสอบและเลขตำแหน่ง จากนั้นลองเล่นในส่วนทดลอง แล้วค่อยอ่าน{' '}
-        <strong className="text-think-700">Function</strong> เพื่อเข้าใจการเรียกใช้ซ้ำ
-        ปิดท้ายด้วยข้อผิดพลาดที่พบบ่อยและคำถามทบทวน
-      </p>
+      {/* คลังนี้มีเนื้อหาราวสองหมื่นตัวอักษร ถ้าสั่งให้อ่านครบก่อนเรียนจะใช้เวลาเกินครึ่งชั่วโมง
+          จึงคัดเส้นทางสั้นไว้ให้ ว่าจำเป็นจริง ๆ แค่ 4 หัวข้อ ที่เหลือเป็นคู่มือเปิดดูตอนติด */}
+      <div
+        className="mt-4 rounded-[1.25rem] border-2 border-mint-300 bg-gradient-to-b from-mint-50 to-white px-4 py-3.5"
+        style={{ boxShadow: '0 5px 0 0 rgba(16,185,129,0.25)' }}
+      >
+        <p className="font-display text-[15px] font-bold text-mint-900">
+          ก่อนเข้าคาบ อ่านแค่ 4 หัวข้อนี้พอ
+        </p>
+        <ol className="mt-2 grid gap-1.5 sm:grid-cols-2">
+          {[
+            'Array คืออะไร',
+            'Index เริ่มนับที่ 0 ไม่ใช่ 1',
+            'Array.Width คือจำนวนช่องที่มีอยู่',
+            'Function คืออะไร',
+          ].map((t, i) => (
+            <li
+              key={t}
+              className="flex items-center gap-2 rounded-xl bg-white/80 px-3 py-1.5 text-sm text-slate-700"
+            >
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-mint-400 to-mint-600 font-display text-[11px] font-bold text-white">
+                {i + 1}
+              </span>
+              {t}
+            </li>
+          ))}
+        </ol>
+        <p className="mt-2.5 text-sm leading-relaxed text-slate-600">
+          สี่หัวข้อนี้ใช้เวลาอ่านประมาณ 5 นาที และเป็นทุกอย่างที่ต้องรู้เพื่อเริ่มภารกิจแรก
+          จากนั้นให้ลองกดลบช่องในส่วน &quot;ลองเล่น Array ด้วยตัวเอง&quot; สัก 2 ถึง 3 ครั้ง
+        </p>
+        <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
+          <strong className="text-slate-800">หัวข้อที่เหลือไม่ต้องอ่านล่วงหน้า</strong>{' '}
+          ให้ใช้เป็นคู่มือเปิดค้นตอนลงมือทำจริงเมื่อติดขัด โดยเฉพาะบน iPad ของ Navigator
+          ซึ่งมีหน้าที่คอยเปิดหาข้อมูลให้คู่อยู่แล้ว
+        </p>
+      </div>
     </Card>
 
     {/* ---------- Array ---------- */}

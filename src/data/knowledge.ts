@@ -6,6 +6,14 @@
 export interface ConceptSection {
   id: string;
   title: string;
+  /**
+   * true = เป็นหัวข้อที่ต้องรู้ก่อนเข้าคาบจึงจะทำภารกิจได้
+   *
+   * คลังความรู้ทั้งหมดยาวเกินกว่าจะสั่งให้อ่านครบก่อนเรียน
+   * จึงคัดเฉพาะหัวข้อที่ภารกิจที่ 1 ใช้จริงไว้เป็นเส้นทางสั้น
+   * ที่เหลือให้เปิดดูตอนทำงานเมื่อติดขัด ซึ่งตรงกับหน้าที่ของ Navigator อยู่แล้ว
+   */
+  essential?: boolean;
   /** คำอธิบายแบบภาษาชาวบ้าน ให้เห็นภาพก่อน */
   plain: string;
   /** คำอธิบายเชิงเทคนิคที่ตรงกับ Construct 2 */
@@ -16,6 +24,7 @@ export const ARRAY_CONCEPTS: ConceptSection[] = [
   {
     id: 'what-is-array',
     title: 'Array คืออะไร',
+    essential: true,
     plain:
       'ลองนึกถึงตู้ล็อกเกอร์เรียงกันเป็นแถว แต่ละช่องเก็บของได้ 1 อย่าง และมีเลขกำกับช่องไว้ Array ก็คือตัวแปรที่มีหลายช่องแบบนั้น ต่างจากตัวแปรธรรมดาที่เก็บค่าได้เพียงค่าเดียว',
     technical: [
@@ -28,6 +37,7 @@ export const ARRAY_CONCEPTS: ConceptSection[] = [
   {
     id: 'index',
     title: 'Index เริ่มนับที่ 0 ไม่ใช่ 1',
+    essential: true,
     plain:
       'เรื่องนี้ทำให้นักเรียนพลาดบ่อยที่สุด ถ้า Array มีข้อสอบ 4 ข้อ เลขช่องคือ 0, 1, 2, 3 ไม่ใช่ 1, 2, 3, 4 ช่องสุดท้ายจึงเป็นเลข 3 ซึ่งเท่ากับ จำนวนข้อ ลบ 1 เสมอ',
     technical: [
@@ -40,6 +50,7 @@ export const ARRAY_CONCEPTS: ConceptSection[] = [
   {
     id: 'width',
     title: 'Array.Width คือจำนวนช่องที่มีอยู่',
+    essential: true,
     plain:
       'Array.Width บอกว่าตอนนี้มีของกี่ช่อง ค่านี้ไม่ได้คงที่ ถ้าลบช่องออก 1 ช่อง Array.Width จะลดลงทันที นี่คือหัวใจของการทำระบบสุ่มไม่ซ้ำ',
     technical: [
@@ -109,6 +120,7 @@ export const FUNCTION_CONCEPTS: ConceptSection[] = [
   {
     id: 'what-is-function',
     title: 'Function คืออะไร',
+    essential: true,
     plain:
       'Function คือชุดคำสั่งที่ตั้งชื่อไว้ แล้วเรียกใช้ซ้ำได้ทุกเมื่อ เหมือนเราตั้งชื่อขั้นตอนว่า "ล้างจาน" ไว้ พอบอกคำนี้ทีเดียว ทุกขั้นตอนย่อยก็ทำงานครบ ไม่ต้องพูดใหม่ทุกครั้ง',
     technical: [
