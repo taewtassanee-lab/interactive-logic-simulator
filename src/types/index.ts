@@ -47,7 +47,7 @@ export interface SessionInfo {
 
 /* ---------- บล็อกคำสั่ง ---------- */
 
-export type BlockCategory = 'start' | 'answer' | 'end' | 'bug';
+export type BlockCategory = 'start' | 'answer' | 'end';
 
 export type BlockId =
   // หมวดเริ่มต้นและสุ่มข้อสอบ
@@ -79,6 +79,16 @@ export interface BlockDef {
   category: BlockCategory;
   /** คำอธิบายภาษาไทยสำหรับ Tooltip และ Empty State */
   hint: string;
+  /**
+   * true = เป็นบล็อกลวง (Distractor)
+   *
+   * ตั้งใจไม่นำค่านี้ไปแสดงผลบนหน้าจอเลย ทั้งสีปุ่ม กรอบ และไอคอนเตือน
+   * เพราะถ้าติดป้ายบอกไว้ว่าบล็อกไหนคือกับดัก ผู้เรียนก็แค่หลบบล็อกที่มีสีต่าง
+   * โดยไม่ต้องใช้ตรรกะแยกเลย ซึ่งขัดกับหลักของ Parsons Problems
+   * ผู้เรียนต้องรู้ว่าเลือกผิดจากผลการจำลองใน State Monitor และ Debug Log เท่านั้น
+   *
+   * ค่านี้ยังเก็บไว้เพื่อใช้อ้างอิงในคู่มือครูและการตรวจสอบภายใน
+   */
   isBug: boolean;
 }
 

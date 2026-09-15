@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Bug, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { BLOCK_LIBRARY, CATEGORY_META } from '../data/blocks';
 import type { BlockCategory, BlockId } from '../types';
 
-const ORDER: BlockCategory[] = ['start', 'answer', 'end', 'bug'];
+const ORDER: BlockCategory[] = ['start', 'answer', 'end'];
 
 /**
  * ตัวเลือกบล็อกแบบย่อ วางไว้ในการ์ดเดียวกับพื้นที่เรียงตรรกะ
@@ -38,7 +38,6 @@ export const InlineBlockPicker = ({ onAdd }: { onAdd: (id: BlockId) => void }) =
                   : 'border-slate-200 bg-white text-slate-600'
               }`}
             >
-              {c === 'bug' && <Bug className="h-3.5 w-3.5" aria-hidden="true" />}
               {m.title}
               <span
                 className={`rounded-full px-1.5 text-[10px] font-medium ${

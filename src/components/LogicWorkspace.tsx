@@ -126,27 +126,21 @@ export const LogicWorkspace = ({
           return (
             <li key={block.uid}>
               <div
+                /* บล็อกทุกชิ้นหน้าตาเหมือนกัน ไม่ไฮไลต์บล็อกลวงไว้ล่วงหน้า
+                   ผู้เรียนต้องรู้ว่าวางผิดจากผลการจำลอง ไม่ใช่จากสีของบล็อก */
                 className={`block-3d flex items-start gap-2.5 rounded-2xl border-2 px-3 py-2.5 ${
                   active
                     ? 'scale-[1.02] border-brand-400 bg-gradient-to-b from-brand-50 to-brand-100 ring-4 ring-brand-200'
-                    : def.isBug
-                      ? 'border-bubble-200 bg-gradient-to-b from-bubble-50 to-white'
-                      : 'border-slate-100 bg-white'
+                    : 'border-slate-100 bg-white'
                 }`}
                 style={{
                   boxShadow: active
                     ? '0 5px 0 0 #9db4ff'
-                    : def.isBug
-                      ? '0 4px 0 0 rgba(255,200,222,0.9)'
-                      : '0 4px 0 0 rgba(203,213,225,0.55)',
+                    : '0 4px 0 0 rgba(203,213,225,0.55)',
                 }}
               >
                 <span
-                  className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl font-mono text-xs font-bold shadow-clay-sm ${
-                    def.isBug
-                      ? 'bg-gradient-to-b from-bubble-200 to-bubble-300 text-bubble-900'
-                      : 'bg-gradient-to-b from-slate-100 to-slate-200 text-slate-700'
-                  }`}
+                  className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-gradient-to-b from-slate-100 to-slate-200 font-mono text-xs font-bold text-slate-700 shadow-clay-sm"
                   aria-hidden="true"
                 >
                   {index + 1}
@@ -154,13 +148,6 @@ export const LogicWorkspace = ({
 
                 <div className="min-w-0 flex-1">
                   <p className="break-words font-mono text-[12.5px] font-semibold leading-snug text-slate-800">
-                    {def.isBug && (
-                      <TriangleAlert
-                        className="mr-1 inline h-3.5 w-3.5 text-bubble-600"
-                        aria-hidden="true"
-                      />
-                    )}
-                    {def.isBug && <span className="sr-only">บล็อก Bug: </span>}
                     {def.label}
                   </p>
                   <p className="mt-0.5 text-[11.5px] leading-relaxed text-slate-500">{def.hint}</p>

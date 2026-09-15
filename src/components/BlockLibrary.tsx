@@ -1,17 +1,16 @@
 import { useState } from 'react';
-import { Bug, ChevronDown, Plus, Library } from 'lucide-react';
+import { ChevronDown, Plus, Library } from 'lucide-react';
 import { BLOCK_LIBRARY, CATEGORY_META } from '../data/blocks';
 import type { BlockCategory, BlockId } from '../types';
 import { Card } from './Ui';
 
-const ORDER: BlockCategory[] = ['start', 'answer', 'end', 'bug'];
+const ORDER: BlockCategory[] = ['start', 'answer', 'end'];
 
 export const BlockLibrary = ({ onAdd }: { onAdd: (id: BlockId) => void }) => {
   const [open, setOpen] = useState<Record<BlockCategory, boolean>>({
     start: true,
     answer: true,
     end: true,
-    bug: false,
   });
 
   return (
@@ -35,7 +34,6 @@ export const BlockLibrary = ({ onAdd }: { onAdd: (id: BlockId) => void }) => {
               >
                 <span className="min-w-0">
                   <span className="flex items-center gap-1.5 font-display text-sm font-bold text-slate-800">
-                    {cat === 'bug' && <Bug className="h-4 w-4 text-bubble-600" aria-hidden="true" />}
                     {meta.title}
                     <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${meta.chip}`}>
                       {blocks.length}
@@ -70,15 +68,13 @@ export const BlockLibrary = ({ onAdd }: { onAdd: (id: BlockId) => void }) => {
                         <button
                           type="button"
                           onClick={() => onAdd(block.id)}
-                          className={`btn-3d mt-0.5 shrink-0 rounded-xl p-1.5 text-white focus:outline-none focus-visible:ring-4 focus-visible:ring-offset-1 ${
-                            block.isBug
-                              ? 'bg-gradient-to-b from-bubble-400 to-bubble-600 focus-visible:ring-bubble-200'
-                              : 'bg-gradient-to-b from-brand-400 to-brand-600 focus-visible:ring-brand-200'
-                          }`}
+          /* ปุ่มเพิ่มบล็อกใช้สีเดียวกันทุกบล็อก ไม่แยกสีบล็อกลวง
+             เพื่อไม่ให้ผู้เรียนคัดกรองด้วยสายตาแทนการใช้ตรรกะ */
+                          className="btn-3d mt-0.5 shrink-0 rounded-xl bg-gradient-to-b from-brand-400 to-brand-600 p-1.5 text-white focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-200 focus-visible:ring-offset-1"
                           style={
                             {
-                              boxShadow: block.isBug ? '0 3px 0 0 #a11349' : '0 3px 0 0 #2f3aa1',
-                              '--btn-edge': block.isBug ? '#a11349' : '#2f3aa1',
+                              boxShadow: '0 3px 0 0 #2f3aa1',
+                              '--btn-edge': '#2f3aa1',
                             } as React.CSSProperties
                           }
                           aria-label={`เพิ่มบล็อก ${block.label} ลงในพื้นที่เรียงตรรกะ`}

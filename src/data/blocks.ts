@@ -99,40 +99,43 @@ export const BLOCK_LIBRARY: BlockDef[] = [
     isBug: false,
   },
 
-  /* ---------- หมวดบล็อก Bug ---------- */
+  /* ---------- บล็อกลวง (Distractors) ----------
+     กระจายเข้าไปอยู่ในหมวดเดียวกับบล็อกจริงที่หน้าตาใกล้เคียงกัน
+     ป้ายกำกับเขียนเป็นคำสั่งที่เป็นไปได้จริงใน Construct 2 และคำอธิบายบอกเฉพาะว่า
+     บล็อกนั้นทำอะไร ไม่บอกว่าผิดตรงไหน ผู้เรียนต้องแยกเองด้วยตรรกะและผลการจำลอง */
   {
     id: 'bug_no_delete',
-    label: 'Random question without Delete index',
-    category: 'bug',
-    hint: 'สุ่มข้อสอบโดยไม่ลบข้อที่ใช้แล้ว ทำให้ Array.Width เท่าเดิมและสุ่มซ้ำได้',
-    isBug: true,
-  },
-  {
-    id: 'bug_score_no_check',
-    label: 'Add score without checking answer',
-    category: 'bug',
-    hint: 'เพิ่มคะแนนโดยไม่ตรวจคำตอบก่อน ทำให้ตอบผิดก็ยังได้คะแนน',
-    isBug: true,
-  },
-  {
-    id: 'bug_empty_wrong_position',
-    label: 'Check Array is empty in wrong position',
-    category: 'bug',
-    hint: 'ตรวจ Array ว่างผิดตำแหน่ง เช่น ตรวจก่อนลบข้อสอบ ทำให้เงื่อนไขจบเกมไม่เป็นจริง',
-    isBug: true,
-  },
-  {
-    id: 'bug_summary_early',
-    label: 'Go to Summary too early',
-    category: 'bug',
-    hint: 'เปลี่ยนไปหน้าสรุปผลตั้งแต่ยังทำข้อสอบไม่ครบ',
+    label: 'Array -> Set value at (Num, 0) to ""',
+    category: 'start',
+    hint: 'ล้างข้อความในช่องที่สุ่มได้ให้เป็นค่าว่าง โดยจำนวนช่องของ Array ยังเท่าเดิม',
     isBug: true,
   },
   {
     id: 'bug_wrong_variable',
-    label: 'Compare wrong answer variable',
-    category: 'bug',
-    hint: 'เปรียบเทียบผิดตัวแปร เช่น เทียบกับ CurrentQuestion แทน bt_Select.Choice',
+    label: 'If Answer = CurrentQuestion',
+    category: 'answer',
+    hint: 'เงื่อนไขเปรียบเทียบตัวแปร Answer กับตัวแปร CurrentQuestion',
+    isBug: true,
+  },
+  {
+    id: 'bug_score_no_check',
+    label: 'On button answer clicked -> Add 1 to Score',
+    category: 'answer',
+    hint: 'เพิ่มคะแนน 1 คะแนนทันทีที่ผู้เล่นกดปุ่มคำตอบ',
+    isBug: true,
+  },
+  {
+    id: 'bug_empty_wrong_position',
+    label: 'On start of layout -> If Array is empty',
+    category: 'end',
+    hint: 'ตรวจว่า Array ว่างหรือไม่ ตั้งแต่ตอนเปิด Layout ก่อนเริ่มสุ่มข้อสอบ',
+    isBug: true,
+  },
+  {
+    id: 'bug_summary_early',
+    label: 'If Score > 0 -> Go to Layout "Summary"',
+    category: 'end',
+    hint: 'เปลี่ยนไปหน้าสรุปผลเมื่อคะแนนมากกว่า 0',
     isBug: true,
   },
 ];
@@ -151,27 +154,21 @@ export const CATEGORY_META: Record<
 > = {
   start: {
     title: 'เริ่มต้นและสุ่มข้อสอบ',
-    description: 'ชุดคำสั่งสำหรับเริ่มระบบและสุ่มข้อสอบจาก Array',
+    description: 'ชุดคำสั่งสำหรับเริ่มระบบและสุ่มข้อสอบจาก Array บางบล็อกในหมวดนี้ใช้ไม่ได้ผล ต้องเลือกให้ถูก',
     accent: 'border-brand-200 bg-gradient-to-b from-brand-50 to-white',
     chip: 'bg-brand-100 text-brand-800',
   },
   answer: {
     title: 'ตรวจคำตอบ',
-    description: 'ชุดคำสั่งสำหรับตรวจคำตอบและให้คะแนน',
+    description: 'ชุดคำสั่งสำหรับตรวจคำตอบและให้คะแนน บางบล็อกในหมวดนี้ใช้ไม่ได้ผล ต้องเลือกให้ถูก',
     accent: 'border-think-200 bg-gradient-to-b from-think-50 to-white',
     chip: 'bg-think-100 text-think-800',
   },
   end: {
     title: 'เงื่อนไขจบเกม',
-    description: 'ชุดคำสั่งสำหรับตรวจว่าเมื่อใดควรจบแบบทดสอบ',
+    description: 'ชุดคำสั่งสำหรับตรวจว่าเมื่อใดควรจบแบบทดสอบ บางบล็อกในหมวดนี้ใช้ไม่ได้ผล ต้องเลือกให้ถูก',
     accent: 'border-mint-200 bg-gradient-to-b from-mint-50 to-white',
     chip: 'bg-mint-100 text-mint-800',
-  },
-  bug: {
-    title: 'บล็อก Bug',
-    description: 'บล็อกที่จงใจทำให้ระบบทำงานผิด ใช้ทดลองหาสาเหตุของปัญหา',
-    accent: 'border-bubble-200 bg-gradient-to-b from-bubble-50 to-white',
-    chip: 'bg-bubble-100 text-bubble-800',
   },
 };
 
