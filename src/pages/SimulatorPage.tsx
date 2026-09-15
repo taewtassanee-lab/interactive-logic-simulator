@@ -6,6 +6,7 @@ import { LogicWorkspace } from '../components/LogicWorkspace';
 import { StateMonitor } from '../components/StateMonitor';
 import { MissionBar } from '../components/MissionBar';
 import { ComparePanel } from '../components/ComparePanel';
+import { ExpectedResult } from '../components/ExpectedResult';
 import { useApp } from '../context/AppContext';
 import { useToast } from '../components/Toast';
 import type { BlockId, SimResult, WorkspaceBlock } from '../types';
@@ -247,6 +248,10 @@ export const SimulatorPage = () => {
           </ol>
         </section>
       )}
+
+      {/* ตารางเทียบผลของผู้เรียนกับผลที่ถูกต้อง วางไว้เหนือพื้นที่ทำงาน
+          เพื่อให้เห็นเป้าหมายก่อนลงมือ และกวาดตากลับมาเทียบได้ทุกครั้งหลังกด Run */}
+      <ExpectedResult state={displayState} hasRun={result !== null} />
 
       {/* 3 คอลัมน์บนจอใหญ่ เรียงลงมาบนมือถือ */}
       <div className="grid gap-4 xl:grid-cols-[minmax(0,300px)_minmax(0,1fr)_minmax(0,340px)]">
