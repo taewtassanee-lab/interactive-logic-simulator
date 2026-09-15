@@ -9,7 +9,7 @@ import { ComparePanel } from '../components/ComparePanel';
 import { ExpectedResult } from '../components/ExpectedResult';
 import { useApp } from '../context/AppContext';
 import { useToast } from '../components/Toast';
-import type { BlockId, SimResult, WorkspaceBlock } from '../types';
+import type { BlockCategory, BlockId, SimResult, WorkspaceBlock } from '../types';
 import { emptyState, MISSION_SUCCESS_MESSAGES, runSimulation } from '../utils/simulator';
 import { analyzeFlags, buildHints, validateWorkspace } from '../utils/validator';
 import { useRoleTimer } from '../context/RoleTimerContext';
@@ -171,6 +171,18 @@ export const SimulatorPage = () => {
     }
   };
 
+  /**
+   * หมวดบล็อกที่ภารกิจปัจจุบันต้องใช้
+   * ภารกิจที่ 1 แก้ที่ชุดคำสั่งสุ่มข้อสอบ ภารกิจที่ 2 แก้ที่เงื่อนไขจบเกม
+   * เมื่อผ่านครบทั้งสองภารกิจแล้วจึงเปิดทุกหมวด เพราะไม่มีภารกิจให้โฟกัสอีก
+   */
+  const focusCategory: BlockCategory | null =
+    state.missions.mission1Passed && state.missions.mission2Passed
+      ? null
+      : state.missions.mission1Passed
+        ? 'end'
+        : 'start';
+
   const stepLabel = result
     ? `ขั้นที่ ${frameIndex + 1} จาก ${result.frames.length}`
     : 'ยังไม่เริ่มการจำลอง';
@@ -258,7 +270,7 @@ export const SimulatorPage = () => {
         {/* คลังบล็อกเต็มรูปแบบใช้เฉพาะจอกว้างที่วางได้ 3 คอลัมน์
             จอเล็กกว่านั้นใช้ตัวเลือกย่อที่อยู่ในกรอบเดียวกับพื้นที่เรียงตรรกะแทน */}
         <div className="hidden xl:block">
-          <BlockLibrary onAdd={handleAdd} />
+          <BlockLibrary onAdd={handleAdd} focusCategory={focusCategory} />
         </div>
 
         <LogicWorkspace
@@ -277,6 +289,7 @@ export const SimulatorPage = () => {
           onResetSim={handleResetSim}
           onToggleHints={() => setHintsOpen((v) => !v)}
           onAdd={handleAdd}
+          focusCategory={focusCategory}
         />
 
         <StateMonitor

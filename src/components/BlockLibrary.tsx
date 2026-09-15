@@ -6,12 +6,26 @@ import { Card } from './Ui';
 
 const ORDER: BlockCategory[] = ['start', 'answer', 'end'];
 
-export const BlockLibrary = ({ onAdd }: { onAdd: (id: BlockId) => void }) => {
+export const BlockLibrary = ({
+  onAdd,
+  focusCategory,
+}: {
+  onAdd: (id: BlockId) => void;
+  /** หมวดที่ภารกิจปัจจุบันต้องใช้ ถ้าเป็น null แปลว่าเปิดทุกหมวด */
+  focusCategory: BlockCategory | null;
+}) => {
   const [open, setOpen] = useState<Record<BlockCategory, boolean>>({
     start: true,
     answer: true,
     end: true,
   });
+  const [showAll, setShowAll] = useState(false);
+  /**
+   * ภารกิจหนึ่งข้อใช้บล็อกจากหมวดเดียว จึงแสดงเฉพาะหมวดนั้นก่อน
+   * ผู้เรียนที่อยากดูหมวดอื่นกดเปิดเองได้ตลอด ไม่ได้ถูกปิดกั้น
+   */
+  const visible = focusCategory && !showAll ? ORDER.filter((c) => c === focusCategory) : ORDER;
+  const hidden = ORDER.length - visible.length;
 
   return (
     <Card
@@ -20,7 +34,7 @@ export const BlockLibrary = ({ onAdd }: { onAdd: (id: BlockId) => void }) => {
       icon={<Library className="h-5 w-5 text-brand-600" aria-hidden="true" />}
     >
       <div className="space-y-3">
-        {ORDER.map((cat) => {
+        {visible.map((cat) => {
           const meta = CATEGORY_META[cat];
           const blocks = BLOCK_LIBRARY.filter((b) => b.category === cat);
           const isOpen = open[cat];
@@ -90,6 +104,16 @@ export const BlockLibrary = ({ onAdd }: { onAdd: (id: BlockId) => void }) => {
             </div>
           );
         })}
+
+        {hidden > 0 && (
+          <button
+            type="button"
+            onClick={() => setShowAll(true)}
+            className="w-full rounded-[1.25rem] border-2 border-dashed border-slate-300 bg-white px-3 py-2.5 text-center font-display text-xs font-semibold text-slate-500 transition hover:text-slate-700"
+          >
+            แสดงอีก {hidden} หมวดที่ยังไม่ต้องใช้ในภารกิจนี้
+          </button>
+        )}
       </div>
     </Card>
   );

@@ -15,17 +15,34 @@ const ORDER: BlockCategory[] = ['start', 'answer', 'end'];
  * ตัวนี้จึงย่อคลังบล็อกให้เหลือแถบหมวดกับรายการสั้น ๆ อยู่ในกรอบเดียวกับที่วางบล็อก
  * เลือกหมวดทีละหมวดเพื่อไม่ให้รายการยาวจนดันพื้นที่เรียงตรรกะตกจอ
  */
-export const InlineBlockPicker = ({ onAdd }: { onAdd: (id: BlockId) => void }) => {
-  const [cat, setCat] = useState<BlockCategory>('start');
-  const blocks = BLOCK_LIBRARY.filter((b) => b.category === cat);
-  const meta = CATEGORY_META[cat];
+export const InlineBlockPicker = ({
+  onAdd,
+  focusCategory,
+}: {
+  onAdd: (id: BlockId) => void;
+  /**
+   * หมวดที่ภารกิจปัจจุบันต้องใช้ ถ้าเป็น null แปลว่าเปิดทุกหมวด
+   *
+   * ภารกิจหนึ่งข้อใช้บล็อกจากหมวดเดียว การโชว์ทั้ง 18 บล็อกพร้อมกันตั้งแต่ต้น
+   * ทำให้ผู้เรียนต้องคัดกรองของที่ยังไม่เกี่ยวข้องออกเองก่อนทุกครั้ง
+   */
+  focusCategory: BlockCategory | null;
+}) => {
+  const [showAll, setShowAll] = useState(false);
+  const visible = focusCategory && !showAll ? [focusCategory] : ORDER;
+  const [cat, setCat] = useState<BlockCategory>(focusCategory ?? 'start');
+  // หมวดที่เลือกไว้อาจถูกซ่อนเมื่อเปลี่ยนภารกิจ จึงถอยมาใช้หมวดแรกที่ยังเห็นอยู่
+  const current = visible.includes(cat) ? cat : visible[0];
+  const hidden = ORDER.length - visible.length;
+  const blocks = BLOCK_LIBRARY.filter((b) => b.category === current);
+  const meta = CATEGORY_META[current];
 
   return (
     <div className={`mb-3 rounded-[1.25rem] border-2 ${meta.accent}`}>
       <div className="flex flex-wrap items-center gap-1.5 px-3 pt-3">
-        {ORDER.map((c) => {
+        {visible.map((c) => {
           const m = CATEGORY_META[c];
-          const active = c === cat;
+          const active = c === current;
           return (
             <button
               key={c}
@@ -49,6 +66,15 @@ export const InlineBlockPicker = ({ onAdd }: { onAdd: (id: BlockId) => void }) =
             </button>
           );
         })}
+        {hidden > 0 && (
+          <button
+            type="button"
+            onClick={() => setShowAll(true)}
+            className="ml-auto rounded-xl border-2 border-dashed border-slate-300 bg-white px-2.5 py-1.5 font-display text-xs font-semibold text-slate-500 transition hover:text-slate-700"
+          >
+            แสดงอีก {hidden} หมวด
+          </button>
+        )}
       </div>
 
       <p className="px-3 pt-2 text-xs leading-relaxed text-slate-600">{meta.description}</p>

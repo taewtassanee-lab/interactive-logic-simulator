@@ -16,7 +16,7 @@ import {
   Wrench,
 } from 'lucide-react';
 import { BLOCK_MAP } from '../data/blocks';
-import type { BlockId, LogicReport, WorkspaceBlock } from '../types';
+import type { BlockCategory, BlockId, LogicReport, WorkspaceBlock } from '../types';
 import { Button, Card, EmptyState } from './Ui';
 import { InlineBlockPicker } from './InlineBlockPicker';
 
@@ -36,6 +36,8 @@ interface Props {
   onResetSim: () => void;
   onToggleHints: () => void;
   onAdd: (id: BlockId) => void;
+  /** หมวดบล็อกที่ภารกิจปัจจุบันต้องใช้ ส่งต่อให้ตัวเลือกบล็อกแบบย่อ */
+  focusCategory: BlockCategory | null;
 }
 
 export const LogicWorkspace = ({
@@ -54,6 +56,7 @@ export const LogicWorkspace = ({
   onResetSim,
   onToggleHints,
   onAdd,
+  focusCategory,
 }: Props) => {
   /** เครื่องมือที่ใช้นาน ๆ ครั้ง ปิดไว้ก่อนเพื่อลดจำนวนปุ่มที่ต้องทำความเข้าใจ */
   const [toolsOpen, setToolsOpen] = useState(false);
@@ -69,7 +72,7 @@ export const LogicWorkspace = ({
       จอกว้างมีคลังบล็อกเป็นคอลัมน์ซ้ายให้เห็นคู่กันอยู่แล้ว จึงไม่ต้องแสดงซ้ำ
     */}
     <div className="xl:hidden">
-      <InlineBlockPicker onAdd={onAdd} />
+      <InlineBlockPicker onAdd={onAdd} focusCategory={focusCategory} />
     </div>
 
     {/* ---------- แถบปุ่มควบคุม ---------- */}
