@@ -283,6 +283,7 @@ export const SimulatorPage = () => {
           state={displayState}
           caption={frame?.caption ?? ''}
           onCopyLog={handleCopyLog}
+          focus={state.missions.mission1Passed ? 'mission2' : 'mission1'}
         />
       </div>
 

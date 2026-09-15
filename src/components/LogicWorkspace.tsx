@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import {
   ArrowDown,
   ArrowUp,
   Blocks,
+  ChevronDown,
   CircleCheck,
   Eraser,
   FlaskConical,
@@ -11,6 +13,7 @@ import {
   StepForward,
   Trash2,
   TriangleAlert,
+  Wrench,
 } from 'lucide-react';
 import { BLOCK_MAP } from '../data/blocks';
 import type { BlockId, LogicReport, WorkspaceBlock } from '../types';
@@ -51,7 +54,11 @@ export const LogicWorkspace = ({
   onResetSim,
   onToggleHints,
   onAdd,
-}: Props) => (
+}: Props) => {
+  /** เครื่องมือที่ใช้นาน ๆ ครั้ง ปิดไว้ก่อนเพื่อลดจำนวนปุ่มที่ต้องทำความเข้าใจ */
+  const [toolsOpen, setToolsOpen] = useState(false);
+
+  return (
   <Card
     title="พื้นที่เรียงลำดับตรรกะ"
     subtitle="เรียงบล็อกจากบนลงล่างตามลำดับการทำงานของระบบ"
@@ -66,7 +73,10 @@ export const LogicWorkspace = ({
     </div>
 
     {/* ---------- แถบปุ่มควบคุม ---------- */}
-    <div className="mb-4 flex flex-wrap gap-2">
+    {/* แถวปุ่มหลัก เหลือเฉพาะ 4 ปุ่มที่ใช้ทุกครั้งในวงจรแก้ Bug
+        ส่วนปุ่มที่ใช้นาน ๆ ครั้งและปุ่มที่ลบงานทิ้งได้ ย้ายไปอยู่หลังปุ่มเครื่องมือเพิ่มเติม
+        เพราะหน้านี้มีของให้เรียนรู้มากอยู่แล้ว และการวางปุ่มล้างงานไว้ข้างปุ่ม Run เสี่ยงกดพลาด */}
+    <div className="mb-4 flex flex-wrap items-center gap-2">
       <Button variant="primary" onClick={onRun} disabled={blocks.length === 0}>
         <Play className="h-4 w-4" aria-hidden="true" />
         Run Simulation
@@ -83,15 +93,38 @@ export const LogicWorkspace = ({
         <Lightbulb className="h-4 w-4 text-lemon-500" aria-hidden="true" />
         {hintsOpen ? 'ซ่อนคำใบ้' : 'แสดงคำใบ้'}
       </Button>
-      <Button variant="secondary" onClick={onLoadBuggy}>
-        <FlaskConical className="h-4 w-4 text-bubble-500" aria-hidden="true" />
-        โหลดตัวอย่างตรรกะที่มี Bug
-      </Button>
-      <Button variant="ghost" onClick={onClear} disabled={blocks.length === 0}>
-        <Eraser className="h-4 w-4" aria-hidden="true" />
-        ล้าง Workspace
-      </Button>
+
+      <button
+        type="button"
+        onClick={() => setToolsOpen((v) => !v)}
+        aria-expanded={toolsOpen}
+        className="ml-auto inline-flex items-center gap-1.5 rounded-xl border-2 border-slate-200 bg-white px-3 py-1.5 font-display text-xs font-semibold text-slate-500 transition hover:text-slate-700"
+      >
+        <Wrench className="h-3.5 w-3.5" aria-hidden="true" />
+        เครื่องมือเพิ่มเติม
+        <ChevronDown
+          className={`h-3.5 w-3.5 transition-transform ${toolsOpen ? 'rotate-180' : ''}`}
+          aria-hidden="true"
+        />
+      </button>
     </div>
+
+    {toolsOpen && (
+      <div className="mb-4 flex flex-wrap gap-2 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 px-3 py-2.5">
+        <Button variant="secondary" onClick={onLoadBuggy}>
+          <FlaskConical className="h-4 w-4 text-bubble-500" aria-hidden="true" />
+          โหลดโจทย์ตั้งต้นใหม่
+        </Button>
+        <Button variant="ghost" onClick={onClear} disabled={blocks.length === 0}>
+          <Eraser className="h-4 w-4" aria-hidden="true" />
+          ล้าง Workspace
+        </Button>
+        <p className="w-full text-xs leading-relaxed text-slate-500">
+          โจทย์ตั้งต้นถูกวางไว้ให้อัตโนมัติตั้งแต่เปิดหน้านี้แล้ว
+          สองปุ่มนี้ใช้เมื่อต้องการเริ่มใหม่ทั้งหมดเท่านั้น
+        </p>
+      </div>
+    )}
 
     {/* ---------- คำใบ้ ---------- */}
     {hintsOpen && (
@@ -116,7 +149,7 @@ export const LogicWorkspace = ({
       <EmptyState
         icon={<Blocks className="h-10 w-10" aria-hidden="true" />}
         title="ยังไม่มีบล็อกคำสั่งในพื้นที่นี้"
-        description="เลือกบล็อกจากคลังคำสั่งแล้วกดปุ่ม + เพื่อเริ่มเรียงตรรกะ หรือกดปุ่ม โหลดตัวอย่างตรรกะที่มี Bug เพื่อเริ่มจากโจทย์ที่ครูเตรียมไว้"
+        description="เลือกบล็อกจากคลังคำสั่งแล้วกดปุ่ม + เพื่อเริ่มเรียงตรรกะ หรือกดปุ่ม เครื่องมือเพิ่มเติม แล้วเลือก โหลดโจทย์ตั้งต้นใหม่"
       />
     ) : (
       <ol className="space-y-2">
@@ -250,4 +283,5 @@ export const LogicWorkspace = ({
       </div>
     </div>
   </Card>
-);
+  );
+};

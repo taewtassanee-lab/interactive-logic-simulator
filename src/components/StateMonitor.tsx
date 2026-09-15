@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { Activity, Copy, Database, ScrollText, Terminal } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Activity, ChevronDown, Copy, Database, ScrollText, Terminal } from 'lucide-react';
 import type { LogLevel, SimState, SystemStatus } from '../types';
 import { Card, EmptyState, Tooltip } from './Ui';
 import { IsoCube } from './Illustrations';
@@ -58,13 +58,22 @@ export const StateMonitor = ({
   state,
   caption,
   onCopyLog,
+  focus,
 }: {
   state: SimState;
   caption: string;
   onCopyLog: () => void;
+  /** ภารกิจที่ผู้เรียนกำลังทำอยู่ ใช้เลือกว่าค่าไหนต้องเด่น ค่าไหนพับเก็บได้ */
+  focus: 'mission1' | 'mission2';
 }) => {
   const logRef = useRef<HTMLDivElement>(null);
   const status = STATUS_META[state.status];
+  /**
+   * State Monitor มีค่าให้ดู 10 ค่า แต่แต่ละภารกิจใช้จริงแค่ 2 ถึง 3 ค่า
+   * การวางทั้งหมดเรียงกันทำให้ผู้เรียนที่เพิ่งเริ่มไม่รู้ว่าควรมองค่าไหน
+   * จึงแยกค่าที่ภารกิจปัจจุบันต้องใช้ขึ้นมาไว้ด้านบน ที่เหลือพับเก็บไว้ให้กางดูเองได้
+   */
+  const [moreOpen, setMoreOpen] = useState(false);
 
   useEffect(() => {
     // เลื่อน Debug Log ไปบรรทัดล่าสุดเสมอ เพื่อให้เห็นเหตุการณ์ปัจจุบัน
@@ -121,53 +130,97 @@ export const StateMonitor = ({
           </div>
         </div>
 
-        <div className="rounded-[1.25rem] border-2 border-slate-100 bg-white px-3.5 py-1">
+        {/* ---------- ค่าที่ภารกิจปัจจุบันต้องดู ---------- */}
+        <div
+          className="rounded-[1.25rem] border-2 border-mint-300 bg-gradient-to-b from-mint-50 to-white px-3.5 py-1"
+          style={{ boxShadow: '0 4px 0 0 rgba(16,185,129,0.22)' }}
+        >
+          <p className="pb-1 pt-2 font-display text-xs font-bold uppercase tracking-wide text-mint-800">
+            ค่าที่ต้องดูในภารกิจที่ {focus === 'mission1' ? '1' : '2'}
+          </p>
           <Row label="Array Size (Array.Width)" value={state.arraySize} />
-          <Row
-            label={
-              <Tooltip term="Random Index (Num)">
-                ตัวแปรเก็บเลขตำแหน่งที่สุ่มได้ คำนวณจาก floor(random(Array.Width)) จึงได้ค่า 0 ถึง Width-1
-              </Tooltip>
-            }
-            value={state.num === null ? '-' : state.num}
-          />
-          <Row
-            label="Current Question"
-            value={state.currentQuestion ? state.currentQuestion.code : '-'}
-          />
-          <Row
-            label="ข้อความคำถาม"
-            value={state.currentQuestion ? state.currentQuestion.text : '-'}
-            mono={false}
-          />
-          <Row label="Selected Answer" value={state.selectedAnswer ?? '-'} mono={false} />
-          <Row label="Correct Answer" value={state.correctAnswer ?? '-'} mono={false} />
-          <Row
-            label="Score"
-            value={<span className="text-base text-mint-700">{state.score}</span>}
-          />
-          <Row
-            label="Current Layout"
-            value={
-              <span
-                className={
-                  state.layout === 'Summary' ? 'text-mint-700' : 'text-brand-700'
-                }
-              >
-                {state.layout}
-              </span>
-            }
-          />
+          {focus === 'mission1' ? (
+            <Row
+              label="จำนวนครั้งที่สุ่มซ้ำ"
+              value={
+                <span className={state.duplicateCount > 0 ? 'text-bubble-700' : 'text-mint-700'}>
+                  {state.duplicateCount}
+                </span>
+              }
+            />
+          ) : (
+            <Row
+              label="Current Layout"
+              value={
+                <span className={state.layout === 'Summary' ? 'text-mint-700' : 'text-brand-700'}>
+                  {state.layout}
+                </span>
+              }
+            />
+          )}
           <Row label="จำนวนข้อที่ตอบแล้ว" value={state.answeredCount} />
-          <Row
-            label="จำนวนครั้งที่สุ่มซ้ำ"
-            value={
-              <span className={state.duplicateCount > 0 ? 'text-bubble-700' : 'text-slate-800'}>
-                {state.duplicateCount}
-              </span>
-            }
-          />
         </div>
+
+        {/* ---------- ค่าอื่น ๆ พับเก็บไว้ ---------- */}
+        <button
+          type="button"
+          onClick={() => setMoreOpen((v) => !v)}
+          aria-expanded={moreOpen}
+          className="mt-2.5 flex w-full items-center justify-between gap-2 rounded-2xl border-2 border-slate-200 bg-white px-3.5 py-2 text-left font-display text-xs font-semibold text-slate-500 transition hover:text-slate-700"
+        >
+          ค่าอื่น ๆ ในระบบ อีก 7 ค่า
+          <ChevronDown
+            className={`h-4 w-4 transition-transform ${moreOpen ? 'rotate-180' : ''}`}
+            aria-hidden="true"
+          />
+        </button>
+
+        {moreOpen && (
+          <div className="mt-2 rounded-[1.25rem] border-2 border-slate-100 bg-white px-3.5 py-1">
+            <Row
+              label={
+                <Tooltip term="Random Index (Num)">
+                  ตัวแปรเก็บเลขตำแหน่งที่สุ่มได้ คำนวณจาก floor(random(Array.Width)) จึงได้ค่า 0 ถึง Width-1
+                </Tooltip>
+              }
+              value={state.num === null ? '-' : state.num}
+            />
+            <Row
+              label="Current Question"
+              value={state.currentQuestion ? state.currentQuestion.code : '-'}
+            />
+            <Row
+              label="ข้อความคำถาม"
+              value={state.currentQuestion ? state.currentQuestion.text : '-'}
+              mono={false}
+            />
+            <Row label="Selected Answer" value={state.selectedAnswer ?? '-'} mono={false} />
+            <Row label="Correct Answer" value={state.correctAnswer ?? '-'} mono={false} />
+            <Row
+              label="Score"
+              value={<span className="text-base text-mint-700">{state.score}</span>}
+            />
+            {focus === 'mission1' ? (
+              <Row
+                label="Current Layout"
+                value={
+                  <span className={state.layout === 'Summary' ? 'text-mint-700' : 'text-brand-700'}>
+                    {state.layout}
+                  </span>
+                }
+              />
+            ) : (
+              <Row
+                label="จำนวนครั้งที่สุ่มซ้ำ"
+                value={
+                  <span className={state.duplicateCount > 0 ? 'text-bubble-700' : 'text-slate-800'}>
+                    {state.duplicateCount}
+                  </span>
+                }
+              />
+            )}
+          </div>
+        )}
       </Card>
 
       {/* ---------- Debug Log ---------- */}
