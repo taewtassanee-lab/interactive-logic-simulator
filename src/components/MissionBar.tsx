@@ -4,7 +4,6 @@ import {
   CircleCheck,
   Lightbulb,
   PartyPopper,
-  Search,
   Target,
   TriangleAlert,
   Wrench,
@@ -147,12 +146,15 @@ export const MissionBar = ({ missions }: { missions: MissionState }) => {
                 <p className="text-[15px] leading-relaxed text-slate-700">{current.symptom}</p>
               </div>
 
+              {/* ช่องนี้เคยเป็น "สาเหตุ" ซึ่งซ้ำกับช่อง "ต้องทำอะไร" ที่อยู่ถัดไป
+                  และยังเป็นคำตอบของใบงานส่วนที่ 2 ที่ผู้เรียนต้องคิดเอง จึงเปลี่ยนมาบอกผลลัพธ์ที่ต้องการแทน
+                  ผู้เรียนจะได้ตรวจงานของตัวเองจาก State Monitor เป็น ไม่ต้องรอให้ระบบบอกว่าผ่าน */}
               <div className="rounded-2xl border-2 border-lemon-200 bg-gradient-to-b from-lemon-50 to-white px-3.5 py-3">
                 <p className="mb-1 flex items-center gap-1.5 font-display text-xs font-bold uppercase tracking-wide text-peach-700">
-                  <Search className="h-4 w-4" aria-hidden="true" />
-                  สาเหตุ
+                  <Target className="h-4 w-4" aria-hidden="true" />
+                  ผลลัพธ์ที่ต้องการ
                 </p>
-                <p className="text-[15px] leading-relaxed text-slate-700">{current.cause}</p>
+                <p className="text-[15px] leading-relaxed text-slate-700">{current.expected}</p>
               </div>
 
               {/* กล่องเป้าหมายเน้นที่สุด เพราะเป็นสิ่งเดียวที่ผู้เรียนต้องลงมือทำ */}

@@ -10,7 +10,13 @@ export interface MissionDef {
   shortTitle: string;
   title: string;
   symptom: string;
-  cause: string;
+  /**
+   * ผลลัพธ์ที่ถูกต้อง เขียนให้ตรวจได้จริงจากค่าใน State Monitor
+   *
+   * เดิมแถบภารกิจบอกแต่อาการกับวิธีแก้ ไม่ได้บอกว่าถ้าแก้ถูกแล้วหน้าจอควรเป็นอย่างไร
+   * ผู้เรียนจึงต้องรอให้ระบบขึ้นว่าผ่าน แทนที่จะตรวจงานของตัวเองเป็น
+   */
+  expected: string;
   goal: string;
   /** คำใบ้เฉพาะของภารกิจนี้ ไล่จากใบ้น้อยไปใบ้มาก */
   hints: string[];
@@ -25,7 +31,7 @@ export const MISSIONS: MissionDef[] = [
     shortTitle: 'ระบบสุ่มข้อสอบซ้ำ',
     title: 'ภารกิจที่ 1: ระบบสุ่มข้อสอบซ้ำ',
     symptom: 'ระบบสุ่มคำถามเดิมซ้ำ ผู้เล่นเจอข้อเดิมหลายครั้ง และเกมไม่จบสักที',
-    cause: 'ไม่มีบล็อก Array -> Delete index Num from X axis ข้อสอบที่ใช้แล้วจึงยังอยู่ใน Array',
+    expected: 'ทุกครั้งที่สุ่ม ค่า Array Size ต้องลดลงทีละ 1 ช่อง จนเหลือ 0 และค่า "จำนวนครั้งที่สุ่มซ้ำ" ต้องเป็น 0 ตลอดทั้งรอบ',
     goal: 'เพิ่มบล็อก Delete index ให้อยู่ต่อจาก Set CurrentQuestion ภายใน Function "Random"',
     hints: [
       'ลอง Run แล้วดู Debug Log ว่ามีบรรทัดที่บอกว่าสุ่มได้ข้อเดิมซ้ำหรือไม่',
@@ -41,7 +47,7 @@ export const MISSIONS: MissionDef[] = [
     shortTitle: 'เงื่อนไขจบเกม',
     title: 'ภารกิจที่ 2: ทำข้อสอบครบแต่ไม่เข้าสู่หน้าสรุปผล',
     symptom: 'ทำข้อสอบครบทุกข้อแล้ว แต่หน้าจอยังค้างอยู่ที่ Layout Quiz ไม่ไปหน้าสรุปผล',
-    cause: 'ไม่มีเงื่อนไข If Array is empty หรือวาง Go to Layout "Summary" ไม่ถูกตำแหน่ง',
+    expected: 'เมื่อ Array Size เหลือ 0 ค่า Current Layout ต้องเปลี่ยนจาก Quiz เป็น Summary และ Debug Log ต้องมีบรรทัดที่แสดงคะแนนรวม',
     goal: 'จัดบล็อก If Array is empty ให้อยู่ก่อน Go to Layout "Summary" และ Display Score',
     hints: [
       'Run จนข้อสอบหมด แล้วดูว่า Current Layout ยังเป็น Quiz อยู่หรือไม่',
