@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import {
   ArrowDown,
   ArrowUp,
@@ -7,6 +7,7 @@ import {
   CircleCheck,
   Eraser,
   FlaskConical,
+  GripVertical,
   Lightbulb,
   Play,
   RotateCcw,
@@ -28,6 +29,8 @@ interface Props {
   hintsOpen: boolean;
   isRunning: boolean;
   onMove: (index: number, direction: -1 | 1) => void;
+  /** ย้ายบล็อกจากตำแหน่ง from ไปแทรกที่ตำแหน่ง to ใช้กับการลากวาง */
+  onReorder: (from: number, to: number) => void;
   onRemove: (uid: string) => void;
   onLoadBuggy: () => void;
   onClear: () => void;
@@ -86,6 +89,7 @@ export const LogicWorkspace = ({
   hintsOpen,
   isRunning,
   onMove,
+  onReorder,
   onRemove,
   onLoadBuggy,
   onClear,
@@ -100,10 +104,67 @@ export const LogicWorkspace = ({
   const [toolsOpen, setToolsOpen] = useState(false);
   const structure = buildStructure(blocks.map((b) => b.blockId));
 
+  /**
+   * การลากวางด้วย Pointer Events ไม่ใช่ HTML5 drag and drop
+   *
+   * เลือกแบบนี้เพราะ drag and drop ของ HTML5 ใช้ไม่ได้บน Safari ของ iPad
+   * ซึ่งเป็นเครื่องที่ผู้เรียนใช้จริงครึ่งหนึ่ง ส่วน Pointer Events รองรับทั้งเมาส์และนิ้ว
+   *
+   * ปุ่มขึ้นลงยังอยู่ครบ เพราะลากวางในรายการยาว ๆ บนจอสัมผัสพลาดง่าย
+   * และปุ่มยังใช้ได้ด้วยคีย์บอร์ดสำหรับผู้ที่ใช้เมาส์ไม่ได้
+   */
+  const listRef = useRef<HTMLOListElement>(null);
+  const [dragFrom, setDragFrom] = useState<number | null>(null);
+  const [dragOver, setDragOver] = useState<number | null>(null);
+
+  /** หาว่าตำแหน่ง y ของนิ้วหรือเมาส์ ตรงกับแถวที่เท่าไร */
+  const rowAt = (clientY: number): number | null => {
+    const items = listRef.current?.querySelectorAll('li[data-index]');
+    if (!items) return null;
+    for (let i = 0; i < items.length; i += 1) {
+      const r = items[i].getBoundingClientRect();
+      if (clientY < r.bottom) return i;
+    }
+    return items.length - 1;
+  };
+
+  const startDrag = (index: number) => (e: ReactPointerEvent<HTMLButtonElement>) => {
+    // บางเบราว์เซอร์ปฏิเสธการจับ pointer ถ้า id ไม่ได้อยู่ในสถานะใช้งาน
+    // การลากยังทำงานได้โดยไม่ต้องจับ จึงไม่ปล่อยให้ข้อผิดพลาดนี้ทำให้ทั้งหน้าพัง
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      /* ไม่เป็นไร ใช้การติดตามจากตำแหน่งแถวแทนได้ */
+    }
+    setDragFrom(index);
+    setDragOver(index);
+  };
+
+  const moveDrag = (e: ReactPointerEvent<HTMLButtonElement>) => {
+    if (dragFrom === null) return;
+    const over = rowAt(e.clientY);
+    if (over !== null) setDragOver(over);
+  };
+
+  const endDrag = (e: ReactPointerEvent<HTMLButtonElement>) => {
+    if (dragFrom !== null && dragOver !== null && dragOver !== dragFrom) {
+      onReorder(dragFrom, dragOver);
+    }
+    try {
+      if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+    } catch {
+      /* ไม่ได้จับไว้ตั้งแต่แรก ข้ามได้ */
+    }
+    setDragFrom(null);
+    setDragOver(null);
+  };
+
   return (
   <Card
     title="พื้นที่เรียงลำดับตรรกะ"
-    subtitle="เรียงบล็อกจากบนลงล่างตามลำดับการทำงานของระบบ"
+    subtitle="ลากที่จุดจับหรือกดปุ่มขึ้นลงเพื่อจัดลำดับ คำสั่งจะย่อหน้าเข้าไปอยู่ใต้เหตุการณ์หรือเงื่อนไขที่อยู่เหนือมัน เหมือน Event Sheet จริง"
     icon={<Blocks className="h-5 w-5 text-think-600" aria-hidden="true" />}
   >
     {/*
@@ -194,13 +255,22 @@ export const LogicWorkspace = ({
         description="เลือกบล็อกจากคลังคำสั่งแล้วกดปุ่ม + เพื่อเริ่มเรียงตรรกะ หรือกดปุ่ม เครื่องมือเพิ่มเติม แล้วเลือก โหลดโจทย์ตั้งต้นใหม่"
       />
     ) : (
-      <ol className="space-y-2">
+      <ol ref={listRef} className="space-y-2">
         {blocks.map((block, index) => {
           const def = BLOCK_MAP[block.blockId];
           const active = activeBlockId === block.blockId;
           const st = structure[index];
           return (
-            <li key={block.uid} style={{ paddingLeft: `${st.depth * 22}px` }}>
+            <li
+              key={block.uid}
+              data-index={index}
+              style={{ paddingLeft: `${st.depth * 22}px` }}
+              className={
+                dragFrom !== null && dragOver === index && dragOver !== dragFrom
+                  ? 'rounded-2xl outline-dashed outline-2 outline-offset-2 outline-brand-400'
+                  : undefined
+              }
+            >
               <div
                 /* บล็อกทุกชิ้นหน้าตาเหมือนกัน ไม่ไฮไลต์บล็อกลวงไว้ล่วงหน้า
                    ผู้เรียนต้องรู้ว่าวางผิดจากผลการจำลอง ไม่ใช่จากสีของบล็อก */
@@ -213,8 +283,22 @@ export const LogicWorkspace = ({
                   boxShadow: active
                     ? '0 5px 0 0 #9db4ff'
                     : '0 4px 0 0 rgba(203,213,225,0.55)',
+                  opacity: dragFrom === index ? 0.45 : 1,
                 }}
               >
+                <button
+                  type="button"
+                  onPointerDown={startDrag(index)}
+                  onPointerMove={moveDrag}
+                  onPointerUp={endDrag}
+                  onPointerCancel={endDrag}
+                  aria-label={`ลากเพื่อย้ายบล็อก ${def.label}`}
+                  title="ลากเพื่อย้ายลำดับ"
+                  className="mt-0.5 flex h-7 w-5 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-slate-300 transition hover:text-slate-500 active:cursor-grabbing"
+                >
+                  <GripVertical className="h-4 w-4" aria-hidden="true" />
+                </button>
+
                 {/* ช่องเลขเหตุการณ์เลียนแบบ Event Sheet จริง เหตุการณ์และเงื่อนไขมีเลขของตัวเอง
                     ส่วนคำสั่งไม่มีเลข เพราะของจริงก็ไม่ให้เลขกับแอ็กชันเช่นกัน */}
                 <span

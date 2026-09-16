@@ -117,6 +117,15 @@ export const SimulatorPage = () => {
     setBlocks(next);
   };
 
+  /** ย้ายบล็อกจากตำแหน่งหนึ่งไปแทรกอีกตำแหน่งหนึ่ง ใช้กับการลากวาง */
+  const handleReorder = (from: number, to: number) => {
+    if (from === to || from < 0 || to < 0 || from >= blocks.length || to >= blocks.length) return;
+    const next = [...blocks];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    setBlocks(next);
+  };
+
   const handleLoadBuggy = () => {
     setBlocks(BUGGY_EXAMPLE.map((blockId) => ({ uid: newUid(), blockId })));
     setHintsOpen(true);
@@ -281,6 +290,7 @@ export const SimulatorPage = () => {
           hintsOpen={hintsOpen}
           isRunning={result !== null}
           onMove={handleMove}
+          onReorder={handleReorder}
           onRemove={handleRemove}
           onLoadBuggy={handleLoadBuggy}
           onClear={handleClear}
