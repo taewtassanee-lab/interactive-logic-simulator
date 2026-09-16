@@ -7,6 +7,7 @@ import {
   CircleHelp,
   FunctionSquare,
   Lightbulb,
+  Copy,
   ListChecks,
   TriangleAlert,
   X,
@@ -22,6 +23,7 @@ import {
   FUNCTION_COMMANDS,
   FUNCTION_CONCEPTS,
   GLOSSARY,
+  QUIZ_JSON,
   REAL_EVENT_MAPPING,
   REVIEW_QUESTIONS,
   type CommandRow,
@@ -309,6 +311,63 @@ const ReviewQuiz = () => {
 
 /* ---------- หน้าหลัก ---------- */
 
+/* ---------- ชุดข้อสอบ JSON สำหรับวางใน Construct 2 ---------- */
+
+/**
+ * แผนกำหนดให้ผู้เรียนเขียนแอ็กชัน Load from JSON string เองในคาบ
+ * แต่เดิมไม่มีที่ใดในระบบบอกว่าข้อความ JSON นั้นหาได้จากไหน
+ * ถ้าปล่อยให้พิมพ์เองจะเสียเวลาไปมากและพิมพ์ผิดง่าย เพราะวงเล็บและเครื่องหมายคำพูดต้องครบทุกตัว
+ * จึงวางไว้ให้คัดลอกได้ในที่ที่ผู้เรียนเปิดอยู่แล้วระหว่างทำงาน
+ */
+const JsonBlock = () => {
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(QUIZ_JSON);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2500);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  return (
+    <div
+      className="mt-4 rounded-[1.25rem] border-2 border-peach-300 bg-gradient-to-b from-peach-50 to-white px-4 py-3.5"
+      style={{ boxShadow: '0 5px 0 0 rgba(249,115,22,0.22)' }}
+    >
+      <div className="mb-2 flex flex-wrap items-center gap-2">
+        <p className="font-display text-[15px] font-bold text-peach-800">
+          ชุดข้อสอบ 10 ข้อสำหรับวางใน Construct 2
+        </p>
+        <Button variant="secondary" onClick={() => void copy()} className="ml-auto">
+          <Copy className="h-4 w-4" aria-hidden="true" />
+          {copied ? 'คัดลอกแล้ว' : 'คัดลอก JSON'}
+        </Button>
+      </div>
+
+      <p className="mb-2 text-sm leading-relaxed text-slate-600">
+        กดคัดลอกแล้วนำไปวางในช่องของแอ็กชัน <strong>Array &gt; Load from JSON string</strong>{' '}
+        ใต้เหตุการณ์ On start of layout ไม่ต้องพิมพ์เอง เพราะวงเล็บและเครื่องหมายคำพูดต้องครบทุกตัว
+        พิมพ์ผิดตัวเดียวข้อสอบจะไม่เข้า Array
+      </p>
+
+      <pre className="overflow-x-auto rounded-2xl bg-slate-900 px-3.5 py-3 font-mono text-[11.5px] leading-relaxed text-mint-200">
+        {QUIZ_JSON}
+      </pre>
+
+      <p className="mt-2 text-xs leading-relaxed text-slate-600">
+        แต่ละช่องเก็บสองค่าไว้ด้วยกันในรูปแบบ <strong>&quot;หมายเลขข้อ,ตัวเฉลย&quot;</strong>{' '}
+        เช่น <code className="font-mono">&quot;3,ก&quot;</code> หมายถึงข้อที่ 3 เฉลยข้อ ก
+        แล้วใช้ <strong>tokenat</strong> แยกสองค่านี้ออกจากกันตอนใช้งาน ตามหัวข้อด้านบน
+        <br />
+        ถ้าเพิ่มหรือลดจำนวนข้อ ต้องแก้เลข <code className="font-mono">size</code> ให้ตรงกับจำนวนจริงด้วย
+      </p>
+    </div>
+  );
+};
+
 export const KnowledgePage = () => (
   <div className="space-y-4">
     {/* ---------- หัวเรื่อง ---------- */}
@@ -399,10 +458,11 @@ export const KnowledgePage = () => (
     <Card
       accent="mint"
       title="ส่วนที่ 3: เทคนิคเพิ่มเติมที่ใช้ในไฟล์จริง"
-      subtitle="3 เรื่องที่จะเจอใน Event Sheet ของโปรเจกต์ แต่ไม่มีในเว็บจำลอง"
+      subtitle="3 เรื่องที่จะเจอใน Event Sheet ของโปรเจกต์ แต่ไม่มีในเว็บจำลอง พร้อมชุดข้อสอบให้คัดลอกไปใช้"
       icon={<Boxes className="h-5 w-5 text-mint-600" aria-hidden="true" />}
     >
       <ConceptList sections={ADVANCED_CONCEPTS} tone="mint" />
+      <JsonBlock />
     </Card>
 
     {/* ---------- ตารางเทียบเว็บจำลองกับของจริง ---------- */}
