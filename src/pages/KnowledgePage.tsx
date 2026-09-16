@@ -311,6 +311,110 @@ const ReviewQuiz = () => {
 
 /* ---------- หน้าหลัก ---------- */
 
+/* ---------- ตรวจโปรเจกต์ก่อนเขียน Event ---------- */
+
+/**
+ * รายการตรวจสิ่งที่ต้องมีในโปรเจกต์ก่อนลงมือเขียน Event Sheet
+ *
+ * ผู้เรียนนำระบบแบบทดสอบไปติดตั้งในสื่อปฏิสัมพันธ์ของตนเอง ไม่ได้เริ่มจากไฟล์ที่ครูเตรียมให้
+ * การออกแบบ Layout เสร็จแล้วยังไม่พอ เพราะสิ่งที่ Event Sheet ต้องใช้จริงหลายอย่างมองไม่เห็นบนหน้าจอ
+ * เช่น ปลั๊กอินที่ไม่มีรูปร่าง จำนวนเฟรมของ Sprite และตัวแปรประจำอ็อบเจกต์
+ * ถ้าขาดอย่างใดอย่างหนึ่ง จะเขียนบล็อกที่ต้องใช้มันไม่ได้เลย และรู้ตัวตอนหมดเวลาไปแล้ว
+ */
+const PREFLIGHT: { item: string; why: string; how: string }[] = [
+  {
+    item: 'ปลั๊กอิน Array',
+    why: 'ใช้เก็บชุดข้อสอบทั้ง 10 ข้อ',
+    how: 'ดูในแถบ Objects ว่ามีไอคอนตาราง ถ้าไม่มีให้ Insert new object เลือก Array',
+  },
+  {
+    item: 'ปลั๊กอิน Function',
+    why: 'ใช้ประกาศและเรียก Function "Random"',
+    how: 'ดูในแถบ Objects ถ้าไม่มีให้ Insert new object เลือก Function',
+  },
+  {
+    item: 'ปลั๊กอิน Mouse',
+    why: 'ใช้รับเหตุการณ์คลิกปุ่มคำตอบ',
+    how: 'ดูในแถบ Objects ถ้าไม่มีให้ Insert new object เลือก Mouse',
+  },
+  {
+    item: 'Sprite คำถาม มีครบ 10 เฟรม',
+    why: 'สั่ง Set animation frame ตามเลขข้อที่สุ่มได้',
+    how: 'ดับเบิลคลิกที่ Sprite แล้วนับเฟรมใน Animations frames ต้องได้ 10 เฟรม เรียงตามข้อที่ 0 ถึง 9',
+  },
+  {
+    item: 'Sprite feedback มี 3 เฟรม',
+    why: 'เฟรม 0 ว่าง เฟรม 1 เครื่องหมายถูก เฟรม 2 เครื่องหมายผิด',
+    how: 'ดับเบิลคลิกที่ Sprite feedback แล้วตรวจลำดับเฟรมให้ตรงตามนี้',
+  },
+  {
+    item: 'ปุ่มตัวเลือกมีตัวแปรประจำอ็อบเจกต์ชื่อ Choice',
+    why: 'เก็บตัวเลือกที่ผู้เล่นกด ไว้เทียบกับตัวแปร Answer',
+    how: 'คลิกที่ปุ่ม ดูช่อง Instance variables ถ้าไม่มีให้กด Add เพิ่มชนิดข้อความ',
+  },
+  {
+    item: 'ตัวแปรส่วนกลาง Answer, Num, Score',
+    why: 'ใช้ในทุกบล็อกที่จะเขียน',
+    how: 'ดูบนสุดของ Event Sheet ถ้าไม่มีให้คลิกขวาเลือก Add global variable',
+  },
+  {
+    item: 'Layout หน้าผลลัพธ์ 2 หน้า',
+    why: 'ปลายทางของเงื่อนไขจบเกม',
+    how: 'จดชื่อจริงของทั้งสองหน้าไว้ เพราะต้องพิมพ์ให้ตรงตอนสั่ง Go to layout',
+  },
+];
+
+const Preflight = () => (
+  <div
+    className="mt-4 rounded-[1.25rem] border-2 border-think-300 bg-gradient-to-b from-think-50 to-white px-4 py-3.5"
+    style={{ boxShadow: '0 5px 0 0 rgba(139,92,246,0.22)' }}
+  >
+    <p className="font-display text-[15px] font-bold text-think-900">
+      ตรวจโปรเจกต์ของเราก่อนเริ่มเขียน Event
+    </p>
+    <p className="mt-1 text-sm leading-relaxed text-slate-600">
+      ออกแบบหน้าจอเสร็จแล้วยังไม่พอ เพราะสิ่งที่ Event Sheet ต้องใช้หลายอย่าง
+      <strong> มองไม่เห็นบนหน้า Layout</strong> ไล่ตรวจให้ครบก่อน จะได้ไม่ติดกลางทางตอนเวลาเหลือน้อย
+    </p>
+
+    <div className="mt-2.5 overflow-x-auto">
+      <table className="w-full min-w-[560px] border-collapse text-sm">
+        <thead>
+          <tr className="text-left">
+            <th className="w-1/3 pb-1.5 font-display text-xs font-bold uppercase tracking-wide text-slate-500">
+              ต้องมี
+            </th>
+            <th className="pb-1.5 font-display text-xs font-bold uppercase tracking-wide text-slate-500">
+              ตรวจอย่างไร
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {PREFLIGHT.map((p, i) => (
+            <tr key={p.item} className="border-t-2 border-dashed border-think-100 align-top">
+              <td className="py-1.5 pr-3">
+                <span className="mr-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-b from-think-400 to-think-600 font-display text-[11px] font-bold text-white">
+                  {i + 1}
+                </span>
+                <span className="font-semibold text-slate-800">{p.item}</span>
+                <span className="mt-0.5 block text-xs text-slate-500">{p.why}</span>
+              </td>
+              <td className="py-1.5 text-slate-700">{p.how}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <p className="mt-2.5 rounded-2xl bg-white/80 px-3.5 py-2.5 text-sm leading-relaxed text-slate-700">
+      <strong className="text-think-800">ชื่ออ็อบเจกต์ของเราไม่ต้องตรงกับในเฉลย</strong>{' '}
+      เพราะเป็นสื่อที่เราออกแบบเอง แต่ต้องรู้ว่าชื่อของเราตรงกับตัวใดในเฉลย
+      เช่น ถ้าตั้งชื่อหน้าผลลัพธ์ว่า win และ lose คำสั่งก็ต้องเป็น Go to layout &quot;win&quot;
+      ไม่ใช่ลอกเฉลยมาทั้งบรรทัด
+    </p>
+  </div>
+);
+
 /* ---------- ชุดข้อสอบ JSON สำหรับวางใน Construct 2 ---------- */
 
 /**
@@ -462,6 +566,7 @@ export const KnowledgePage = () => (
       icon={<Boxes className="h-5 w-5 text-mint-600" aria-hidden="true" />}
     >
       <ConceptList sections={ADVANCED_CONCEPTS} tone="mint" />
+      <Preflight />
       <JsonBlock />
     </Card>
 
