@@ -22,6 +22,7 @@ import {
   COMMON_MISTAKES,
   FUNCTION_COMMANDS,
   FUNCTION_CONCEPTS,
+  COPY_LINES,
   GLOSSARY,
   QUIZ_JSON,
   REAL_EVENT_MAPPING,
@@ -423,6 +424,55 @@ const Preflight = () => (
  * ถ้าปล่อยให้พิมพ์เองจะเสียเวลาไปมากและพิมพ์ผิดง่าย เพราะวงเล็บและเครื่องหมายคำพูดต้องครบทุกตัว
  * จึงวางไว้ให้คัดลอกได้ในที่ที่ผู้เรียนเปิดอยู่แล้วระหว่างทำงาน
  */
+/** บรรทัดนิพจน์ยาวพร้อมปุ่มคัดลอก ลดเวลาพิมพ์และความผิดพลาดจากวงเล็บซ้อนหลายชั้น */
+const CopyLines = () => {
+  const [copiedId, setCopiedId] = useState('');
+
+  const copy = async (id: string, code: string) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedId(id);
+      window.setTimeout(() => setCopiedId(''), 2500);
+    } catch {
+      setCopiedId('');
+    }
+  };
+
+  return (
+    <div
+      className="mt-4 rounded-[1.25rem] border-2 border-brand-300 bg-gradient-to-b from-brand-50 to-white px-4 py-3.5"
+      style={{ boxShadow: '0 5px 0 0 rgba(99,102,241,0.22)' }}
+    >
+      <p className="font-display text-[15px] font-bold text-brand-800">
+        นิพจน์ยาวสำหรับวางใน Construct 2
+      </p>
+      <p className="mt-1 text-sm leading-relaxed text-slate-600">
+        สองบรรทัดนี้มีวงเล็บซ้อนกันหลายชั้น การพิมพ์เองไม่ได้ทำให้เข้าใจตรรกะเพิ่มขึ้น
+        มีแต่จะกินเวลาและพิมพ์ผิดจนหาสาเหตุไม่เจอ ให้กดคัดลอกไปวางแล้ว
+        <strong> แก้เฉพาะชื่ออ็อบเจกต์ให้ตรงกับของเราเอง</strong>
+      </p>
+
+      <div className="mt-2.5 space-y-2.5">
+        {COPY_LINES.map((line) => (
+          <div key={line.id} className="rounded-2xl border-2 border-white bg-white/80 px-3.5 py-2.5">
+            <div className="mb-1.5 flex flex-wrap items-center gap-2">
+              <p className="min-w-0 flex-1 text-sm font-semibold text-slate-800">{line.title}</p>
+              <Button variant="secondary" onClick={() => void copy(line.id, line.code)}>
+                <Copy className="h-4 w-4" aria-hidden="true" />
+                {copiedId === line.id ? 'คัดลอกแล้ว' : 'คัดลอก'}
+              </Button>
+            </div>
+            <pre className="overflow-x-auto rounded-xl bg-slate-900 px-3 py-2 font-mono text-[11.5px] leading-relaxed text-mint-200">
+              {line.code}
+            </pre>
+            <p className="mt-1 text-xs leading-relaxed text-slate-600">{line.note}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const JsonBlock = () => {
   const [copied, setCopied] = useState(false);
 
@@ -568,6 +618,7 @@ export const KnowledgePage = () => (
       <ConceptList sections={ADVANCED_CONCEPTS} tone="mint" />
       <Preflight />
       <JsonBlock />
+      <CopyLines />
     </Card>
 
     {/* ---------- ตารางเทียบเว็บจำลองกับของจริง ---------- */}

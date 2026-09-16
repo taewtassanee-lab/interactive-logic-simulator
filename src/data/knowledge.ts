@@ -247,6 +247,36 @@ export const QUIZ_JSON =
   '{"c2array":true,"size":[10,1,1],"data":[[["0,ก"]],[["1,ค"]],[["2,ค"]],[["3,ก"]],' +
   '[["4,ข"]],[["5,ข"]],[["6,ง"]],[["7,ก"]],[["8,ค"]],[["9,ง"]]]}';
 
+/**
+ * นิพจน์ยาวที่ต้องพิมพ์ลงใน Construct 2 ให้คัดลอกไปใช้ได้
+ *
+ * เหตุผลเดียวกับชุดข้อสอบ JSON คือเป็นเรื่องของรูปแบบการพิมพ์ ไม่ใช่ตรรกะ
+ * ตรรกะว่าทำไมต้องแยกค่าด้วย tokenat อยู่ในหัวข้อด้านบนซึ่งผู้เรียนต้องเข้าใจเอง
+ * แต่การพิมพ์วงเล็บซ้อนสี่ชั้นให้ครบถ้วนไม่ได้ทำให้เข้าใจตรรกะเพิ่มขึ้นเลย
+ * มีแต่จะกินเวลาและพิมพ์ผิดจนหาสาเหตุไม่เจอ
+ */
+export interface CopyLine {
+  id: string;
+  title: string;
+  code: string;
+  note: string;
+}
+
+export const COPY_LINES: CopyLine[] = [
+  {
+    id: 'quiz-frame',
+    title: 'ดึงหมายเลขข้อไปแสดงเป็นเฟรมของ Sprite คำถาม',
+    code: 'int(trim(tokenat(Array.At(Num),0,",")))',
+    note: 'ใช้ในแอ็กชัน Set animation frame ของ Sprite คำถาม เลข 0 คือช่องแรกซึ่งเก็บหมายเลขข้อ',
+  },
+  {
+    id: 'answer-var',
+    title: 'ดึงตัวเฉลยไปเก็บในตัวแปร Answer',
+    code: 'trim(tokenat(Array.At(Num),1,","))',
+    note: 'ใช้ในแอ็กชัน Set Answer เลข 1 คือช่องที่สองซึ่งเก็บตัวเฉลย ไม่ต้องครอบ int เพราะเป็นตัวอักษร',
+  },
+];
+
 export const REAL_EVENT_MAPPING: MappingRow[] = [
   {
     block: 'On start of layout',
