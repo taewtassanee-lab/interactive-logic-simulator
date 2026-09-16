@@ -201,6 +201,13 @@ export const runSimulation = (blocks: WorkspaceBlock[], seed = 20690701): SimRes
         state = { ...state, score: state.score + 1 };
         log(`Score เพิ่มเป็น ${state.score}`, 'success');
         commit('add_score', `เพิ่มคะแนนเป็น ${state.score}`);
+      } else if (flags.hasElse) {
+        // กรณีตอบผิดมีคำสั่งรองรับ ตรงกับ Event 9 ในไฟล์จริงที่แสดงเครื่องหมายผิด
+        log('เข้าเงื่อนไข Else: ตอบผิด ระบบแจ้งผลว่าผิดโดยไม่เพิ่มคะแนน', 'info');
+        commit('else_branch', 'เข้าเงื่อนไข Else กรณีตอบผิด');
+      } else {
+        log('ตอบผิดแล้วไม่มีคำสั่งใดทำงาน เพราะยังไม่มี System: Else รองรับกรณีนี้', 'warn');
+        commit(null, 'ไม่มี Else รองรับกรณีตอบผิด');
       }
     }
 

@@ -78,6 +78,19 @@ export const BLOCK_LIBRARY: BlockDef[] = [
     isBug: false,
   },
   {
+    /**
+     * Else ใน Construct 2 ไม่ใช่คำสั่ง แต่เป็นเงื่อนไขที่รับกรณีตรงข้ามของเงื่อนไขก่อนหน้า
+     * จึงอยู่ระดับเดียวกับเงื่อนไขที่มันจับคู่ด้วย ไม่ใช่ลึกลงไปอีกชั้น
+     * ไฟล์จริงใช้ Else สองที่ คือกรณีตอบผิด และกรณีข้อสอบหมด
+     */
+    id: 'else_branch',
+    kind: 'condition',
+    label: 'System: Else',
+    category: 'answer',
+    hint: 'รับกรณีตรงข้ามของเงื่อนไขที่อยู่เหนือมัน เช่น เมื่อคำตอบไม่ตรงกับเฉลย',
+    isBug: false,
+  },
+  {
     id: 'call_random',
     kind: 'action',
     label: 'Call Function "Random"',
@@ -202,6 +215,7 @@ export const CORRECT_SOLUTION: BlockId[] = [
   'if_answer_correct',
   'add_score',
   'call_random',
+  'else_branch',
   'if_array_empty',
   'go_summary',
   'display_score',

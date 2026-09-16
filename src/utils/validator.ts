@@ -52,6 +52,8 @@ export interface LogicFlags {
   hasAnswerCheck: boolean;
   hasAddScore: boolean;
   hasCallRandom: boolean;
+  /** มี Else ที่วางไว้หลังเงื่อนไขตรวจคำตอบแล้ว */
+  hasElse: boolean;
   hasArrayEmptyCheck: boolean;
   hasGoSummary: boolean;
   hasDisplayScore: boolean;
@@ -67,6 +69,7 @@ export interface LogicFlags {
 export const analyzeFlags = (blocks: WorkspaceBlock[]): LogicFlags => {
   const iScore = indexOfBlock(blocks, 'add_score');
   const iCheck = indexOfBlock(blocks, 'if_answer_correct');
+  const iElse = indexOfBlock(blocks, 'else_branch');
   const iSummary = indexOfBlock(blocks, 'go_summary');
   const iEmpty = indexOfBlock(blocks, 'if_array_empty');
 
@@ -80,6 +83,8 @@ export const analyzeFlags = (blocks: WorkspaceBlock[]): LogicFlags => {
     hasAnswerCheck: iCheck >= 0,
     hasAddScore: iScore >= 0,
     hasCallRandom: hasBlock(blocks, 'call_random'),
+    // Else ต้องอยู่หลังเงื่อนไขตรวจคำตอบจึงจะมีความหมาย ถ้าวางก่อนถือว่ายังไม่ได้จับคู่กับเงื่อนไขใด
+    hasElse: iElse >= 0 && iCheck >= 0 && iElse > iCheck,
     hasArrayEmptyCheck: iEmpty >= 0,
     hasGoSummary: iSummary >= 0,
     hasDisplayScore: hasBlock(blocks, 'display_score'),
@@ -184,6 +189,17 @@ export const validateWorkspace = (blocks: WorkspaceBlock[]): LogicReport => {
       advice: 'เพิ่มบล็อก Display CurrentQuestion ต่อท้ายฟังก์ชัน Random',
     });
   }
+  // Else ไม่ได้ทำให้ภารกิจไม่ผ่าน แต่ถ้าไม่มี ผู้เล่นตอบผิดแล้วจะไม่มีอะไรเกิดขึ้นเลย
+  // ซึ่งเป็นสิ่งที่ไฟล์จริงมี จึงแจ้งเป็นความเสี่ยงให้ผู้เรียนเห็นก่อนนำไปเขียนของจริง
+  if (f.hasAnswerCheck && !f.hasElse) {
+    issues.push({
+      id: 'no-else',
+      severity: 'risk',
+      message: 'ยังไม่มี System: Else ต่อจากเงื่อนไขตรวจคำตอบ',
+      advice: 'เมื่อผู้เล่นตอบผิด จะไม่มีคำสั่งใดทำงานเลย เพิ่มบล็อก System: Else ไว้หลังคำสั่งของกรณีตอบถูก',
+    });
+  }
+
   if (f.hasAnswerClicked && !f.hasCallRandom) {
     issues.push({
       id: 'no_call_random',

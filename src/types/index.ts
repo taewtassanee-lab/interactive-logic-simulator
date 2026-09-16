@@ -62,6 +62,7 @@ export type BlockId =
   | 'if_answer_correct'
   | 'add_score'
   | 'call_random'
+  | 'else_branch'
   // หมวดเงื่อนไขจบเกม
   | 'if_array_empty'
   | 'go_summary'
