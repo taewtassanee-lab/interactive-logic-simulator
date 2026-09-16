@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Check, Minus, Target, X } from 'lucide-react';
+import { APP_CONFIG } from '../config';
 import { CORRECT_SOLUTION } from '../data/blocks';
 import { runSimulation } from '../utils/simulator';
 import type { SimState } from '../types';
@@ -38,6 +39,16 @@ export const ExpectedResult = ({
     [],
   );
 
+  /**
+   * รอบนี้ถูกระบบสั่งหยุดเองหรือไม่
+   *
+   * เมื่อไม่มีคำสั่งลบข้อสอบ ตรรกะจะวนไม่รู้จบ ตัวจำลองจึงหยุดให้เองเมื่อครบจำนวนรอบสูงสุด
+   * ค่า "จำนวนข้อที่ตอบแล้ว" ที่ได้จึงเป็นเพดานของตัวจำลอง ไม่ใช่จำนวนจริงที่ผู้เล่นตอบ
+   * ถ้าไม่บอกไว้ ผู้เรียนจะอ่านตัวเลขนี้ว่าตอบเกินไป 6 ข้อ ทั้งที่ความจริงคือระบบไม่ยอมจบ
+   */
+  const cappedRun =
+    hasRun && state.arraySize > 0 && state.answeredCount >= APP_CONFIG.maxSimulationRounds;
+
   const lines: Line[] = [
     {
       label: 'Array Size (Array.Width)',
@@ -53,7 +64,7 @@ export const ExpectedResult = ({
     },
     {
       label: 'จำนวนข้อที่ตอบแล้ว',
-      mine: fmt(state.answeredCount),
+      mine: cappedRun ? `${state.answeredCount} (ชนเพดาน)` : fmt(state.answeredCount),
       want: fmt(target.answeredCount),
       ok: state.answeredCount === target.answeredCount,
     },
@@ -132,6 +143,17 @@ export const ExpectedResult = ({
           </tbody>
         </table>
       </div>
+
+      {cappedRun && (
+        <p className="mt-2.5 rounded-2xl border-2 border-bubble-200 bg-bubble-50/70 px-3.5 py-2.5 text-sm leading-relaxed text-slate-700">
+          <strong className="text-bubble-700">ทำไมตอบไปตั้ง {state.answeredCount} ข้อ ทั้งที่มีข้อสอบแค่{' '}
+          {target.answeredCount} ข้อ</strong> เพราะข้อสอบที่ทำแล้วไม่ถูกลบออกจาก Array
+          ระบบจึงสุ่มข้อเดิมกลับมาให้ตอบซ้ำได้เรื่อย ๆ และไม่มีวันจบ
+          ตัวจำลองจึงสั่งหยุดเองเมื่อครบ {APP_CONFIG.maxSimulationRounds} รอบเพื่อไม่ให้ค้าง
+          ตัวเลข {state.answeredCount} จึงเป็นเพดานของตัวจำลอง ไม่ใช่จำนวนจริง
+          ถ้าไม่หยุดให้ ตัวเลขนี้จะวิ่งขึ้นไม่มีที่สิ้นสุด
+        </p>
+      )}
 
       <p className="mt-2.5 text-xs leading-relaxed text-slate-600">
         ค่าฝั่งขวาได้จากการให้ระบบรันตรรกะที่ถูกต้องจริง ไม่ใช่ตัวเลขที่พิมพ์ไว้ล่วงหน้า
