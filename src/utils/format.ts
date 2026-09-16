@@ -63,14 +63,9 @@ export interface WorksheetField {
 
 export const getWorksheetFields = (w: WorksheetData): WorksheetField[] => [
   {
-    key: 'goalTarget',
-    label: 'ก่อนลงมือ: เป้าหมายที่คู่เราตั้งไว้',
-    filled: w.goalTarget.trim().length >= 10,
-  },
-  {
-    key: 'goalHow',
-    label: 'ก่อนลงมือ: ข้อตกลงว่าจะไปให้ถึงเป้าหมายอย่างไร',
-    filled: w.goalHow.trim().length >= 10,
+    key: 'goal',
+    label: 'ก่อนลงมือ: เป้าหมายและข้อตกลงของคู่เรา',
+    filled: w.goal.trim().length >= 10,
   },
   {
     key: 'q1',
@@ -93,11 +88,6 @@ export const getWorksheetFields = (w: WorksheetData): WorksheetField[] => [
     filled: w.q4RandomLogic.trim().length >= 10,
   },
   {
-    key: 'q5',
-    label: 'ส่วนที่ 1 ข้อ 5: ผลกระทบเมื่อลืมสั่ง Delete index',
-    filled: w.q5NoDeleteEffect.trim().length >= 10,
-  },
-  {
     key: 'row1plan',
     label: 'ส่วนที่ 2 แถวที่ 1: แผนที่วางไว้ก่อนลงมือ',
     filled: w.debugRows[0].plan.trim().length >= 5,
@@ -118,11 +108,6 @@ export const getWorksheetFields = (w: WorksheetData): WorksheetField[] => [
     filled: w.debugRows[0].evidence.trim().length > 0,
   },
   {
-    key: 'row2plan',
-    label: 'ส่วนที่ 2 แถวที่ 2: แผนที่วางไว้ก่อนลงมือ',
-    filled: w.debugRows[1].plan.trim().length >= 5,
-  },
-  {
     key: 'row2cause',
     label: 'ส่วนที่ 2 แถวที่ 2: สาเหตุที่พบ',
     filled: w.debugRows[1].cause.trim().length >= 5,
@@ -138,41 +123,10 @@ export const getWorksheetFields = (w: WorksheetData): WorksheetField[] => [
     filled: w.debugRows[1].evidence.trim().length > 0,
   },
   {
-    key: 'appHelp',
-    label: 'ส่วนที่ 3: Web App ช่วยให้เข้าใจ Array และ Function อย่างไร',
-    filled: w.q3AppHelp.trim().length >= 10,
-  },
-  {
     key: 'extend',
     label: 'ส่วนที่ 3: ข้อเสนอต่อยอดระบบแบบทดสอบ',
     filled: w.q4Extend.trim().length >= 10,
   },
-  // นับคำตอบสะท้อนตนเองแยกรายคน ใบงานจะครบ 100% ก็ต่อเมื่อเขียนครบทั้งสองคน
-  ...w.reflections.flatMap((r, i): WorksheetField[] => {
-    const who = `ผู้เรียนคนที่ ${i + 1}`;
-    return [
-      {
-        key: `roles${i}`,
-        label: `ส่วนที่ 3 (${who}): บทบาทที่ได้ปฏิบัติ`,
-        filled: r.rolesPlayed.driver || r.rolesPlayed.navigator,
-      },
-      {
-        key: `partnerGood${i}`,
-        label: `ส่วนที่ 3 (${who}): สิ่งที่คู่ของฉันทำได้ดี`,
-        filled: r.partnerGood.trim().length >= 5,
-      },
-      {
-        key: `toImprove${i}`,
-        label: `ส่วนที่ 3 (${who}): สิ่งที่ต้องพัฒนาต่อไป`,
-        filled: r.toImprove.trim().length >= 5,
-      },
-      {
-        key: `rating${i}`,
-        label: `ส่วนที่ 3 (${who}): คะแนนความร่วมมือ`,
-        filled: r.collaborationRating > 0,
-      },
-    ];
-  }),
 ];
 
 export const getWorksheetProgress = (w: WorksheetData): number => {

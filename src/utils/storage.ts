@@ -1,5 +1,5 @@
 import { APP_CONFIG } from '../config';
-import type { AppState, PersonReflection, WorksheetData } from '../types';
+import type { AppState, WorksheetData } from '../types';
 
 export const createInitialState = (): AppState => ({
   pair: {
@@ -30,13 +30,11 @@ export const createInitialState = (): AppState => ({
     lastBlockCount: 0,
   },
   worksheet: {
-    goalTarget: '',
-    goalHow: '',
+    goal: '',
     q1Observation: '',
     q2FillIn: '',
     q3Choice: '',
     q4RandomLogic: '',
-    q5NoDeleteEffect: '',
     debugRows: [
       {
         point: 'จุดที่ 1 ระบบสุ่ม',
@@ -55,12 +53,7 @@ export const createInitialState = (): AppState => ({
         evidence: '',
       },
     ],
-    q3AppHelp: '',
     q4Extend: '',
-    reflections: [
-      { rolesPlayed: { driver: false, navigator: false }, partnerGood: '', toImprove: '', collaborationRating: 0 },
-      { rolesPlayed: { driver: false, navigator: false }, partnerGood: '', toImprove: '', collaborationRating: 0 },
-    ],
   },
   capxFile: null,
   lastDebugLog: [],
@@ -68,43 +61,21 @@ export const createInitialState = (): AppState => ({
 });
 
 /**
- * ย้ายคำตอบส่วนที่ 3 จากรูปแบบเดิมที่มีช่องเดียวต่อคู่ มาเป็นแยกรายคน
+ * ข้อมูลใบงานรุ่นก่อน ๆ ที่ยังอาจค้างอยู่ในเบราว์เซอร์ของผู้เรียน
  *
- * ข้อมูลเดิมที่นักเรียนพิมพ์ไว้แล้วจะถูกยกไปเป็นคำตอบของผู้เรียนคนที่ 1
- * เพื่อไม่ให้คำตอบที่กรอกไปแล้วหายไปเมื่ออัปเดตระบบ
+ * ใบงานเคยมีช่องเป้าหมายแยกสองช่อง ช่องความเห็นต่อสื่อ และช่องสะท้อนตนเองรายคน
+ * ตอนนี้ตัดออกและย้ายการสะท้อนตนเองไปเป็นกิจกรรมสดแล้ว
+ * แต่ยังต้องรับข้อมูลเก่าเพื่อไม่ให้สิ่งที่ผู้เรียนพิมพ์ไว้แล้วหายไปเฉย ๆ
  */
 type LegacyWorksheet = Partial<WorksheetData> & {
-  rolesPlayed?: { driver?: boolean; navigator?: boolean };
-  q3PartnerGood?: string;
-  q3ToImprove?: string;
-  collaborationRating?: number;
+  goalTarget?: string;
+  goalHow?: string;
 };
 
-const emptyReflection = (): PersonReflection => ({
-  rolesPlayed: { driver: false, navigator: false },
-  partnerGood: '',
-  toImprove: '',
-  collaborationRating: 0,
-});
-
-const mergeReflections = (saved?: LegacyWorksheet): [PersonReflection, PersonReflection] => {
-  const list = saved?.reflections;
-  if (Array.isArray(list) && list.length === 2) {
-    return [
-      { ...emptyReflection(), ...list[0], rolesPlayed: { ...emptyReflection().rolesPlayed, ...list[0]?.rolesPlayed } },
-      { ...emptyReflection(), ...list[1], rolesPlayed: { ...emptyReflection().rolesPlayed, ...list[1]?.rolesPlayed } },
-    ];
-  }
-  const legacy: PersonReflection = {
-    rolesPlayed: {
-      driver: Boolean(saved?.rolesPlayed?.driver),
-      navigator: Boolean(saved?.rolesPlayed?.navigator),
-    },
-    partnerGood: saved?.q3PartnerGood ?? '',
-    toImprove: saved?.q3ToImprove ?? '',
-    collaborationRating: Number(saved?.collaborationRating) || 0,
-  };
-  return [legacy, emptyReflection()];
+/** ต่อเป้าหมายกับข้อตกลงของรุ่นเก่าเข้าด้วยกัน ให้กลายเป็นช่องเดียวของรุ่นปัจจุบัน */
+const mergeGoal = (saved?: LegacyWorksheet): string => {
+  if (saved?.goal?.trim()) return saved.goal;
+  return [saved?.goalTarget, saved?.goalHow].map((t) => t?.trim()).filter(Boolean).join(' ');
 };
 
 /** รวมข้อมูลที่โหลดมากับค่าเริ่มต้น กัน error เมื่อเวอร์ชันข้อมูลเก่าไม่มีบางฟิลด์ */
@@ -123,7 +94,7 @@ const mergeState = (saved: Partial<AppState>): AppState => {
     worksheet: {
       ...base.worksheet,
       ...(saved.worksheet ?? {}),
-      reflections: mergeReflections(saved.worksheet),
+      goal: mergeGoal(saved.worksheet),
       debugRows:
         saved.worksheet?.debugRows && saved.worksheet.debugRows.length === 2
           ? saved.worksheet.debugRows.map((row, i) => ({

@@ -6,7 +6,6 @@ import {
   FileText,
   ListChecks,
   Loader2,
-  Star,
   Target,
   Wrench,
 } from 'lucide-react';
@@ -22,7 +21,7 @@ import {
   getWorksheetFields,
   getWorksheetProgress,
 } from '../utils/format';
-import type { DebugRow, PersonReflection, WorksheetData } from '../types';
+import type { DebugRow, WorksheetData } from '../types';
 
 const Q3_CHOICES = [
   'เปลี่ยนไปหน้า Summary',
@@ -42,7 +41,6 @@ export const WorksheetPage = () => {
   const [showMissing, setShowMissing] = useState(false);
 
   const w = state.worksheet;
-  const pair = state.pair;
   const progress = getWorksheetProgress(w);
   const missing = getMissingWorksheetFields(w);
   const totalFields = getWorksheetFields(w).length;
@@ -180,24 +178,16 @@ export const WorksheetPage = () => {
           คุยกับคู่ของตัวเองสั้น ๆ แล้วตกลงกันว่าคาบนี้เราจะทำอะไรให้สำเร็จ
           เป้าหมายที่ตั้งเองจะทำให้รู้ว่าต้องโฟกัสตรงไหน และตอนจบคาบจะวัดได้ว่าทำได้ตามที่ตั้งใจหรือไม่
         </p>
-        <div className="grid gap-4 lg:grid-cols-2">
-          <TextArea
-            label="1. คาบนี้คู่เราตั้งเป้าว่าจะทำอะไรให้สำเร็จ"
-            value={w.goalTarget}
-            onChange={(v) => setW({ goalTarget: v })}
-            placeholder="เขียนให้วัดได้ เช่น แก้ Bug ให้ผ่านทั้ง 2 ภารกิจโดยเปิดคำใบ้ไม่เกิน 1 ครั้ง และเขียน Event Sheet ให้สลับหน้า Layout ได้เอง"
-            rows={3}
-            required
-          />
-          <TextArea
-            label="2. เราจะไปให้ถึงเป้าหมายนั้นได้อย่างไร"
-            value={w.goalHow}
-            onChange={(v) => setW({ goalHow: v })}
-            placeholder="ตกลงวิธีทำงานร่วมกัน เช่น อ่านโจทย์ให้จบก่อนแตะเมาส์ Navigator อ่าน State Monitor ออกเสียงทุกครั้งที่ Run และลองเองก่อน 2 รอบจึงเปิดคำใบ้"
-            rows={3}
-            required
-          />
-        </div>
+        {/* รวมเป้าหมายกับข้อตกลงไว้ช่องเดียว เพราะเป็นหลักฐานของตัวชี้วัดเดียวกัน
+            แยกสองช่องแล้วผู้เรียนต้องพิมพ์สองรอบโดยไม่ได้หลักฐานเพิ่ม */}
+        <TextArea
+          label="เป้าหมายของคู่เราในคาบนี้ และเราจะไปให้ถึงได้อย่างไร"
+          value={w.goal}
+          onChange={(v) => setW({ goal: v })}
+          placeholder="เขียนเป้าหมายให้วัดได้ แล้วต่อด้วยข้อตกลงสั้น ๆ เช่น แก้ Bug ให้ผ่านทั้ง 2 ภารกิจโดยเปิดคำใบ้ไม่เกิน 1 ครั้ง โดยจะอ่านโจทย์ให้จบก่อนแตะเมาส์ และให้ Navigator อ่าน State Monitor ออกเสียงทุกครั้งที่ Run"
+          rows={3}
+          required
+        />
       </Card>
 
       {/* ---------- ส่วนที่ 1 ---------- */}
@@ -311,16 +301,6 @@ export const WorksheetPage = () => {
             required
             hint="ลองทดลองในหน้าคลังความรู้ ส่วนลองเล่น Array แล้วสังเกตเลข Index ที่สุ่มได้"
           />
-
-          <TextArea
-            label="5. หากลืมสั่ง Delete index บนแกน X หลังสุ่มคำถามแล้ว จะส่งผลต่อ State Monitor และโปรแกรมอย่างไร"
-            value={w.q5NoDeleteEffect}
-            onChange={(v) => setW({ q5NoDeleteEffect: v })}
-            placeholder="ระบุค่าใน State Monitor ที่เปลี่ยนหรือไม่เปลี่ยน และผลที่เกิดกับผู้เล่น"
-            rows={3}
-            required
-            hint="ทดลองลบบล็อก Delete index ออกแล้วกด Run Simulation เพื่อดูผลจริง"
-          />
         </div>
       </Card>
 
@@ -415,19 +395,11 @@ export const WorksheetPage = () => {
 
       {/* ---------- ส่วนที่ 3 ---------- */}
       <Card
-        title="ส่วนที่ 3: สรุปประเมินตนเอง (Metacognition)"
+        title="ส่วนที่ 3: ต่อยอดระบบ"
+        subtitle="การสะท้อนการทำงานเป็นคู่ย้ายไปตอบรายคนในกิจกรรมสดของครู"
         icon={<span className="flex h-6 w-6 items-center justify-center rounded-md bg-think-100 text-xs font-bold text-think-800">3</span>}
       >
         <div className="space-y-5">
-          <TextArea
-            label="1. Web App ช่วยให้เข้าใจ Array และ Function อย่างไร (ตอบร่วมกันทั้งคู่)"
-            value={w.q3AppHelp}
-            onChange={(v) => setW({ q3AppHelp: v })}
-            placeholder="เขียนว่าส่วนใดของเว็บช่วยให้เข้าใจ และเข้าใจเรื่องอะไรเพิ่มขึ้น"
-            rows={3}
-            required
-          />
-
           {/* ช่องเดียวในใบงานที่ไม่มีคำตอบถูกผิดตายตัว ทุกคู่จึงได้คิดต่อยอดเอง
               ไม่ใช่เฉพาะกลุ่มที่ทำเสร็จก่อนแล้วได้ภารกิจเสริม */}
           <div
@@ -435,7 +407,7 @@ export const WorksheetPage = () => {
             style={{ boxShadow: '0 4px 0 0 rgba(236,72,153,0.2)' }}
           >
             <TextArea
-              label="2. ถ้าจะต่อยอดระบบแบบทดสอบนี้ให้ดีขึ้นอีก 1 อย่าง คู่เราจะเพิ่มอะไร และจะทำอย่างไร"
+              label="ถ้าจะต่อยอดระบบแบบทดสอบนี้ให้ดีขึ้นอีก 1 อย่าง คู่เราจะเพิ่มอะไร และจะทำอย่างไร"
               value={w.q4Extend}
               onChange={(v) => setW({ q4Extend: v })}
               placeholder="คิดเองได้เต็มที่ ข้อนี้ไม่มีคำตอบตายตัว เขียนทั้งสิ่งที่จะเพิ่ม และบอกคร่าว ๆ ว่าจะใช้ Array ตัวแปร หรือเงื่อนไขอะไรทำให้เกิดขึ้นจริง"
@@ -448,155 +420,18 @@ export const WorksheetPage = () => {
             </p>
           </div>
 
-          {/*
-            ข้อ 3 แยกช่องรายคน เพราะคำถามใช้สรรพนามรายบุคคลว่า "คู่ของฉัน" และ "ฉันต้องพัฒนา"
-            ถ้าใช้ช่องเดียวต่อคู่จะกลายเป็นคนหนึ่งเขียนแทนอีกคน ผิดเจตนาของคำถาม
-            และครูใช้เป็นหลักฐานการประเมินรายบุคคลไม่ได้
-            ทั้งคู่ผลัดกันพิมพ์ที่เครื่อง Driver เครื่องเดียว ข้อมูลจึงไม่แยกกันคนละชุด
-          */}
-          <div>
-            <p className="mb-1 text-sm font-medium text-slate-700">
-              3. สะท้อนการทำงานร่วมกัน
-              <span className="ml-1 text-bubble-600" aria-hidden="true">
-                *
-              </span>
+          {/* ส่วนสะท้อนการทำงานเป็นคู่ย้ายออกจากใบงานไปเป็นกิจกรรมสด
+              เพราะกิจกรรมสดบันทึกคำตอบเป็นรายบุคคลพร้อมชื่อและเวลาลงชีตให้เอง
+              และผู้เรียนตอบจากเครื่องของตนเองพร้อมกันได้ ไม่ต้องผลัดกันพิมพ์ที่เครื่องนี้เครื่องเดียว */}
+          <div className="rounded-2xl border-2 border-dashed border-think-300 bg-think-50/60 px-3.5 py-3">
+            <p className="font-display text-sm font-bold text-think-900">
+              การสะท้อนการทำงานเป็นคู่ ตอบในแท็บ &quot;กิจกรรมสด&quot;
             </p>
-            <p className="mb-2.5 text-xs text-slate-500">
-              ส่วนนี้ต้องเขียน<strong>ทั้งสองคน</strong> ผลัดกันพิมพ์ที่เครื่องนี้ได้เลย
-              คำตอบของแต่ละคนจะแยกกันอยู่คนละช่องและลงในไฟล์ PDF ทั้งคู่
+            <p className="mt-1 text-sm leading-relaxed text-slate-600">
+              ตอนท้ายคาบครูจะเปิดกิจกรรมให้ตอบเรื่องบทบาทที่ได้ลงมือทำ สิ่งที่คู่ทำได้ดี
+              และสิ่งที่ตัวเองต้องพัฒนา <strong>ตอบจากเครื่องของตัวเองได้ทั้งสองคนพร้อมกัน</strong>
+              รวมถึงเครื่อง Navigator ด้วย จึงไม่ต้องรอผลัดกันพิมพ์ที่เครื่องนี้
             </p>
-
-            <div className="grid gap-3 lg:grid-cols-2">
-              {w.reflections.map((r, i) => {
-                const name = i === 0 ? pair.driverName : pair.navigatorName;
-                const number = i === 0 ? pair.driverNumber : pair.navigatorNumber;
-                const tone = i === 0 ? 'brand' : 'think';
-                const setR = (patch: Partial<PersonReflection>) =>
-                  setW({
-                    reflections: w.reflections.map((x, k) =>
-                      k === i ? { ...x, ...patch } : x,
-                    ) as [PersonReflection, PersonReflection],
-                  });
-
-                return (
-                  <div
-                    key={i}
-                    className={`rounded-[1.25rem] border-2 p-3.5 ${
-                      tone === 'brand'
-                        ? 'border-brand-200 bg-gradient-to-b from-brand-50/60 to-white'
-                        : 'border-think-200 bg-gradient-to-b from-think-50/60 to-white'
-                    }`}
-                  >
-                    <p className="mb-3 flex items-center gap-2">
-                      <span
-                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-b font-display text-sm font-bold text-white shadow-clay-sm ${
-                          tone === 'brand'
-                            ? 'from-brand-400 to-brand-600'
-                            : 'from-think-400 to-think-600'
-                        }`}
-                      >
-                        {i + 1}
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block truncate font-display text-sm font-bold text-slate-800">
-                          {name || `ผู้เรียนคนที่ ${i + 1}`}
-                        </span>
-                        <span className="block text-xs text-slate-500">
-                          {number ? `เลขที่ ${number}` : 'ยังไม่ได้กรอกชื่อในหน้าเริ่มต้นใช้งาน'}
-                        </span>
-                      </span>
-                    </p>
-
-                    <fieldset className="mb-3">
-                      <legend className="mb-1.5 text-xs font-semibold text-slate-600">
-                        บทบาทที่ฉันได้ลงมือทำ
-                      </legend>
-                      <div className="flex flex-wrap gap-2">
-                        {(
-                          [
-                            { key: 'driver' as const, label: 'Driver' },
-                            { key: 'navigator' as const, label: 'Navigator' },
-                          ]
-                        ).map((role) => (
-                          <label
-                            key={role.key}
-                            className={`flex cursor-pointer items-center gap-2 rounded-xl border-2 px-3 py-1.5 text-sm transition ${
-                              r.rolesPlayed[role.key]
-                                ? 'border-mint-400 bg-mint-50 font-semibold text-mint-900'
-                                : 'border-slate-200 bg-white text-slate-600'
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={r.rolesPlayed[role.key]}
-                              onChange={(e) =>
-                                setR({
-                                  rolesPlayed: {
-                                    ...r.rolesPlayed,
-                                    [role.key]: e.target.checked,
-                                  },
-                                })
-                              }
-                              className="h-4 w-4 accent-mint-600"
-                            />
-                            {role.label}
-                          </label>
-                        ))}
-                      </div>
-                    </fieldset>
-
-                    <div className="space-y-3">
-                      <TextArea
-                        label="สิ่งที่คู่ของฉันทำได้ดี"
-                        value={r.partnerGood}
-                        onChange={(v) => setR({ partnerGood: v })}
-                        placeholder="ยกตัวอย่างสิ่งที่คู่ของตนทำระหว่างกิจกรรมนี้จริง ๆ"
-                        rows={3}
-                      />
-                      <TextArea
-                        label="สิ่งที่ฉันต้องพัฒนาต่อไป"
-                        value={r.toImprove}
-                        onChange={(v) => setR({ toImprove: v })}
-                        placeholder="ระบุสิ่งที่ตนเองทำได้ยังไม่ดี และจะปรับอย่างไรในครั้งหน้า"
-                        rows={3}
-                      />
-                    </div>
-
-                    <fieldset className="mt-3">
-                      <legend className="mb-1.5 text-xs font-semibold text-slate-600">
-                        คะแนนความร่วมมือในการทำงานคู่
-                      </legend>
-                      <div className="flex flex-wrap items-center gap-1">
-                        {[1, 2, 3, 4, 5].map((n) => (
-                          <button
-                            key={n}
-                            type="button"
-                            onClick={() => setR({ collaborationRating: n })}
-                            aria-pressed={r.collaborationRating === n}
-                            aria-label={`${name || `ผู้เรียนคนที่ ${i + 1}`} ให้คะแนน ${n} ดาว`}
-                            className="rounded-md p-0.5 transition hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-lemon-400"
-                          >
-                            <Star
-                              className={`h-7 w-7 ${
-                                r.collaborationRating >= n
-                                  ? 'fill-lemon-400 text-lemon-500'
-                                  : 'text-slate-300'
-                              }`}
-                              aria-hidden="true"
-                            />
-                          </button>
-                        ))}
-                        <span className="ml-1.5 text-xs font-medium text-slate-600">
-                          {r.collaborationRating > 0
-                            ? `${r.collaborationRating} จาก 5`
-                            : 'ยังไม่ให้คะแนน'}
-                        </span>
-                      </div>
-                    </fieldset>
-                  </div>
-                );
-              })}
-            </div>
           </div>
         </div>
       </Card>

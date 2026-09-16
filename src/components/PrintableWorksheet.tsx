@@ -67,7 +67,6 @@ const show = (v: string) => (v.trim() ? v.trim() : EMPTY);
 export const PrintableWorksheet = forwardRef<HTMLDivElement, { state: AppState }>(
   ({ state }, ref) => {
     const { pair, worksheet, missions, session, capxFile, lastDebugLog } = state;
-    const stars = (n: number) => '★'.repeat(n) + '☆'.repeat(5 - n);
 
     return (
       <div ref={ref} style={S.page}>
@@ -117,11 +116,8 @@ export const PrintableWorksheet = forwardRef<HTMLDivElement, { state: AppState }
         {/* ---------- ก่อนลงมือ ---------- */}
         <p style={S.sectionTitle}>ก่อนลงมือ เป้าหมายที่ผู้เรียนกำหนดเอง</p>
 
-        <p style={S.qLabel}>1. คาบนี้คู่เราตั้งเป้าว่าจะทำอะไรให้สำเร็จ</p>
-        <div style={S.answer}>{show(worksheet.goalTarget)}</div>
-
-        <p style={S.qLabel}>2. เราจะไปให้ถึงเป้าหมายนั้นได้อย่างไร</p>
-        <div style={S.answer}>{show(worksheet.goalHow)}</div>
+        <p style={S.qLabel}>เป้าหมายของคู่เราในคาบนี้ และเราจะไปให้ถึงได้อย่างไร</p>
+        <div style={S.answer}>{show(worksheet.goal)}</div>
 
         {/* ---------- ส่วนที่ 1 ---------- */}
         <p style={S.sectionTitle}>ส่วนที่ 1 การวิเคราะห์ตรรกะแบบทดสอบบน Interactive Web App</p>
@@ -146,11 +142,6 @@ export const PrintableWorksheet = forwardRef<HTMLDivElement, { state: AppState }
           4. การสุ่ม Index ด้วย int(random(Array.Width)) ทำงานอย่างไร และเหตุใดจึงต้องครอบด้วย int หรือ floor
         </p>
         <div style={S.answer}>{show(worksheet.q4RandomLogic)}</div>
-
-        <p style={S.qLabel}>
-          5. หากลืมสั่ง Delete index บนแกน X หลังสุ่มคำถามแล้ว จะส่งผลต่อ State Monitor และโปรแกรมอย่างไร
-        </p>
-        <div style={S.answer}>{show(worksheet.q5NoDeleteEffect)}</div>
 
         {/* ---------- ส่วนที่ 2 ---------- */}
         <p style={S.sectionTitle}>ส่วนที่ 2 บันทึกรายการซ่อมข้อผิดพลาดระบบแบบทดสอบ</p>
@@ -182,69 +173,29 @@ export const PrintableWorksheet = forwardRef<HTMLDivElement, { state: AppState }
         </table>
 
         {/* ---------- ส่วนที่ 3 ---------- */}
-        <p style={S.sectionTitle}>ส่วนที่ 3 สรุปประเมินตนเอง (Metacognition)</p>
-
-        <p style={S.qLabel}>1. Web App ช่วยให้เข้าใจ Array และ Function อย่างไร (ตอบร่วมกัน)</p>
-        <div style={S.answer}>{show(worksheet.q3AppHelp)}</div>
+        <p style={S.sectionTitle}>ส่วนที่ 3 ต่อยอดระบบ</p>
 
         <p style={S.qLabel}>
-          2. ถ้าจะต่อยอดระบบแบบทดสอบนี้ให้ดีขึ้นอีก 1 อย่าง คู่เราจะเพิ่มอะไร และจะทำอย่างไร
+          ถ้าจะต่อยอดระบบแบบทดสอบนี้ให้ดีขึ้นอีก 1 อย่าง คู่เราจะเพิ่มอะไร และจะทำอย่างไร
         </p>
         <div style={S.answer}>{show(worksheet.q4Extend)}</div>
 
-        <p style={S.qLabel}>
-          3. การสะท้อนตนเองรายบุคคล (สลับบทบาทระหว่างกิจกรรม {session.roleSwitchCount} ครั้ง)
-        </p>
-        {session.roleSwitchLog.length > 0 && (
-          <p style={{ margin: '0 0 6px', fontSize: '11.5px', color: '#475569' }}>
-            เวลาที่สลับ:{' '}
-            {session.roleSwitchLog
-              .map((t) =>
-                new Date(t).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
-              )
-              .join(' น. / ')}{' '}
-            น.
-          </p>
-        )}
-
-        {/* หนึ่งตารางต่อหนึ่งคน ครูจึงใช้เป็นหลักฐานการประเมินรายบุคคลได้ */}
-        <table style={S.table}>
-          <thead>
-            <tr>
-              <th style={{ ...S.th, width: '28%' }}>ผู้เรียน</th>
-              <th style={{ ...S.th, width: '18%' }}>บทบาทที่ได้ทำ</th>
-              <th style={S.th}>สิ่งที่คู่ของฉันทำได้ดี</th>
-              <th style={S.th}>สิ่งที่ฉันต้องพัฒนาต่อไป</th>
-              <th style={{ ...S.th, width: '16%' }}>ความร่วมมือ</th>
-            </tr>
-          </thead>
-          <tbody>
-            {worksheet.reflections.map((r, i) => {
-              const name = i === 0 ? pair.driverName : pair.navigatorName;
-              const number = i === 0 ? pair.driverNumber : pair.navigatorNumber;
-              const roles = [
-                r.rolesPlayed.driver ? 'Driver' : '',
-                r.rolesPlayed.navigator ? 'Navigator' : '',
-              ]
-                .filter(Boolean)
-                .join(' / ');
-              return (
-                <tr key={i}>
-                  <td style={S.td}>
-                    {show(name || `ผู้เรียนคนที่ ${i + 1}`)}
-                    {number ? ` (เลขที่ ${number})` : ''}
-                  </td>
-                  <td style={S.td}>{roles || '-'}</td>
-                  <td style={S.td}>{show(r.partnerGood)}</td>
-                  <td style={S.td}>{show(r.toImprove)}</td>
-                  <td style={S.td}>
-                    {stars(r.collaborationRating)} ({r.collaborationRating}/5)
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        {/* การสะท้อนตนเองย้ายไปเก็บผ่านกิจกรรมสดซึ่งบันทึกเป็นรายบุคคลลงชีตให้ครูแล้ว
+            ในใบงานจึงเหลือเพียงบันทึกเวลาสลับบทบาทซึ่งระบบจับให้เองระหว่างทำกิจกรรม */}
+        <p style={S.qLabel}>บันทึกการสลับบทบาท (ระบบบันทึกอัตโนมัติ)</p>
+        <div style={S.answer}>
+          สลับบทบาทระหว่างกิจกรรม {session.roleSwitchCount} ครั้ง
+          {session.roleSwitchLog.length > 0 &&
+            ' เวลาที่สลับ: ' +
+              session.roleSwitchLog
+                .map((t) =>
+                  new Date(t).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+                )
+                .join(' น. / ') +
+              ' น.'}
+          <br />
+          คำตอบสะท้อนการทำงานเป็นคู่รายบุคคล ดูได้ที่หน้า &quot;บันทึกกิจกรรม&quot; ในแดชบอร์ดของผู้สอน
+        </div>
 
         {/* ---------- ผลการผ่านภารกิจ ---------- */}
         <p style={S.sectionTitle}>ผลการผ่านภารกิจจากระบบจำลอง</p>
