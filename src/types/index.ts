@@ -90,6 +90,16 @@ export type BlockKind = 'event' | 'condition' | 'action';
 export interface BlockDef {
   id: BlockId;
   label: string;
+  /**
+   * ชื่ออ็อบเจกต์ที่เป็นเจ้าของคำสั่งนี้ เช่น System, Array, Function, Mouse
+   *
+   * Event Sheet ของ Construct 2 แยกเป็นสองช่องเสมอ ช่องซ้ายคือชื่ออ็อบเจกต์
+   * ช่องขวาคือเงื่อนไขหรือคำสั่ง การแสดงแบบเดียวกันทำให้ผู้เรียนคุ้นกับรูปแบบที่จะเจอจริง
+   * และช่วยให้รู้ว่าต้องไปหาคำสั่งนั้นใต้อ็อบเจกต์ใดตอนเพิ่ม Event ในโปรแกรมจริง
+   */
+  object: string;
+  /** ข้อความคำสั่งโดยไม่มีชื่ออ็อบเจกต์นำหน้า ใช้แสดงในช่องขวา */
+  expr: string;
   category: BlockCategory;
   kind: BlockKind;
   /** คำอธิบายภาษาไทยสำหรับ Tooltip และ Empty State */

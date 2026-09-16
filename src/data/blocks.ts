@@ -5,6 +5,8 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   /* ---------- หมวดเริ่มต้นและสุ่มข้อสอบ ---------- */
   {
     id: 'on_start',
+    object: 'System',
+    expr: 'On start of layout',
     kind: 'event',
     label: 'On start of layout',
     category: 'start',
@@ -13,6 +15,8 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'func_random',
+    object: 'Function',
+    expr: 'On "Random"',
     kind: 'event',
     label: 'Function "Random"',
     category: 'start',
@@ -21,6 +25,8 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'set_num',
+    object: 'System',
+    expr: 'Set Num to floor(random(Array.Width))',
     kind: 'action',
     label: 'Set Num to floor(random(Array.Width))',
     category: 'start',
@@ -29,6 +35,8 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'set_current',
+    object: 'System',
+    expr: 'Set CurrentQuestion to Array.At(Num, 0, 0)',
     kind: 'action',
     label: 'Set CurrentQuestion to Array.At(Num, 0, 0)',
     category: 'start',
@@ -37,6 +45,8 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'delete_index',
+    object: 'Array',
+    expr: 'Delete index Num from X axis',
     kind: 'action',
     label: 'Array -> Delete index Num from X axis',
     category: 'start',
@@ -45,6 +55,8 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'display_question',
+    object: 'quiz',
+    expr: 'Display CurrentQuestion',
     kind: 'action',
     label: 'Display CurrentQuestion',
     category: 'start',
@@ -55,6 +67,8 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   /* ---------- หมวดตรวจคำตอบ ---------- */
   {
     id: 'on_answer_clicked',
+    object: 'Mouse',
+    expr: 'On button answer clicked',
     kind: 'event',
     label: 'On button answer clicked',
     category: 'answer',
@@ -63,6 +77,8 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'if_answer_correct',
+    object: 'System',
+    expr: 'If Answer = bt_Select.Choice',
     kind: 'condition',
     label: 'If Answer = bt_Select.Choice',
     category: 'answer',
@@ -71,6 +87,8 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'add_score',
+    object: 'System',
+    expr: 'Add 1 to Score',
     kind: 'action',
     label: 'Add 1 to Score',
     category: 'answer',
@@ -84,6 +102,8 @@ export const BLOCK_LIBRARY: BlockDef[] = [
      * ไฟล์จริงใช้ Else สองที่ คือกรณีตอบผิด และกรณีข้อสอบหมด
      */
     id: 'else_branch',
+    object: 'System',
+    expr: 'Else',
     kind: 'condition',
     label: 'System: Else',
     category: 'answer',
@@ -92,6 +112,8 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'call_random',
+    object: 'Function',
+    expr: 'Call Function "Random"',
     kind: 'action',
     label: 'Call Function "Random"',
     category: 'answer',
@@ -102,6 +124,8 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   /* ---------- หมวดเงื่อนไขจบเกม ---------- */
   {
     id: 'if_array_empty',
+    object: 'Array',
+    expr: 'If Array is empty',
     kind: 'condition',
     label: 'If Array is empty',
     category: 'end',
@@ -110,6 +134,8 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'go_summary',
+    object: 'System',
+    expr: 'Go to Layout "Summary"',
     kind: 'action',
     label: 'Go to Layout "Summary"',
     category: 'end',
@@ -118,6 +144,8 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'display_score',
+    object: 'txt_Score',
+    expr: 'Display Score',
     kind: 'action',
     label: 'Display Score',
     category: 'end',
@@ -131,6 +159,8 @@ export const BLOCK_LIBRARY: BlockDef[] = [
      บล็อกนั้นทำอะไร ไม่บอกว่าผิดตรงไหน ผู้เรียนต้องแยกเองด้วยตรรกะและผลการจำลอง */
   {
     id: 'bug_no_delete',
+    object: 'Array',
+    expr: 'Set value at (Num, 0) to ""',
     kind: 'action',
     label: 'Array -> Set value at (Num, 0) to ""',
     category: 'start',
@@ -139,6 +169,8 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'bug_wrong_variable',
+    object: 'System',
+    expr: 'If Answer = CurrentQuestion',
     kind: 'condition',
     label: 'If Answer = CurrentQuestion',
     category: 'answer',
@@ -147,6 +179,8 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'bug_score_no_check',
+    object: 'Mouse',
+    expr: 'On button answer clicked -> Add 1 to Score',
     kind: 'event',
     label: 'On button answer clicked -> Add 1 to Score',
     category: 'answer',
@@ -155,6 +189,8 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'bug_empty_wrong_position',
+    object: 'System',
+    expr: 'On start of layout -> If Array is empty',
     kind: 'event',
     label: 'On start of layout -> If Array is empty',
     category: 'end',
@@ -163,6 +199,8 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'bug_summary_early',
+    object: 'System',
+    expr: 'If Score > 0 -> Go to Layout "Summary"',
     kind: 'condition',
     label: 'If Score > 0 -> Go to Layout "Summary"',
     category: 'end',

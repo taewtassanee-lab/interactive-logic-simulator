@@ -228,9 +228,17 @@ export const LogicWorkspace = ({
                   {st.eventNo ?? '→'}
                 </span>
 
+                {/* ช่องซ้ายคือชื่ออ็อบเจกต์ ช่องขวาคือเงื่อนไขหรือคำสั่ง
+                    เลียนตาราง 2 ช่องของ Event Sheet จริง ผู้เรียนจะได้รู้ว่าต้องไปหาคำสั่งนี้
+                    ใต้อ็อบเจกต์ใดตอนเพิ่ม Event ในโปรแกรมของตัวเอง */}
                 <div className="min-w-0 flex-1">
-                  <p className="break-words font-mono text-[12.5px] font-semibold leading-snug text-slate-800">
-                    {def.label}
+                  <p className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                    <span className="shrink-0 rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-[11px] font-bold text-slate-600">
+                      {def.object}
+                    </span>
+                    <span className="min-w-0 break-words font-mono text-[12.5px] font-semibold leading-snug text-slate-800">
+                      {def.expr}
+                    </span>
                   </p>
                   {st.orphan && (
                     <p className="mt-0.5 flex items-center gap-1 text-[11px] font-semibold text-bubble-700">
