@@ -5,6 +5,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   /* ---------- หมวดเริ่มต้นและสุ่มข้อสอบ ---------- */
   {
     id: 'on_start',
+    kind: 'event',
     label: 'On start of layout',
     category: 'start',
     hint: 'เหตุการณ์เริ่มต้นเมื่อเปิด Layout ใช้เป็นจุดเริ่มของระบบแบบทดสอบ',
@@ -12,6 +13,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'func_random',
+    kind: 'event',
     label: 'Function "Random"',
     category: 'start',
     hint: 'ประกาศฟังก์ชันสำหรับสุ่มข้อสอบ เรียกซ้ำได้ทุกครั้งที่ต้องการข้อถัดไป',
@@ -19,6 +21,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'set_num',
+    kind: 'action',
     label: 'Set Num to floor(random(Array.Width))',
     category: 'start',
     hint: 'สุ่มเลข Index ตั้งแต่ 0 ถึง Array.Width-1 เก็บไว้ในตัวแปร Num',
@@ -26,6 +29,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'set_current',
+    kind: 'action',
     label: 'Set CurrentQuestion to Array.At(Num, 0, 0)',
     category: 'start',
     hint: 'ดึงข้อความคำถามจาก Array ตำแหน่ง Num มาเก็บในตัวแปร CurrentQuestion',
@@ -33,6 +37,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'delete_index',
+    kind: 'action',
     label: 'Array -> Delete index Num from X axis',
     category: 'start',
     hint: 'ลบข้อสอบที่ใช้แล้วออกจาก Array ทำให้ Array.Width ลดลงและไม่ถูกสุ่มซ้ำ',
@@ -40,6 +45,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'display_question',
+    kind: 'action',
     label: 'Display CurrentQuestion',
     category: 'start',
     hint: 'แสดงคำถามที่สุ่มได้บนหน้าจอให้ผู้เล่นอ่าน',
@@ -49,6 +55,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   /* ---------- หมวดตรวจคำตอบ ---------- */
   {
     id: 'on_answer_clicked',
+    kind: 'event',
     label: 'On button answer clicked',
     category: 'answer',
     hint: 'เหตุการณ์เมื่อผู้เล่นคลิกปุ่มคำตอบ เป็นจุดเริ่มของการตรวจคำตอบ',
@@ -56,6 +63,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'if_answer_correct',
+    kind: 'condition',
     label: 'If Answer = bt_Select.Choice',
     category: 'answer',
     hint: 'เงื่อนไขเปรียบเทียบคำตอบที่ผู้เล่นเลือกกับเฉลยของข้อนั้น',
@@ -63,6 +71,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'add_score',
+    kind: 'action',
     label: 'Add 1 to Score',
     category: 'answer',
     hint: 'เพิ่มคะแนน 1 คะแนน ต้องอยู่ภายใต้เงื่อนไขตรวจคำตอบเสมอ',
@@ -70,6 +79,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'call_random',
+    kind: 'action',
     label: 'Call Function "Random"',
     category: 'answer',
     hint: 'เรียกฟังก์ชัน Random อีกครั้งเพื่อไปข้อถัดไป',
@@ -79,6 +89,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   /* ---------- หมวดเงื่อนไขจบเกม ---------- */
   {
     id: 'if_array_empty',
+    kind: 'condition',
     label: 'If Array is empty',
     category: 'end',
     hint: 'ตรวจว่า Array.Width = 0 หรือไม่ คือเงื่อนไขว่าทำข้อสอบครบทุกข้อแล้ว',
@@ -86,6 +97,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'go_summary',
+    kind: 'action',
     label: 'Go to Layout "Summary"',
     category: 'end',
     hint: 'เปลี่ยนไปหน้าสรุปผล ต้องทำหลังตรวจว่า Array ว่างแล้วเท่านั้น',
@@ -93,6 +105,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'display_score',
+    kind: 'action',
     label: 'Display Score',
     category: 'end',
     hint: 'แสดงคะแนนรวมบนหน้า Summary',
@@ -105,6 +118,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
      บล็อกนั้นทำอะไร ไม่บอกว่าผิดตรงไหน ผู้เรียนต้องแยกเองด้วยตรรกะและผลการจำลอง */
   {
     id: 'bug_no_delete',
+    kind: 'action',
     label: 'Array -> Set value at (Num, 0) to ""',
     category: 'start',
     hint: 'ล้างข้อความในช่องที่สุ่มได้ให้เป็นค่าว่าง โดยจำนวนช่องของ Array ยังเท่าเดิม',
@@ -112,6 +126,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'bug_wrong_variable',
+    kind: 'condition',
     label: 'If Answer = CurrentQuestion',
     category: 'answer',
     hint: 'เงื่อนไขเปรียบเทียบตัวแปร Answer กับตัวแปร CurrentQuestion',
@@ -119,6 +134,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'bug_score_no_check',
+    kind: 'event',
     label: 'On button answer clicked -> Add 1 to Score',
     category: 'answer',
     hint: 'เพิ่มคะแนน 1 คะแนนทันทีที่ผู้เล่นกดปุ่มคำตอบ',
@@ -126,6 +142,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'bug_empty_wrong_position',
+    kind: 'event',
     label: 'On start of layout -> If Array is empty',
     category: 'end',
     hint: 'ตรวจว่า Array ว่างหรือไม่ ตั้งแต่ตอนเปิด Layout ก่อนเริ่มสุ่มข้อสอบ',
@@ -133,6 +150,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
   },
   {
     id: 'bug_summary_early',
+    kind: 'condition',
     label: 'If Score > 0 -> Go to Layout "Summary"',
     category: 'end',
     hint: 'เปลี่ยนไปหน้าสรุปผลเมื่อคะแนนมากกว่า 0',

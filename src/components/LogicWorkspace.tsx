@@ -40,6 +40,44 @@ interface Props {
   focusCategory: BlockCategory | null;
 }
 
+/**
+ * คำนวณเลขเหตุการณ์และระดับการย่อหน้าของแต่ละบล็อก ให้อ่านเหมือน Event Sheet จริง
+ *
+ * ของจริงใน Construct 2 เป็นโครงสร้างต้นไม้ คำสั่งอยู่ใต้เงื่อนไข และเงื่อนไขอยู่ใต้เหตุการณ์
+ * ส่วนพื้นที่เรียงตรรกะเก็บข้อมูลเป็นรายการเรียงลำดับ จึงคำนวณระดับจากลำดับที่ผู้เรียนวางเอง
+ * ไม่ได้กำหนดตายตัวไว้ล่วงหน้า ผู้เรียนจึงเห็นทันทีว่าการสลับลำดับทำให้คำสั่งย้ายไปอยู่ใต้เงื่อนไขอื่น
+ *
+ * คำสั่งที่ถูกวางไว้ก่อนเหตุการณ์ใด ๆ จะอยู่ระดับ 0 และถูกทำเครื่องหมายว่ายังไม่มีเหตุการณ์ครอบ
+ * ซึ่งเป็นความผิดพลาดแบบเดียวกับที่เกิดใน Construct 2 จริง
+ */
+interface Structured {
+  depth: number;
+  eventNo: number | null;
+  orphan: boolean;
+}
+
+const buildStructure = (ids: BlockId[]): Structured[] => {
+  let eventNo = 0;
+  let hasEvent = false;
+  let inCondition = false;
+  return ids.map((id) => {
+    const kind = BLOCK_MAP[id]?.kind ?? 'action';
+    if (kind === 'event') {
+      eventNo += 1;
+      hasEvent = true;
+      inCondition = false;
+      return { depth: 0, eventNo, orphan: false };
+    }
+    if (kind === 'condition') {
+      eventNo += 1;
+      inCondition = true;
+      return { depth: hasEvent ? 1 : 0, eventNo, orphan: !hasEvent };
+    }
+    const depth = !hasEvent ? 0 : inCondition ? 2 : 1;
+    return { depth, eventNo: null, orphan: !hasEvent };
+  });
+};
+
 export const LogicWorkspace = ({
   blocks,
   report,
@@ -60,6 +98,7 @@ export const LogicWorkspace = ({
 }: Props) => {
   /** เครื่องมือที่ใช้นาน ๆ ครั้ง ปิดไว้ก่อนเพื่อลดจำนวนปุ่มที่ต้องทำความเข้าใจ */
   const [toolsOpen, setToolsOpen] = useState(false);
+  const structure = buildStructure(blocks.map((b) => b.blockId));
 
   return (
   <Card
@@ -159,8 +198,9 @@ export const LogicWorkspace = ({
         {blocks.map((block, index) => {
           const def = BLOCK_MAP[block.blockId];
           const active = activeBlockId === block.blockId;
+          const st = structure[index];
           return (
-            <li key={block.uid}>
+            <li key={block.uid} style={{ paddingLeft: `${st.depth * 22}px` }}>
               <div
                 /* บล็อกทุกชิ้นหน้าตาเหมือนกัน ไม่ไฮไลต์บล็อกลวงไว้ล่วงหน้า
                    ผู้เรียนต้องรู้ว่าวางผิดจากผลการจำลอง ไม่ใช่จากสีของบล็อก */
@@ -175,17 +215,29 @@ export const LogicWorkspace = ({
                     : '0 4px 0 0 rgba(203,213,225,0.55)',
                 }}
               >
+                {/* ช่องเลขเหตุการณ์เลียนแบบ Event Sheet จริง เหตุการณ์และเงื่อนไขมีเลขของตัวเอง
+                    ส่วนคำสั่งไม่มีเลข เพราะของจริงก็ไม่ให้เลขกับแอ็กชันเช่นกัน */}
                 <span
-                  className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-gradient-to-b from-slate-100 to-slate-200 font-mono text-xs font-bold text-slate-700 shadow-clay-sm"
+                  className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl font-mono text-xs font-bold shadow-clay-sm ${
+                    st.eventNo === null
+                      ? 'bg-white text-slate-300'
+                      : 'bg-gradient-to-b from-slate-100 to-slate-200 text-slate-700'
+                  }`}
                   aria-hidden="true"
                 >
-                  {index + 1}
+                  {st.eventNo ?? '→'}
                 </span>
 
                 <div className="min-w-0 flex-1">
                   <p className="break-words font-mono text-[12.5px] font-semibold leading-snug text-slate-800">
                     {def.label}
                   </p>
+                  {st.orphan && (
+                    <p className="mt-0.5 flex items-center gap-1 text-[11px] font-semibold text-bubble-700">
+                      <TriangleAlert className="h-3 w-3" aria-hidden="true" />
+                      ยังไม่มีเหตุการณ์ครอบอยู่ คำสั่งนี้จะไม่ถูกเรียกใช้
+                    </p>
+                  )}
                   <p className="mt-0.5 text-[11.5px] leading-relaxed text-slate-500">{def.hint}</p>
                 </div>
 

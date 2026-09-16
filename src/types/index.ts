@@ -73,10 +73,24 @@ export type BlockId =
   | 'bug_summary_early'
   | 'bug_wrong_variable';
 
+/**
+ * บทบาทของบล็อกใน Event Sheet ของ Construct 2
+ *
+ * event     = เหตุการณ์ตั้งต้น อยู่ระดับบนสุดและได้เลขลำดับของตัวเอง
+ * condition = เงื่อนไขย่อยที่ซ้อนอยู่ใต้เหตุการณ์
+ * action    = คำสั่งที่ทำงานภายใต้เหตุการณ์หรือเงื่อนไขที่อยู่เหนือมัน
+ *
+ * ใช้คำนวณระดับการย่อหน้าในพื้นที่เรียงตรรกะให้เหมือน Event Sheet จริง
+ * เพราะของจริงเป็นโครงสร้างต้นไม้ ไม่ใช่รายการแบน การเห็นการย่อหน้าตั้งแต่ในเว็บจำลอง
+ * ทำให้ผู้เรียนเข้าใจว่าคำสั่งอยู่ใต้เงื่อนไขใด ก่อนไปเจอของจริงใน Construct 2
+ */
+export type BlockKind = 'event' | 'condition' | 'action';
+
 export interface BlockDef {
   id: BlockId;
   label: string;
   category: BlockCategory;
+  kind: BlockKind;
   /** คำอธิบายภาษาไทยสำหรับ Tooltip และ Empty State */
   hint: string;
   /**
