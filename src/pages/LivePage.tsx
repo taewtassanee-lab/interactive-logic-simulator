@@ -259,6 +259,11 @@ export const LivePage = () => {
   }
 
   /* ---------- เข้าร่วมแล้ว ---------- */
+  const roomMismatch =
+    state.pair.classroom.trim() !== '' &&
+    normalizeRoom(state.pair.classroom) !== normalizeRoom(identity.classroom);
+  const latinName = /^[A-Za-z\s.]{1,12}$/.test(identity.studentName.trim());
+
   return (
     <div className="space-y-4">
       <Card
@@ -292,6 +297,52 @@ export const LivePage = () => {
           <p className="mb-3 flex items-start gap-2 rounded-2xl border-2 border-bubble-200 bg-bubble-50 px-3.5 py-2.5 text-sm leading-relaxed text-bubble-900">
             <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
             {error}
+          </p>
+        )}
+
+        {/* ห้องที่ลงทะเบียนไว้ไม่ตรงกับห้องในหน้าเริ่มต้นใช้งาน
+            ข้อมูลผู้ตอบกิจกรรมสดเก็บแยกจากข้อมูลคู่ และจำค้างไว้ในเครื่องตั้งแต่ครั้งแรกที่กรอก
+            ถ้าเครื่องนี้เคยใช้ลงทะเบียนมาก่อน หรือกรอกผิดช่อง ห้องจะไม่เปลี่ยนตามหน้าเริ่มต้นใช้งานเอง
+            ผลคือครูเปิดกิจกรรมแล้วเครื่องนี้ไม่เห็นโจทย์ ทั้งที่ทุกอย่างดูปกติ */}
+        {roomMismatch && (
+          <div className="mb-3 rounded-2xl border-2 border-peach-300 bg-peach-50 px-3.5 py-3">
+            <p className="flex items-start gap-2 text-sm leading-relaxed text-peach-900">
+              <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>
+                <strong>ห้องไม่ตรงกัน</strong> กิจกรรมสดลงทะเบียนไว้ที่ห้อง{' '}
+                <strong className="font-mono">{normalizeRoom(identity.classroom)}</strong>{' '}
+                แต่หน้าเริ่มต้นใช้งานกรอกไว้ว่าห้อง{' '}
+                <strong className="font-mono">{normalizeRoom(state.pair.classroom)}</strong>{' '}
+                ถ้าครูเปิดกิจกรรมให้ห้อง {normalizeRoom(state.pair.classroom)} เครื่องนี้จะไม่เห็นโจทย์
+              </span>
+            </p>
+            <Button
+              variant="secondary"
+              className="mt-2"
+              onClick={() => {
+                const next = { ...identity, classroom: state.pair.classroom.trim() };
+                saveIdentity(next);
+                setIdentity(next);
+                setSession(null);
+                setAnsweredId('');
+                notify(`เปลี่ยนเป็นห้อง ${normalizeRoom(next.classroom)} แล้ว`, 'success');
+              }}
+            >
+              ใช้ห้อง {normalizeRoom(state.pair.classroom)} ตามหน้าเริ่มต้นใช้งาน
+            </Button>
+          </div>
+        )}
+
+        {/* ชื่อที่เป็นตัวอักษรอังกฤษล้วนแบบสั้น ๆ มักเกิดจากลืมเปลี่ยนภาษาคีย์บอร์ด
+            เช่นตั้งใจพิมพ์ ดี แต่ได้ fu ซึ่งครูจะอ่านไม่ออกว่าเป็นใครในบันทึกกิจกรรม */}
+        {latinName && (
+          <p className="mb-3 flex items-start gap-2 rounded-2xl border-2 border-lemon-300 bg-lemon-50 px-3.5 py-2.5 text-sm leading-relaxed text-peach-900">
+            <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            <span>
+              ชื่อผู้ตอบเป็นตัวอักษรภาษาอังกฤษ <strong className="font-mono">{identity.studentName}</strong>{' '}
+              ลืมเปลี่ยนภาษาคีย์บอร์ดหรือไม่ ถ้าใช่ให้กด &quot;เปลี่ยนชื่อผู้ตอบ&quot; แล้วพิมพ์ชื่อภาษาไทยใหม่
+              ครูจะได้รู้ว่าคำตอบเป็นของใคร
+            </span>
           </p>
         )}
 
