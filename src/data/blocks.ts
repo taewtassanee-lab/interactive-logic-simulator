@@ -1,6 +1,16 @@
 import type { BlockDef, BlockId, BlockCategory } from '../types';
 
 /** คลังบล็อกคำสั่งทั้งหมด อ้างอิงชื่อ Event/Action จริงของ Construct 2 */
+/**
+ * คำอธิบายของทุกบล็อกบอกเฉพาะว่าบล็อกนั้น "ทำอะไร" เท่านั้น
+ *
+ * ห้ามบอกว่าควรวางไว้ตรงไหน ห้ามบอกว่าแก้ปัญหาใดได้ และห้ามใช้คำว่าต้อง
+ * เพราะคลังบล็อกอยู่ข้างพื้นที่ทำงานตลอดเวลา ถ้าคำอธิบายบอกคำตอบไว้
+ * ผู้เรียนก็แค่กวาดตาหาคำที่ตรงกับโจทย์แล้วหยิบมาวาง โดยไม่ต้องใช้ตรรกะเลย
+ *
+ * อีกเหตุผลคือบล็อกลวงเขียนแบบบรรยายอยู่แล้ว ถ้าบล็อกจริงเขียนแบบสั่งสอน
+ * ผู้เรียนจะแยกของจริงกับของลวงได้จากสำนวน ไม่ใช่จากความเข้าใจ
+ */
 export const BLOCK_LIBRARY: BlockDef[] = [
   /* ---------- หมวดเริ่มต้นและสุ่มข้อสอบ ---------- */
   {
@@ -20,7 +30,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
     kind: 'event',
     label: 'Function "Random"',
     category: 'start',
-    hint: 'ประกาศฟังก์ชันสำหรับสุ่มข้อสอบ เรียกซ้ำได้ทุกครั้งที่ต้องการข้อถัดไป',
+    hint: 'ประกาศฟังก์ชันชื่อ Random ที่เรียกใช้ซ้ำได้',
     isBug: false,
   },
   {
@@ -50,7 +60,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
     kind: 'action',
     label: 'Array -> Delete index Num from X axis',
     category: 'start',
-    hint: 'ลบข้อสอบที่ใช้แล้วออกจาก Array ทำให้ Array.Width ลดลงและไม่ถูกสุ่มซ้ำ',
+    hint: 'ลบข้อมูลในช่องตำแหน่ง Num ออกจาก Array ทำให้ Array.Width ลดลง 1 ช่อง',
     isBug: false,
   },
   {
@@ -82,7 +92,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
     kind: 'condition',
     label: 'If Answer = bt_Select.Choice',
     category: 'answer',
-    hint: 'เงื่อนไขเปรียบเทียบคำตอบที่ผู้เล่นเลือกกับเฉลยของข้อนั้น',
+    hint: 'เงื่อนไขเปรียบเทียบตัวแปร Answer กับตัวเลือกที่ผู้เล่นกด',
     isBug: false,
   },
   {
@@ -92,7 +102,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
     kind: 'action',
     label: 'Add 1 to Score',
     category: 'answer',
-    hint: 'เพิ่มคะแนน 1 คะแนน ต้องอยู่ภายใต้เงื่อนไขตรวจคำตอบเสมอ',
+    hint: 'เพิ่มค่าตัวแปร Score ขึ้น 1',
     isBug: false,
   },
   {
@@ -107,7 +117,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
     kind: 'condition',
     label: 'System: Else',
     category: 'answer',
-    hint: 'รับกรณีตรงข้ามของเงื่อนไขที่อยู่เหนือมัน เช่น เมื่อคำตอบไม่ตรงกับเฉลย',
+    hint: 'รับกรณีตรงข้ามของเงื่อนไขที่อยู่เหนือมัน',
     isBug: false,
   },
   {
@@ -117,7 +127,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
     kind: 'action',
     label: 'Call Function "Random"',
     category: 'answer',
-    hint: 'เรียกฟังก์ชัน Random อีกครั้งเพื่อไปข้อถัดไป',
+    hint: 'เรียกฟังก์ชัน Random ให้ทำงานอีกครั้ง',
     isBug: false,
   },
 
@@ -129,7 +139,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
     kind: 'condition',
     label: 'If Array is empty',
     category: 'end',
-    hint: 'ตรวจว่า Array.Width = 0 หรือไม่ คือเงื่อนไขว่าทำข้อสอบครบทุกข้อแล้ว',
+    hint: 'ตรวจว่า Array.Width เท่ากับ 0 หรือไม่',
     isBug: false,
   },
   {
@@ -139,7 +149,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
     kind: 'action',
     label: 'Go to Layout "Summary"',
     category: 'end',
-    hint: 'เปลี่ยนไปหน้าสรุปผล ต้องทำหลังตรวจว่า Array ว่างแล้วเท่านั้น',
+    hint: 'สั่งให้เกมเปลี่ยนไปยัง Layout ชื่อ Summary',
     isBug: false,
   },
   {
@@ -149,7 +159,7 @@ export const BLOCK_LIBRARY: BlockDef[] = [
     kind: 'action',
     label: 'Display Score',
     category: 'end',
-    hint: 'แสดงคะแนนรวมบนหน้า Summary',
+    hint: 'แสดงค่าตัวแปร Score บนหน้าจอ',
     isBug: false,
   },
 
