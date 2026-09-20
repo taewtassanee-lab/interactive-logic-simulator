@@ -11,6 +11,7 @@ export const LIVE_ACTIVITIES: LiveActivityPreset[] = [
   /* ==================== ขั้นที่ 1 Gathering ==================== */
   {
     id: 'warmup_words',
+    inPlan: true,
     type: 'wordcloud',
     step: 1,
     title: 'อุ่นเครื่อง: คำศัพท์ตรรกะที่จำได้',
@@ -21,6 +22,7 @@ export const LIVE_ACTIVITIES: LiveActivityPreset[] = [
   },
   {
     id: 'pretest_5',
+    inPlan: true,
     type: 'quiz',
     step: 1,
     title: 'แบบทดสอบก่อนเรียน 5 ข้อ',
@@ -132,6 +134,7 @@ export const LIVE_ACTIVITIES: LiveActivityPreset[] = [
   /* ==================== ขั้นที่ 3 Applying ==================== */
   {
     id: 'sos_screenshot',
+    inPlan: true,
     type: 'image',
     step: 3,
     title: 'SOS Bug Hunter: ส่งภาพหน้าจอขอความช่วยเหลือ',
@@ -159,6 +162,7 @@ export const LIVE_ACTIVITIES: LiveActivityPreset[] = [
   /* ==================== ขั้นที่ 4 Communicating ==================== */
   {
     id: 'two_stars_wish',
+    inPlan: true,
     type: 'shortanswer',
     step: 4,
     title: 'Two Stars and a Wish',
@@ -173,6 +177,7 @@ export const LIVE_ACTIVITIES: LiveActivityPreset[] = [
   },
   {
     id: 'simulator_value',
+    inPlan: true,
     type: 'wordcloud',
     step: 4,
     title: 'ข้อดีของการจำลองตรรกะก่อนเขียนโค้ดจริง',
@@ -191,6 +196,7 @@ export const LIVE_ACTIVITIES: LiveActivityPreset[] = [
      * และผู้เรียนทั้งสองคนตอบจากเครื่องของตัวเองพร้อมกันได้ รวมถึงเครื่อง Navigator
      */
     id: 'pair_reflection',
+    inPlan: true,
     type: 'shortanswer',
     step: 5,
     title: 'สะท้อนการทำงานเป็นคู่ (ตอบรายคน)',

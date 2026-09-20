@@ -234,17 +234,28 @@ const LeaderboardView = ({ preset, responses, revealed }: ViewProps) => {
           <h4 className="mb-2 font-display text-sm font-bold text-think-900">
             เฉลยและสัดส่วนที่ตอบถูกรายข้อ
           </h4>
-          <ol className="space-y-2.5">
+          {/* แสดงตัวโจทย์ด้วย เพราะหน้านี้ถูกฉายขึ้นจอหน้าชั้นตอนเฉลย
+              ถ้าเห็นแต่เลขข้อกับคำตอบ ผู้เรียนจะจำไม่ได้ว่ากำลังพูดถึงข้อไหน */}
+          <ol className="space-y-3">
             {perQuestion.map(({ q, percent }, i) => (
-              <li key={q.id} className="text-sm leading-relaxed text-slate-700">
-                <span className="font-semibold">ข้อ {i + 1}</span> ตอบถูก{' '}
-                <span
-                  className={`font-bold ${percent >= 70 ? 'text-mint-700' : 'text-bubble-700'}`}
-                >
-                  {percent}%
-                </span>{' '}
-                — เฉลยคือ <strong>{q.choices[q.answerIndex]}</strong>
-                <p className="mt-0.5 text-xs text-slate-500">{q.explain}</p>
+              <li
+                key={q.id}
+                className="rounded-xl bg-white/70 px-3 py-2.5 text-sm leading-relaxed text-slate-700"
+              >
+                <p className="font-semibold text-slate-800">
+                  ข้อ {i + 1}. {q.text}
+                </p>
+                <p className="mt-1">
+                  เฉลยคือ <strong className="text-mint-700">{q.choices[q.answerIndex]}</strong>
+                  {' · '}
+                  ตอบถูก{' '}
+                  <span
+                    className={`font-bold ${percent >= 70 ? 'text-mint-700' : 'text-bubble-700'}`}
+                  >
+                    {percent}%
+                  </span>
+                </p>
+                {q.explain && <p className="mt-0.5 text-xs text-slate-500">{q.explain}</p>}
               </li>
             ))}
           </ol>

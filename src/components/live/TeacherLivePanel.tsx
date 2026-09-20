@@ -69,6 +69,8 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
   const [polling, setPolling] = useState(false);
   const [error, setError] = useState('');
   const [revealed, setRevealed] = useState(false);
+  /** true = แสดงกิจกรรมสำรองที่ไม่ได้อยู่ในแผน 60 นาทีด้วย */
+  const [showSpare, setShowSpare] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
   /** เปิดจอฉายผลลัพธ์เต็มจอสำหรับหน้าชั้นเรียน */
   const [presenting, setPresenting] = useState(false);
@@ -259,13 +261,18 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
     );
   };
 
+  /* ค่าเริ่มต้นแสดงเฉพาะกิจกรรมที่แผน 60 นาทีเปิดใช้จริง
+     ที่เหลือเป็นกิจกรรมสำรอง ซ่อนไว้ก่อนเพื่อลดโอกาสกดผิดขณะบันทึกคลิป */
+  const spareCount = useMemo(() => activities.filter((a) => !a.inPlan).length, [activities]);
+
   const grouped = useMemo(() => {
+    const list = showSpare ? activities : activities.filter((a) => a.inPlan);
     const map = new Map<number, LiveActivityPreset[]>();
-    activities.forEach((a) => {
+    list.forEach((a) => {
       map.set(a.step, [...(map.get(a.step) ?? []), a]);
     });
     return [...map.entries()].sort((a, b) => a[0] - b[0]);
-  }, [activities]);
+  }, [activities, showSpare]);
 
   return (
     <div className="space-y-4">
@@ -455,8 +462,19 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
       {/* ---------- คลังกิจกรรม ---------- */}
       <Card
         title="คลังกิจกรรมตามขั้น GPAS 5 Steps"
-        subtitle="กดเปิดได้ทันที ไม่ต้องพิมพ์โจทย์สดหน้าชั้น"
+        subtitle={
+          showSpare
+            ? `แสดงทั้งหมด ${activities.length} กิจกรรม · กดเปิดได้ทันที ไม่ต้องพิมพ์โจทย์สดหน้าชั้น`
+            : `แสดงเฉพาะ ${activities.length - spareCount} กิจกรรมที่แผน 60 นาทีใช้จริง · กดเปิดได้ทันที`
+        }
         icon={<Play className="h-5 w-5 text-brand-600" aria-hidden="true" />}
+        actions={
+          spareCount > 0 && (
+            <Button variant="secondary" onClick={() => setShowSpare((v) => !v)}>
+              {showSpare ? 'แสดงเฉพาะที่ใช้ในคาบ' : `แสดงกิจกรรมสำรองอีก ${spareCount} รายการ`}
+            </Button>
+          )
+        }
       >
         <div className="space-y-4">
           {grouped.map(([step, items]) => (
@@ -479,6 +497,7 @@ export const TeacherLivePanel = ({ teacherKey, rows }: Props) => {
                       <div className="mb-1 flex flex-wrap items-center gap-1.5">
                         <Pill tone="think">{TYPE_LABELS[a.type]}</Pill>
                         {active && <Pill tone="mint">กำลังเปิดอยู่</Pill>}
+                        {!a.inPlan && <Pill tone="slate">สำรอง</Pill>}
                       </div>
                       <h4 className="font-display text-sm font-bold text-slate-800">{a.title}</h4>
                       <p className="mt-0.5 text-xs leading-relaxed text-slate-500">

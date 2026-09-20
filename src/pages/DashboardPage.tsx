@@ -100,6 +100,8 @@ export const DashboardPage = () => {
   const [lastLoadedAt, setLastLoadedAt] = useState<Date | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [keyword, setKeyword] = useState('');
+  /** ห้องที่เลือกดู 'all' คือทุกห้อง */
+  const [room, setRoom] = useState('all');
   /** มุมมองย่อยของแดชบอร์ด แยกส่วนสรุปผล กิจกรรมสด และเครื่องมือหน้าชั้นออกจากกัน */
   const [view, setView] = useState<DashboardView>('summary');
   /** แถวที่กำลังรอการยืนยันลบ null = ไม่มีหน้าต่างยืนยันเปิดอยู่ */
@@ -202,36 +204,55 @@ export const DashboardPage = () => {
     notify('ดาวน์โหลดไฟล์ CSV เรียบร้อย เปิดด้วย Excel ได้เลย', 'success');
   };
 
+  /* รายชื่อห้องที่มีข้อมูลจริง ใช้เป็นตัวเลือกในตัวกรอง
+     เรียงแบบไทยเพื่อให้ ม.5/1 ม.5/2 เรียงติดกันตามธรรมชาติ */
+  const classrooms = useMemo(
+    () =>
+      [...new Set(rows.map((r) => r.classroom.trim()).filter(Boolean))].sort((a, b) =>
+        a.localeCompare(b, 'th'),
+      ),
+    [rows],
+  );
+
+  const inRoom = useCallback(
+    (r: ProgressRow) => room === 'all' || r.classroom.trim() === room,
+    [room],
+  );
+
   const filtered = useMemo(() => {
     const k = keyword.trim().toLowerCase();
-    const list = k
-      ? rows.filter((r) =>
+    const list = rows.filter(
+      (r) =>
+        inRoom(r) &&
+        (!k ||
           [r.classroom, r.pairCode, r.driverName, r.navigatorName]
             .join(' ')
             .toLowerCase()
-            .includes(k),
-        )
-      : rows;
+            .includes(k)),
+    );
     return [...list].sort(
       (a, b) =>
         a.classroom.localeCompare(b.classroom, 'th') ||
         a.pairCode.localeCompare(b.pairCode, 'th'),
     );
-  }, [rows, keyword]);
+  }, [rows, keyword, inRoom]);
 
+  /* การ์ดสรุปคิดจากห้องที่เลือกเท่านั้น ไม่งั้นเปอร์เซ็นต์จะถูกเจือจาง
+     ด้วยห้องอื่นและแถวทดสอบระบบ จนอ่านผลรายห้องไม่ได้ */
   const stats = useMemo(() => {
-    const total = rows.length;
-    const m1 = rows.filter((r) => r.mission1Passed).length;
-    const m2 = rows.filter((r) => r.mission2Passed).length;
-    const both = rows.filter((r) => r.mission1Passed && r.mission2Passed).length;
-    const done = rows.filter((r) => r.worksheetPercent === 100).length;
-    const pdf = rows.filter((r) => r.pdfGenerated).length;
-    const capx = rows.filter((r) => r.capxFileName).length;
+    const scope = rows.filter(inRoom);
+    const total = scope.length;
+    const m1 = scope.filter((r) => r.mission1Passed).length;
+    const m2 = scope.filter((r) => r.mission2Passed).length;
+    const both = scope.filter((r) => r.mission1Passed && r.mission2Passed).length;
+    const done = scope.filter((r) => r.worksheetPercent === 100).length;
+    const pdf = scope.filter((r) => r.pdfGenerated).length;
+    const capx = scope.filter((r) => r.capxFileName).length;
     const avgWorksheet = total
-      ? Math.round(rows.reduce((sum, r) => sum + r.worksheetPercent, 0) / total)
+      ? Math.round(scope.reduce((sum, r) => sum + r.worksheetPercent, 0) / total)
       : 0;
     return { total, m1, m2, both, done, pdf, capx, avgWorksheet };
-  }, [rows]);
+  }, [rows, inRoom]);
 
   const pct = (n: number) => (stats.total ? Math.round((n / stats.total) * 100) : 0);
 
@@ -376,9 +397,8 @@ export const DashboardPage = () => {
       <Card
         title="แดชบอร์ดสรุปผลการทำกิจกรรม"
         subtitle={
-          lastLoadedAt
-            ? `ข้อมูลล่าสุดเมื่อ ${formatThaiDateTime(lastLoadedAt)}`
-            : 'กำลังโหลดข้อมูล'
+          (room === 'all' ? 'ตัวเลขด้านล่างคิดจากทุกห้องรวมกัน' : `เฉพาะห้อง ${room}`) +
+          (lastLoadedAt ? ` · ข้อมูลล่าสุดเมื่อ ${formatThaiDateTime(lastLoadedAt)}` : ' · กำลังโหลดข้อมูล')
         }
         icon={<LayoutDashboard className="h-5 w-5 text-brand-600" aria-hidden="true" />}
         actions={
@@ -433,6 +453,28 @@ export const DashboardPage = () => {
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
+          {/* ตัวกรองรายห้อง ทั้งตารางและการ์ดสรุปด้านบนจะคิดเฉพาะห้องที่เลือก
+              เพื่อให้ครูอ่านผลของห้องที่กำลังสอนได้ โดยไม่ถูกห้องอื่นและแถวทดสอบเจือจาง */}
+          <label className="flex items-center gap-2 text-sm font-medium text-slate-600">
+            ดูห้อง
+            <select
+              value={room}
+              onChange={(e) => setRoom(e.target.value)}
+              className="rounded-2xl border-2 border-slate-200 bg-white px-3 py-2 text-sm font-semibold outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-100"
+            >
+              <option value="all">ทุกห้อง ({rows.length} คู่)</option>
+              {classrooms.map((c) => (
+                <option key={c} value={c}>
+                  {c} ({rows.filter((r) => r.classroom.trim() === c).length} คู่)
+                </option>
+              ))}
+            </select>
+          </label>
+          {room !== 'all' && (
+            <Button variant="secondary" onClick={() => setRoom('all')}>
+              ล้างตัวกรอง
+            </Button>
+          )}
           <label className="flex items-center gap-2 text-sm font-medium text-slate-600">
             <input
               type="checkbox"
