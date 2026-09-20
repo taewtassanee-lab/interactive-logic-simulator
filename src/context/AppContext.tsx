@@ -11,6 +11,7 @@ import {
 import type { AppState } from '../types';
 import { clearState, createInitialState, loadState, saveState } from '../utils/storage';
 import { isSyncEnabled, syncProgress, type SyncStatus } from '../utils/sync';
+import { clearIdentity } from '../utils/live';
 import { SYNC_CONFIG } from '../config';
 
 interface AppContextValue {
@@ -18,6 +19,8 @@ interface AppContextValue {
   /** อัปเดตสถานะแบบบางส่วน แล้วบันทึกลง localStorage อัตโนมัติ */
   update: (patch: Partial<AppState> | ((prev: AppState) => Partial<AppState>)) => void;
   resetAll: () => void;
+  /** เพิ่มขึ้นทุกครั้งที่กด Reset ใช้ให้หน้าที่เก็บ state แยกของตัวเองรู้ว่าต้องล้างตาม */
+  resetToken: number;
   /** เวลาที่บันทึกล่าสุด ใช้แสดงข้อความ "บันทึกอัตโนมัติแล้ว" */
   lastSavedAt: Date | null;
   /** สถานะการส่งข้อมูลขึ้นแดชบอร์ดของครู */
@@ -30,6 +33,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState<AppState>(() => loadState());
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>(isSyncEnabled() ? 'idle' : 'off');
+  const [resetToken, setResetToken] = useState(0);
   const firstRender = useRef(true);
 
   // บันทึกอัตโนมัติแบบหน่วงเวลา ลดการเขียน localStorage ขณะพิมพ์ใบงาน
@@ -62,14 +66,18 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   const resetAll = useCallback(() => {
     clearState();
+    // ข้อมูลผู้ตอบกิจกรรมสดเก็บคนละคีย์กับข้อมูลคู่ ต้องลบด้วย
+    // ไม่งั้นห้องเดิมจะค้าง แล้วผู้เรียนคาบถัดไปจะไม่เห็นโจทย์
+    clearIdentity();
     setState(createInitialState());
     setLastSavedAt(null);
     setSyncStatus(isSyncEnabled() ? 'idle' : 'off');
+    setResetToken((n) => n + 1);
   }, []);
 
   const value = useMemo(
-    () => ({ state, update, resetAll, lastSavedAt, syncStatus }),
-    [state, update, resetAll, lastSavedAt, syncStatus],
+    () => ({ state, update, resetAll, resetToken, lastSavedAt, syncStatus }),
+    [state, update, resetAll, resetToken, lastSavedAt, syncStatus],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

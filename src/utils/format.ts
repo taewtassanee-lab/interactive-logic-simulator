@@ -127,6 +127,11 @@ export const getWorksheetFields = (w: WorksheetData): WorksheetField[] => [
     label: 'ส่วนที่ 3: ข้อเสนอต่อยอดระบบแบบทดสอบ',
     filled: w.q4Extend.trim().length >= 10,
   },
+  {
+    key: 'transfer',
+    label: 'ส่วนที่ 3: ย้ายตรรกะไปใช้กับระบบสุ่มชื่อนักเรียน',
+    filled: w.q5Transfer.trim().length >= 10,
+  },
 ];
 
 export const getWorksheetProgress = (w: WorksheetData): number => {

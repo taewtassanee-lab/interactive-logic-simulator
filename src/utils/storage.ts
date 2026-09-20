@@ -54,6 +54,7 @@ export const createInitialState = (): AppState => ({
       },
     ],
     q4Extend: '',
+    q5Transfer: '',
   },
   capxFile: null,
   lastDebugLog: [],

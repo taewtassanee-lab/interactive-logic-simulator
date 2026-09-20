@@ -39,7 +39,7 @@ import type { LiveIdentity, LiveSession } from '../types/live';
  * เพื่อประหยัดโควตาการประมวลผลของ Apps Script เมื่อเปิดพร้อมกันทั้งห้อง
  */
 export const LivePage = () => {
-  const { state } = useApp();
+  const { state, resetToken } = useApp();
   const { notify } = useToast();
   const { settings } = useSettings();
 
@@ -62,6 +62,20 @@ export const LivePage = () => {
   // เก็บคำตอบที่ส่งสำเร็จไว้ เพื่อคืนผลให้เจ้าของคำตอบเห็นทันทีว่าถูกผิดตรงไหน
   const [lastDraft, setLastDraft] = useState<AnswerDraft | null>(null);
   const [editing, setEditing] = useState(false);
+
+  /* ปุ่ม Reset ข้อมูล ลบผู้ตอบกิจกรรมสดออกจาก localStorage ไปแล้ว
+     แต่ค่าที่อยู่ในหน่วยความจำของหน้านี้ยังค้าง เพราะอ่านมาตอน mount ครั้งเดียว
+     จึงต้องล้างตามด้วย ไม่งั้นหน้าจอยังโชว์ห้องเดิมทั้งที่ข้อมูลถูกลบแล้ว */
+  useEffect(() => {
+    if (resetToken === 0) return;
+    setIdentity(null);
+    setSession(null);
+    setAnsweredId('');
+    setLastDraft(null);
+    setEditing(false);
+    setError('');
+    setDraftId({ classroom: '', studentName: '', studentNumber: '', pairCode: '' });
+  }, [resetToken]);
 
   /** เวลาที่เริ่มเห็นโจทย์ ใช้คำนวณเวลาที่ใช้ตอบเพื่อจัดอันดับ */
   const startedAt = useRef(Date.now());
