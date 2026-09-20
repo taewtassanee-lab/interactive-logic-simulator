@@ -177,7 +177,6 @@ export const LIVE_ACTIVITIES: LiveActivityPreset[] = [
   },
   {
     id: 'simulator_value',
-    inPlan: true,
     type: 'wordcloud',
     step: 4,
     title: 'ข้อดีของการจำลองตรรกะก่อนเขียนโค้ดจริง',

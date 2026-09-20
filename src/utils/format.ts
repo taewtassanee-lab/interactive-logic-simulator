@@ -108,6 +108,14 @@ export const getWorksheetFields = (w: WorksheetData): WorksheetField[] => [
     filled: w.debugRows[0].evidence.trim().length > 0,
   },
   {
+    /* แผนกำหนดให้เขียนช่องนี้ก่อนลงมือ "ทุกครั้ง" ไม่ใช่เฉพาะแถวแรก
+       ถ้าไม่บังคับ ผู้เรียนจะเว้นว่างได้ทั้งที่ระบบยังขึ้นว่าพร้อมส่ง
+       แล้วหลักฐานทักษะการวางแผนของด้านที่ 2 จะหายไปครึ่งหนึ่ง */
+    key: 'row2plan',
+    label: 'ส่วนที่ 2 แถวที่ 2: แผนที่วางไว้ก่อนลงมือ',
+    filled: w.debugRows[1].plan.trim().length >= 5,
+  },
+  {
     key: 'row2cause',
     label: 'ส่วนที่ 2 แถวที่ 2: สาเหตุที่พบ',
     filled: w.debugRows[1].cause.trim().length >= 5,
