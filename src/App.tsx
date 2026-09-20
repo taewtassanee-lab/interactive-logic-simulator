@@ -79,7 +79,9 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen">
+    /* เลขรุ่นไม่แสดงบนหน้าจอแล้ว แต่ยังติดมากับหน้าเว็บในรูปแอตทริบิวต์
+       ไว้ตรวจว่าเครื่องนั้นโหลดไฟล์ชุดใหม่แล้วหรือยัง เวลาแคชค้างบนไอแพด */
+    <div className="min-h-screen" data-build={__BUILD_ID__}>
       <FloatingShapes />
       <Header onReset={handleReset} isAssistant={state.session.deviceMode === 'assistant'} />
 
@@ -157,8 +159,6 @@ const App = () => {
           <p className="mt-1">
             ข้อมูลทั้งหมดถูกบันทึกไว้ในเบราว์เซอร์ของเครื่องนี้เท่านั้น ไม่ได้ส่งขึ้นเซิร์ฟเวอร์
           </p>
-          {/* ป้ายรุ่น ใช้ตรวจว่าเครื่องนี้โหลดไฟล์ชุดใหม่แล้วหรือยัง เวลาแคชค้างบนไอแพด */}
-          <p className="mt-2 text-[11px] text-slate-400">รุ่น {__BUILD_ID__}</p>
         </div>
       </footer>
     </div>
